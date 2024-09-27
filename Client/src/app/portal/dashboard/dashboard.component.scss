@@ -1,0 +1,89 @@
+.dashboard-container {
+    .dashboard-header {
+        border: 6px solid #D4E5F7;
+        border-radius: 7px;
+        width: 96%;
+        margin: 20px auto;
+
+        .add-project {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 0;
+            .uploadfile-logo {
+                width: 170px;
+                margin-bottom: 15px;
+            }
+            .add-btn {
+                padding: 12px 20px 12px 12px;
+                background-color: #014FA1;
+                border: 1px solid #014FA1;
+                color: #ffffff;
+                border-radius: 4px;
+                margin-bottom: 15px;
+                #add-logo {
+                    margin-right: 10px;
+                }
+            }
+            span {
+                font-size: 15px;
+                color: #475467;
+            }
+        }
+    }
+    .dashboard-body {
+        border-top: 1px solid #E4E7EC;
+        border-radius: 20px;
+        .dashboard-body-title {
+            padding: 20px 24px 20px 24px;
+            label {
+                color: #101828;
+                font-size: 18px;
+                margin-right: 10px;
+                font-weight: 600;
+            }
+            span {
+                border-radius: 16px;
+                padding: 2px 8px 2px 8px;
+                background-color: #D4E5F7;
+                color: #014FA1;
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+::ng-deep .p-datatable .p-datatable-thead > tr > th {
+    text-align: left;
+    padding: 8px 15px;
+    font-weight: 500;
+    color: #475467;
+    background: #E4E7EC !important;
+    font-size: 14px !important;
+    border: none;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+    text-align: left;
+    border: 1px solid #E4E7EC;
+    border-width: 0 0 1px 0;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 400;
+    .p-tag {
+        background-color: #014FA1;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px;
+        margin-right: 10px;
+    }   
+    .edit-button {
+        border: none;
+                outline: none;
+    }
+}
+
+.dashboard-body-table {
+    height: 250px;
+    overflow-y: auto;
+  }
