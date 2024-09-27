@@ -121,7 +121,7 @@ export class DashboardComponent {
   }
 
   showAudioPopup() {
-    this.dialog.open(UploadFileComponent, {
+    this.dialog.open(AddProjectComponent, {
       height: '90vh',
       width: '40vw',
       disableClose: true

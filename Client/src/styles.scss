@@ -27,3 +27,83 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; overflow: h
 button {
   cursor: pointer;
 }
+
+.tooltips{
+  position: absolute;
+  background-color: black;
+  color :white;
+  padding: 15px;
+  transition: 2.5s;
+  border-radius: 4px;
+  font-size: 12px;
+  box-shadow: 0px 2px 3px #00000028;
+  transform: scale(1) translate(-50%,-102%);
+  z-index: 20000;
+  margin-bottom: 15px;
+}
+
+.targetTooltip{
+  display: none;
+}
+
+.targetGroupPopop{
+ 
+}
+
+.tooltips .targetGroupPopop h6{
+  color: #fff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.tooltips .targetGroupPopop .target-data-wrapper{
+  background-color: #fff;
+  padding: 10px 15px;
+  display: flex;
+  width: 441px;
+  border-radius: 3px;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .data-group{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  padding-left: 20px;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .data-group::before{
+  content: " ";
+  height: calc(100% - 10px);
+  width: 1px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0px;
+  display: block;
+  background-color: #919191;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .data-group:first-child{
+  padding-left: 0px;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .data-group:first-child::before{
+  display: none;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .target{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .target .label{
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #000;
+}
+.tooltips .targetGroupPopop .target-data-wrapper .target .value{
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #000;
+}

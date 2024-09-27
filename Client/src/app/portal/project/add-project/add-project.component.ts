@@ -10,7 +10,11 @@ import { UploadFileComponent } from '../upload-file/upload-file.component';
 })
 export class AddProjectComponent {
   targetForm!: FormGroup;
-  targetGrpArr:any[] = [];
+  targetGrpArr:any[] = [
+    {name: "Gruop 1"},
+    {name: "Gruop 2"},
+    {name: "Gruop 3"},
+  ];
   countries: any[] = [
     {name: 'India', code: 'IN'},
     {name: 'Bangladesh', code: 'BD'},

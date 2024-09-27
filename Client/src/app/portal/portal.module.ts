@@ -29,7 +29,7 @@ import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { UploadFileComponent } from './project/upload-file/upload-file.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import { SharedModule } from '../shared/shared.module';
-
+import { TooltipDirective } from './tooltip.directive' ;
 
 @NgModule({
   declarations: [
@@ -39,7 +39,8 @@ import { SharedModule } from '../shared/shared.module';
     LayoutComponent,
     AudioDetailsComponent,
     AddProjectComponent,
-    UploadFileComponent
+    UploadFileComponent,
+    TooltipDirective,
   ],
   imports: [
     CommonModule,
