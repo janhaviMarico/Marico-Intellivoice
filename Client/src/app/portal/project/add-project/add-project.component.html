@@ -24,7 +24,7 @@
                 <mat-form-field>
                     <mat-label>Select Country</mat-label>
                     <mat-select formControlName="country">
-                        <mat-option [value]="con.code" *ngFor="let con of countries">{{con.name}}</mat-option>
+                        <mat-option [value]="con.name" *ngFor="let con of countries">{{con.name}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="targetForm.get('country')?.hasError('required')">
                         Country is required
@@ -33,7 +33,7 @@
                 <mat-form-field>
                     <mat-label>Select State</mat-label>
                     <mat-select formControlName="state">
-                        <mat-option [value]="state.code" *ngFor="let state of states">{{state.name}}</mat-option>
+                        <mat-option [value]="state.name" *ngFor="let state of states">{{state.name}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="targetForm.get('state')?.hasError('required')">
                         State is required
@@ -44,7 +44,7 @@
                 <mat-form-field>
                     <mat-label>Competitors Product</mat-label>
                     <mat-select multiple formControlName="competitors">
-                        <mat-option [value]="com.code" *ngFor="let com of competitors">{{com.name}}</mat-option>
+                        <mat-option [value]="com.name" *ngFor="let com of competitors">{{com.name}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="targetForm.get('competitors')?.hasError('required')">
                         Please select at least one competitor
@@ -53,7 +53,7 @@
                 <mat-form-field>
                     <mat-label>Marico Product</mat-label>
                     <mat-select formControlName="maricoProduct">
-                        <mat-option [value]="pro.code" *ngFor="let pro of products">{{pro.name}}</mat-option>
+                        <mat-option [value]="pro.name" *ngFor="let pro of products">{{pro.name}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="targetForm.get('maricoProduct')?.hasError('required')">
                         Marico Product is required
@@ -97,7 +97,7 @@
                 <mat-form-field>
                     <mat-label>Primary Language</mat-label>
                     <mat-select formControlName="primaryLang">
-                        <mat-option [value]="pl.code" *ngFor="let pl of primaryLang">{{pl.name}}</mat-option>
+                        <mat-option [value]="pl.name" *ngFor="let pl of primaryLang">{{pl.name}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="targetForm.get('primaryLang')?.hasError('required')">
                         Primary Language is required
@@ -106,7 +106,7 @@
                 <mat-form-field>
                     <mat-label>Secondary Language</mat-label>
                     <mat-select multiple formControlName="otherLangs">
-                        <mat-option [value]="ol.code" *ngFor="let ol of filteredOtherLang">{{ol.name}}</mat-option>
+                        <mat-option [value]="ol.name" *ngFor="let ol of filteredOtherLang">{{ol.name}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="targetForm.get('otherLangs')?.hasError('required')">
                         At least one Secondary Language is required
@@ -137,51 +137,51 @@
             <mat-grid-list cols="2"rowHeight="5:1" *ngIf="true">
             <!-- <mat-grid-list cols="2"rowHeight="5:1" *ngIf="targetGrpArr.length > 0"> -->
                 <mat-grid-tile *ngFor="let tg of targetGrpArr; let i = index">
-                       <div class="tg-name" appTooltip>
+                       <div class="tg-name" appTooltip (mouseenter) ="mouseEnter(tg)">
                             <div class="targetTooltip" >
                                 <div class="targetGroupPopop">
-                                    <h6>Target Group 1</h6>
+                                    <h6>{{target?.name | truncate:30 }}</h6>
                                     <div class="target-data-wrapper">
                                         <div class="data-group">
                                             <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
+                                                <span class="label">Project Name</span>
+                                                <span class="value">{{target?.projectName}}</span>
                                             </div>
                                             <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
+                                                <span class="label">Country</span>
+                                                <span class="value">{{target?.country}}</span>
                                             </div>
                                             <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
-                                            </div>
-                                        </div>
-                                        <div class="data-group">
-                                            <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
-                                            </div>
-                                            <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
-                                            </div>
-                                            <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
+                                                <span class="label">State</span>
+                                                <span class="value">{{target?.state}}</span>
                                             </div>
                                         </div>
                                         <div class="data-group">
                                             <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
+                                                <span class="label">Competitor Products</span>
+                                                <span class="value">{{target?.competitors}}</span>
                                             </div>
                                             <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
+                                                <span class="label">Marico Product</span>
+                                                <span class="value">{{target?.maricoProduct}}</span>
                                             </div>
                                             <div class="target">
-                                                <span class="label">Counter</span>
-                                                <span class="value">India</span>
+                                                <span class="label">Min Age - Max Age</span>
+                                                <span class="value">{{target?.minAge}} - {{target?.maxAge}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="data-group">
+                                            <div class="target">
+                                                <span class="label">Primary Lang</span>
+                                                <span class="value">{{target?.primaryLang}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">Other Lang</span>
+                                                <span class="value">{{target?.otherLangs}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">No. Of Speakers</span>
+                                                <span class="value">{{target?.numSpeakers}}</span>
                                             </div>
                                         </div>
                                        

@@ -1,6 +1,9 @@
 import { Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSelectChange } from '@angular/material/select';
+import { v4 as uuidv4 } from 'uuid';
+import { InfoComponent } from '../info/info.component';
+import { AddProjectComponent } from '../add-project/add-project.component';
 
 interface AudioFile {
   name: string;
@@ -26,6 +29,7 @@ export class UploadFileComponent {
   isPlayingIndex: number | null = null;
   selectedTargetGrp: string = '';
   expansionArr: any[] = [];
+  target: any;
 
   // currentTime: string = '0:00';
   // durationTime: string = '0:00';
@@ -39,7 +43,8 @@ export class UploadFileComponent {
   // }
 
   constructor(
-    public dialogRef: MatDialogRef<UploadFileComponent>,
+    public uploadDialogRef: MatDialogRef<UploadFileComponent>,
+    private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public targetGrps: { targetGrpArr: any[] }
   ) { }
 
@@ -185,20 +190,20 @@ export class UploadFileComponent {
     expansion: null,
     audioFiles: null
   };
-  
+
   togglePlayPause(index: number, audioList: any[], section: 'expansion' | 'audioFiles'): void {
     let audioElements: NodeListOf<HTMLAudioElement>;
-  
+
     // Get the correct set of audio elements based on the section ('expansion' or 'audioFiles')
     if (section === 'expansion') {
       audioElements = document.querySelectorAll('.expansion-section audio');
     } else {
       audioElements = document.querySelectorAll('.audio-files-section audio');
     }
-  
+
     // Handle play/pause logic for the specific section
     const isPlayingIndex = this.isPlayingIndexMap[section];
-    
+
     if (isPlayingIndex !== null && isPlayingIndex !== index) {
       // Stop the previously playing audio in the same section
       const prevAudio = audioElements[isPlayingIndex] as HTMLAudioElement;
@@ -207,9 +212,9 @@ export class UploadFileComponent {
         prevAudio.currentTime = 0;
       }
     }
-  
+
     const audio = audioElements[index] as HTMLAudioElement;
-  
+
     if (audio.paused) {
       audio.play();
       this.isPlayingIndexMap[section] = index;  // Update the playing index for this section
@@ -218,7 +223,7 @@ export class UploadFileComponent {
       this.isPlayingIndexMap[section] = null;  // Reset the playing index for this section
     }
   }
-  
+
 
   updateProgress(event: any, index: number, audioList: any[]): void {
     const audio = event.target;
@@ -267,15 +272,10 @@ export class UploadFileComponent {
 
   // Delete file functionality
   deleteFile(index: number): void {
-    debugger
     this.audioFiles.splice(index, 1);
     if (this.isPlayingIndex === index) {
       this.isPlayingIndex = null;
     }
-  }
-
-  closeDailog() {
-    this.dialogRef.close();
   }
 
   assignTargetGrp(event: MatSelectChange) {
@@ -311,16 +311,73 @@ export class UploadFileComponent {
     }
   }
 
-  removeFileFromExpansionList(expIndex: number, fileIndex: number, isDelete:boolean = false): void {
-    debugger
+  removeFileFromExpansionList(expIndex: number, fileIndex: number, isDelete: boolean = false): void {
     const fileToMove = this.expansionArr[expIndex].audioList[fileIndex];
-    if(!isDelete) {
+    if (!isDelete) {
       this.audioFiles.push(fileToMove);
     }
     this.expansionArr[expIndex].audioList.splice(fileIndex, 1);
-  
+
     if (this.expansionArr[expIndex].audioList.length === 0) {
       this.expansionArr.splice(expIndex, 1);
     }
+  }
+
+  mouseEnter(tg: any) {
+    this.target = tg;
+  }
+
+  audioProcessing() {
+    const formData = new FormData();
+    var Project:any;
+    var TargetGrp:any = [];
+    var tgArr:any[] = [];
+    for(let i= 0;i< this.targetGrps.targetGrpArr.length;i++) {
+      if(i==0) {
+        Project = {
+          ProjName: this.targetGrps.targetGrpArr[i].projectName,
+          userid: localStorage.getItem('User'),
+          ProjId: uuidv4(),
+          TGIds: []
+        }
+      }
+      const temp = {
+        ProjId: Project.ProjId,
+        TGName: this.targetGrps.targetGrpArr[i].name,
+        AudioName: this.targetGrps.targetGrpArr[i].name,
+        Country: this.targetGrps.targetGrpArr[i].country,
+        State: this.targetGrps.targetGrpArr[i].state,
+        AgeGrp: `${this.targetGrps.targetGrpArr[i].minAge} - ${this.targetGrps.targetGrpArr[i].maxAge}`,
+        CompetetionProduct: this.targetGrps.targetGrpArr[i].competitors,
+        MaricoProduct: this.targetGrps.targetGrpArr[i].maricoProduct,
+        MainLang: this.targetGrps.targetGrpArr[i].primaryLang,
+        SecondaryLang: this.targetGrps.targetGrpArr[i].otherLangs,
+        noOfSpek: this.targetGrps.targetGrpArr[i].numSpeakers,
+        filePath: ""
+      }
+      formData.append('files',this.targetGrps.targetGrpArr[i].audioList[0].data);
+      TargetGrp.push(temp)
+      tgArr.push(this.targetGrps.targetGrpArr[i].name)
+    }
+    Project["TGIds"] = tgArr;
+
+    formData.append('Project',Project);
+    formData.append('TargetGrp',TargetGrp);
+    // this.closeProject();
+    // this.closeDailog();
+    // this.dialog.open(InfoComponent, {
+    //   height: '50vh',
+    //   width: '40vw',
+    //   disableClose: true,
+    //   data:  { info: 'Process' }
+    // });
+  }
+
+  closeProject() {
+    this.uploadDialogRef.close();
+  }
+
+  closeDailog() {
+      this.uploadDialogRef.close();
   }
 }

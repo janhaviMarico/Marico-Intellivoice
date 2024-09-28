@@ -10,11 +10,8 @@ import { UploadFileComponent } from '../upload-file/upload-file.component';
 })
 export class AddProjectComponent {
   targetForm!: FormGroup;
-  targetGrpArr:any[] = [
-    {name: "Gruop 1"},
-    {name: "Gruop 2"},
-    {name: "Gruop 3"},
-  ];
+  targetGrpArr:any[] = [];
+  target:any;
   countries: any[] = [
     {name: 'India', code: 'IN'},
     {name: 'Bangladesh', code: 'BD'},
@@ -69,7 +66,7 @@ export class AddProjectComponent {
     }, { validator: this.ageRangeValidator('minAge', 'maxAge') });
 
     this.targetForm.get('primaryLang')?.valueChanges.subscribe((selectedPrimaryLang) => {
-      this.filteredOtherLang = this.otherLang.filter(lang => lang.code !== selectedPrimaryLang);
+      this.filteredOtherLang = this.otherLang.filter(lang => lang.name !== selectedPrimaryLang);
       
       // Optionally, clear selected other languages if they include the primary language
       const selectedOtherLangs = this.targetForm.get('otherLangs')?.value || [];
@@ -94,61 +91,56 @@ export class AddProjectComponent {
   onSubmit() {
     if (this.targetForm.valid) {
       const currentFormValues = { ...this.targetForm.value };
-      // Remove the 'name' field from the current form values (if it exists)
       delete currentFormValues.name;
-  
-      // Step 1: Check if the form values already exist in the targetGrpArr (excluding the 'name' field)
+
       const isDuplicate = this.targetGrpArr.some(group => {
         const groupWithoutName = { ...group };
-        delete groupWithoutName.name; // Remove 'name' field from each group in the array
+        delete groupWithoutName.name;
   
         return JSON.stringify(groupWithoutName) === JSON.stringify(currentFormValues);
       });
   
       if (!isDuplicate) {
-        // Step 2: If not a duplicate, add the new target group to targetGrpArr
-        //this.targetGrpArr.push(currentFormValues);
-        const targetGroupName = this.generateTargetGroupName(); // Call the new function to get the name
+        
+        const targetGroupName = this.generateTargetGroupName();
         this.targetGrpArr.push({
           ...this.targetForm.value,
           name: targetGroupName
         });
-        //this.targetGrpArr[this.targetGrpArr.length - 1]['name'] = `Target Grp ${this.targetGrpArr.length}`;
-  
-        console.log(this.targetGrpArr);
-  
-        // Step 3: Preserve the project name and reset the form
         const projectNameValue = this.targetForm.get('projectName')?.value;
         this.targetForm.reset();
         this.targetForm.patchValue({
           projectName: projectNameValue
         });
       } else {
-        // Step 4: Alert the user if the values are the same as an existing group
-        console.log('This target group already exists!');
         alert('This target group already exists!');
       }
     }
   }
 
   generateTargetGroupName(): string {
-    // Extract all form field values
-    const projectName = this.targetForm.get('projectName')?.value || 'Project';
-    const country = this.targetForm.get('country')?.value || 'Country';
-    const state = this.targetForm.get('state')?.value || 'State';
-    const competitors = (this.targetForm.get('competitors')?.value || []).join('-'); // Multiple competitors joined with hyphen
-    const maricoProduct = this.targetForm.get('maricoProduct')?.value || 'Product';
-    const minAge = this.targetForm.get('minAge')?.value || 'MinAge';
-    const maxAge = this.targetForm.get('maxAge')?.value || 'MaxAge';
-    const primaryLang = this.targetForm.get('primaryLang')?.value || 'PrimaryLang';
-    const otherLangs = (this.targetForm.get('otherLangs')?.value || []).join('-'); // Multiple languages joined with hyphen
-    const numSpeakers = this.targetForm.get('numSpeakers')?.value || 'NumSpeakers';
-  
-    // Unique identifier based on timestamp
-    const uniqueId = new Date().getTime();  // You can format this date as per your needs
-  
-    // Generate the name by combining all fields with underscores
-    return `${country}_${state}_${competitors}_${maricoProduct}_${minAge}_${maxAge}_${primaryLang}_${otherLangs}_${numSpeakers}_${projectName}_${uniqueId}`;
+
+    // Extract form values
+  const projectName = this.targetForm.get('projectName')?.value || 'Project';
+  const countryName = this.targetForm.get('country')?.value || 'Country';
+  const stateName = this.targetForm.get('state')?.value || 'State';
+  const competitorNames = this.targetForm.get('competitors')?.value || [];
+  const maricoProductName = this.targetForm.get('maricoProduct')?.value || 'Product';
+  const minAge = this.targetForm.get('minAge')?.value || 'MinAge';
+  const maxAge = this.targetForm.get('maxAge')?.value || 'MaxAge';
+  const primaryLangName = this.targetForm.get('primaryLang')?.value || 'PrimaryLang';
+  const otherLangNames = this.targetForm.get('otherLangs')?.value || [];
+  const numSpeakers = this.targetForm.get('numSpeakers')?.value || 'NumSpeakers';
+
+  // Mapping selected values to their corresponding codes
+  const selectedCountry = this.countries.find(country => country.name === countryName)?.code || 'CountryCode';
+  const selectedState = this.states.find(state => state.name === stateName)?.code || 'StateCode';
+  const selectedCompetitors = competitorNames.map((name:any) => this.competitors.find((c:any) => c.name === name)?.code || name).join('-');
+  const selectedProduct = this.products.find(product => product.name === maricoProductName)?.code || 'ProductCode';
+  const selectedPrimaryLang = this.primaryLang.find(lang => lang.name === primaryLangName)?.code || 'PrimaryLangCode';
+  const selectedOtherLangs = otherLangNames.map((name:any) => this.otherLang.find((lang:any) => lang.name === name)?.code || name).join('-');
+    const uniqueId = new Date().getTime();
+    return `${selectedCountry}_${selectedState}_${selectedCompetitors}_${selectedProduct}_${minAge}_${maxAge}_${selectedPrimaryLang}_${selectedOtherLangs}_${numSpeakers}_${projectName}_${uniqueId}`;
   }
   
   openAudioFileDialog() {
@@ -162,6 +154,15 @@ export class AddProjectComponent {
 
   removeTargetGroup(index: number): void {
     this.targetGrpArr.splice(index, 1);
+    if(this.targetGrpArr.length === 0) {
+      document.body.querySelectorAll('.tooltips').forEach(element => {
+        element.remove();
+      });
+    }
+  }
+
+  mouseEnter(tg:any) {
+    this.target = tg;
   }
 
   closeDailog() {

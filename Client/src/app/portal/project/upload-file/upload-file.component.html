@@ -20,7 +20,7 @@
                 (closed)="panelOpenState.set(false)">
                   
                 <mat-expansion-panel-header>
-                  <mat-panel-title> {{exp.name}} </mat-panel-title>
+                  <mat-panel-title> {{exp.name | truncate:29 }} </mat-panel-title>
                 </mat-expansion-panel-header>
                 
                 <ul>
@@ -145,11 +145,64 @@
         <mat-form-field>
             <mat-label>Select Target Group</mat-label>
             <mat-select (selectionChange)="assignTargetGrp($event)">
-              <mat-option *ngFor="let tg of targetGrps.targetGrpArr; let i = index" [value]="tg.name">
-                {{tg.name}}
+              <mat-option *ngFor="let tg of targetGrps?.targetGrpArr; let i = index" [value]="tg.name" (mouseenter) ="mouseEnter(tg)">
+                <div appTooltip>
+                  <div class="targetTooltip" >
+                    <div class="targetGroupPopop">
+                        <h6>{{target?.name | truncate:30 }}</h6>
+                        <div class="target-data-wrapper">
+                            <div class="data-group">
+                                <div class="target">
+                                    <span class="label">Project Name</span>
+                                    <span class="value">{{target?.projectName}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Country</span>
+                                    <span class="value">{{target?.country}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">State</span>
+                                    <span class="value">{{target?.state}}</span>
+                                </div>
+                            </div>
+                            <div class="data-group">
+                                <div class="target">
+                                    <span class="label">Competitor Products</span>
+                                    <span class="value">{{target?.competitors}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Marico Product</span>
+                                    <span class="value">{{target?.maricoProduct}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Min Age - Max Age</span>
+                                    <span class="value">{{target?.minAge}} - {{target?.maxAge}}</span>
+                                </div>
+                            </div>
+                            <div class="data-group">
+                                <div class="target">
+                                    <span class="label">Primary Lang</span>
+                                    <span class="value">{{target?.primaryLang}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Other Lang</span>
+                                    <span class="value">{{target?.otherLangs}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">No. Of Speakers</span>
+                                    <span class="value">{{target?.numSpeakers}}</span>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+                  Target {{i+1}}
+                </div>
+                
               </mat-option>
             </mat-select>
         </mat-form-field>
-        <button>Assign Target Group</button>
+        <button (click)="audioProcessing()">Submit For Processing</button>
     </div>
 </div>

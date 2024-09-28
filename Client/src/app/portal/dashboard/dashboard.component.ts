@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AddProjectComponent } from '../project/add-project/add-project.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadFileComponent } from '../project/upload-file/upload-file.component';
+import { InfoComponent } from '../project/info/info.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -113,7 +114,7 @@ export class DashboardComponent {
 
   loading: boolean = true;
   constructor(private dialog: MatDialog) {
-
+    
   }
 
   ngOnInit() {

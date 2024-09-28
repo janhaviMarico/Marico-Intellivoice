@@ -29,6 +29,7 @@ export class LoginPageComponent {
     await this.msalService.instance.initialize();
 
     this.msalService.loginPopup().subscribe((res: AuthenticationResult) => {
+      localStorage.setItem('User',res.account.username);
       this.msalService.instance.setActiveAccount(res.account);
       this.router.navigate(['/portal/dashboard'])
     }, (error) => {
