@@ -5,9 +5,10 @@ import { CosmosPartitionKey } from '@nestjs/azure-database';
 export class TranscriptionEntity {
   TGId: string;    // Unique identifier for the target group
   TGName:string;
-  audiodata: AudioData[]
+  audiodata: AudioData[];
+  summary: string = '';   // Default empty string
+  sentiment_analysis: string = '';   // Default empty string
 }
-
 
 class AudioData {
     speaker: string;
