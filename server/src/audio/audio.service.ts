@@ -9,6 +9,7 @@ import { TargetGroupEntity } from './entity/target.entity';
 import { fork } from 'child_process';
 import { join } from 'path';
 import { TranscriptionEntity } from './entity/transcription.entity';
+import { nanoid } from 'nanoid';
 
 
 
@@ -108,7 +109,7 @@ export class AudioService {
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
         const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
         const targetGroupEntity: TargetGroupEntity = {
-          TGId: '1457',
+          TGId:nanoid(),
           TGName: groupObj.TGName,
           ProjId: groupObj.ProjId,
           AudioName: groupObj.AudioName,
@@ -120,7 +121,8 @@ export class AudioService {
           MainLang: groupObj.MainLang,  
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
-          filePath: matchingSasUrl.sasUri
+          filePath: matchingSasUrl.sasUri,
+          status:0
         };
          await this.targetContainer.items.create(targetGroupEntity);
          audioProcessDtoArray.push({
@@ -207,5 +209,68 @@ export class AudioService {
     return Promise.resolve(blobUrl);
   }
 
+
+
+  async getAudioData(userid?: string) {
+    try {
+      // 1. Build Project Query
+      let querySpecProject;
+      if (userid) {
+        // If `userid` is passed, filter by `userid`
+        querySpecProject = {
+          query: 'SELECT * FROM c WHERE c.userid = @userid',
+          parameters: [{ name: '@userid', value: userid }],
+        };
+      } else {
+        // If no `userid`, fetch all projects
+        querySpecProject = {
+          query: 'SELECT * FROM c',
+        };
+      }
+
+      // Fetch projects based on query
+      const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
+
+      // If no projects found
+      if (projects.length === 0) {
+        return [];
+      }
+
+      // 2. Fetch and Combine Data from Target Container
+      const combinedResults = [];
+
+      // Iterate over all fetched projects
+      for (const project of projects) {
+        const projId = project.ProjId;
+
+        // Fetch related target data using ProjId
+        const querySpecTarget = {
+          query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
+          parameters: [{ name: '@ProjId', value: projId }],
+        };
+        const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
+
+        // Combine the data from project and target containers
+        for (const target of targets) {
+          combinedResults.push({
+            ProjectName: project.ProjName,
+            Country: target.Country,
+            State: target.State,
+            TargetGroup: target.TGName,
+            TargetId :target.TGId,
+            AgeGroup: target.AgeGrp,
+            CompetitorGroup: target.CompetetionProduct,
+            MaricoProduct: target.MaricoProduct,
+            Status: target.status === 0 ? 'Processing' : target.status === 1 ? 'Completed' : target.status === 2 ? 'Failed': 'Unknown' 
+          });
+        }
+      }
+
+      return combinedResults;
+    } catch (error) {
+      console.error('Error fetching audio data:', error.message);
+      throw new InternalServerErrorException('Failed to fetch audio data');
+    }
+  }
 
 }

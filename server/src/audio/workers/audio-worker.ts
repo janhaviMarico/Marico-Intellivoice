@@ -205,7 +205,8 @@ const audioDataArray = await Promise.all(recognizedPhrases.map(async item => {
 }));
 
 const transcriptionDocument={
-  TGId: project_name,
+  TGName: project_name,
+  TGId:project_name,
   audiodata:audioDataArray
 }
 //console.log(transcriptionDocument.audiodata);

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException } from '@nestjs/common';
 import { AudioService } from './audio.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
@@ -74,6 +74,18 @@ export class AudioController {
         },
         error.status || HttpStatus.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  @Get('list')
+  async getAudioList(@Body('userid') userid?: string) {
+    try {
+      // Fetch data from service with or without userid
+      const audioData = await this.audioService.getAudioData(userid);
+      return { data: audioData, message: 'Audio data fetched successfully' };
+    } catch (error) {
+      console.error('Error fetching audio data:', error.message);
+      throw new InternalServerErrorException('Failed to fetch audio data');
     }
   }
 
