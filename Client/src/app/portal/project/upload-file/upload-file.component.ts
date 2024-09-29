@@ -4,6 +4,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { InfoComponent } from '../info/info.component';
 import { AddProjectComponent } from '../add-project/add-project.component';
+import { AudioService } from '../../service/audio.service';
 
 interface AudioFile {
   name: string;
@@ -45,7 +46,8 @@ export class UploadFileComponent {
   constructor(
     public uploadDialogRef: MatDialogRef<UploadFileComponent>,
     private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public targetGrps: { targetGrpArr: any[] }
+    @Inject(MAT_DIALOG_DATA) public targetGrps: { targetGrpArr: any[] },
+    private audioServ:AudioService
   ) { }
 
   ngOnInit() {
@@ -363,21 +365,27 @@ export class UploadFileComponent {
 
     formData.append('Project',Project);
     formData.append('TargetGrp',TargetGrp);
-    // this.closeProject();
-    // this.closeDailog();
-    // this.dialog.open(InfoComponent, {
-    //   height: '50vh',
-    //   width: '40vw',
-    //   disableClose: true,
-    //   data:  { info: 'Process' }
-    // });
-  }
 
-  closeProject() {
-    this.uploadDialogRef.close();
+    // this.audioServ.uploadForm('audio/upload',formData).subscribe((res:any)=> {
+    //   console.log('res',res);
+    // },(err:any)=> {
+    //   debugger
+    //   console.log('err',err)
+    // })
+    this.closeProjectDialog();
+    this.closeUploadDailog();
+    
+    this.dialog.open(InfoComponent, {
+      height: '50vh',
+      width: '40vw',
+      disableClose: true,
+      data:  { info: 'Process' }
+    });
   }
-
-  closeDailog() {
+  closeProjectDialog() {
+    this.audioServ.closeDialog.next(true);
+  }
+  closeUploadDailog() {
       this.uploadDialogRef.close();
   }
 }

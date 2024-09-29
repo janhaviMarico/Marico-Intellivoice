@@ -31,6 +31,8 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import { SharedModule } from '../shared/shared.module';
 import { TooltipDirective } from './tooltip.directive';
 import { InfoComponent } from './project/info/info.component' ;
+import { AudioService } from './service/audio.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -65,8 +67,9 @@ import { InfoComponent } from './project/info/info.component' ;
     DynamicDialogModule,
     ReactiveFormsModule,
     MatGridListModule,
-    SharedModule
+    SharedModule,
+    HttpClientModule
   ],
-  providers: [DialogService]
+  providers: [DialogService, AudioService]
 })
 export class PortalModule { }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { UploadFileComponent } from '../upload-file/upload-file.component';
+import { AudioService } from '../../service/audio.service';
 
 @Component({
   selector: 'app-add-project',
@@ -49,7 +50,9 @@ export class AddProjectComponent {
     {name: 'Gujrati', code:'GJ'}
   ];
   filteredOtherLang: any[] = [...this.otherLang];
-  constructor(private fb: FormBuilder, private dialog: MatDialog, public dialogRef: MatDialogRef<UploadFileComponent>) {}
+  constructor(private fb: FormBuilder, private dialog: MatDialog, public dialogRef: MatDialogRef<AddProjectComponent>,
+    private audioServ:AudioService
+  ) {}
 
   ngOnInit() {
     this.targetForm = this.fb.group({
@@ -74,6 +77,13 @@ export class AddProjectComponent {
         this.targetForm.get('otherLangs')?.setValue(selectedOtherLangs.filter((lang:any) => lang !== selectedPrimaryLang));
       }
     });
+
+
+    this.audioServ.closeDialog.subscribe((res:any)=> {
+      if(res) {
+        this.dialogRef.close();
+      }
+    })
   }
 
   ageRangeValidator(minAgeField: string, maxAgeField: string): ValidatorFn {
