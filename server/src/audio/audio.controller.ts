@@ -89,4 +89,21 @@ export class AudioController {
     }
   }
 
+  @Get('details')
+  async getAudioDetails(
+  @Body('tgId') tgId: string,
+  @Body('tgName') tgName: string
+) {
+    try {
+      // Fetch details from the service
+      console.log('Input params',tgId,tgName);
+      
+      const audioDetails = await this.audioService.getAudioDetails(tgId, tgName);
+      return { data: audioDetails, message: 'Audio details fetched successfully' };
+    } catch (error) {
+      console.error('Error fetching audio details:', error.message);
+      throw new InternalServerErrorException('Failed to fetch audio details');
+    }
+  }
+
 }

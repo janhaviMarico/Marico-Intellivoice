@@ -83,7 +83,6 @@ export class AudioService {
   }
 
   
-
   private async createProjectAndTargetGroups(project: ProjectGroupDTO, targetGrp: string,
     sasUrls: { fileName: string, sasUri: string, sasToken: string }[]) {
     try {
@@ -172,11 +171,8 @@ export class AudioService {
 
   generateBlobSasUrl(fileName: string): Promise<string> {
 
-    const account = this.config.get<string>('BLOB_CONTAINER_ACCOUNT');
-    const key = this.config.get<string>('BLOB_CONTAINER_ACCOUNT_KEY');
-
-    console.log(account);
-    console.log(key);
+    // const account = this.config.get<string>('BLOB_CONTAINER_ACCOUNT');
+    // const key = this.config.get<string>('BLOB_CONTAINER_ACCOUNT_KEY');
 
     const sharedKeyCredential = new StorageSharedKeyCredential(
       this.config.get<string>('BLOB_CONTAINER_ACCOUNT'),
@@ -208,8 +204,6 @@ export class AudioService {
     this.logger.log(`Generated SAS URL for blob: ${blobUrl}`);
     return Promise.resolve(blobUrl);
   }
-
-
 
   async getAudioData(userid?: string) {
     try {
@@ -270,6 +264,68 @@ export class AudioService {
     } catch (error) {
       console.error('Error fetching audio data:', error.message);
       throw new InternalServerErrorException('Failed to fetch audio data');
+    }
+  }
+
+  async viewData(TGName:string,TGId:string){
+  }
+
+  async getAudioDetails(tgId: string, tgName: string) {
+    try {
+      // 1. Fetch Target Data by TGId and TGName
+      //IN_MH_18_25_SOIL_NYK_E_MAR
+      //IN_MH_18_25_SOIL_NYK_E_MAR
+      const querySpecTarget = {
+        query: 'SELECT * FROM c WHERE c.TGName = @TGName',
+        parameters: [
+          { name: '@TGName', value: tgName },
+          //{name:'@id',value:"113536ec-41e6-445b-8324-bf99bd93d5cd"}
+        ],
+      };
+      console.log(querySpecTarget.query);
+      const { resources: targetData } = await this.targetContainer.items
+        .query(querySpecTarget)
+        .fetchAll();
+        this.logger.log(`Fetching details for  ${tgId} and ${tgName} `);  
+
+
+      if (targetData.length === 0) {
+        return { message: 'Target data not found' };
+      }
+      const targetItem = targetData[0]; // Assuming TGId and TGName are unique
+
+      // 2. Fetch Transcription Data by TGId and TGName
+      const querySpecTranscription = {
+        query: 'SELECT * FROM c WHERE c.TGId = @TGId AND c.TGName = @TGName',
+        parameters: [
+          { name: '@TGId', value: tgId },
+          { name: '@TGName', value: tgName },
+        ],
+      };
+      const { resources: transcriptionData } = await this.transcriptContainer.items
+        .query(querySpecTranscription)
+        .fetchAll();
+        this.logger.log(`Fetching transcription data for  ${tgId} and ${tgName} `);  
+
+      if (transcriptionData.length === 0) {
+        return { message: 'Transcription data not found' };
+      }   
+      const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
+     this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);  
+     const filenameurl=await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
+      // 3. Combine Target and Transcription Data
+      const combinedData = {
+        TGId: targetItem.TGId,
+        TGName: targetItem.TGName,
+        FilePath: filenameurl, // Audio Blob Link from Target Container
+        AudioData: transcriptionItem.audiodata, // Transcription and Translation
+        Summary: transcriptionItem.summary, // Summary from Transcription Container
+        SentimentAnalysis: transcriptionItem.sentiment_analysis, // Sentiment Analysis from Transcription Container
+      };
+      return combinedData;
+    } catch (error) {
+      console.error('Error fetching audio details:', error.message);
+      throw new InternalServerErrorException('Failed to fetch audio details');
     }
   }
 
