@@ -8,6 +8,7 @@ export class TranscriptionEntity {
   audiodata: AudioData[];
   summary: string = '';   // Default empty string
   sentiment_analysis: string = '';   // Default empty string
+  combinedTranslation:string='';
 }
 
 class AudioData {
