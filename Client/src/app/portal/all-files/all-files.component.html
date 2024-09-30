@@ -22,13 +22,13 @@
           </ng-template>
           <ng-template pTemplate="body" let-project>
               <tr>
-                  <td>{{ project.name }}</td>
-                  <td>{{ project.country }}</td>
-                  <td>{{ project.state }}</td>
-                  <td>{{ project.targetGroup }}</td>
-                  <td>{{ project.ageGroup }}</td>
-                  <td>{{ project.competition }}</td>
-                  <td>{{ project.maricoProduct }}</td>
+                  <td>{{ project.ProjectName }}</td>
+                  <td>{{ project.Country }}</td>
+                  <td>{{ project.State }}</td>
+                  <td>{{ project.TargetGroup }}</td>
+                  <td>{{ project.AgeGroup }}</td>
+                  <td>{{ project.CompetitorGroup }}</td>
+                  <td>{{ project.MaricoProduct }}</td>
                   <td style="display: flex;justify-content: center;"> <p-tag value="View Data" /> <button class="edit-button" *ngIf="!isAllFiles"><img
                     src="../../../assets/Img/allFiles/edit.png" alt=""></button></td>
               </tr>

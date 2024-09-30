@@ -31,7 +31,7 @@ export class UploadFileComponent {
   selectedTargetGrp: string = '';
   expansionArr: any[] = [];
   target: any;
-
+  isProcessingDisable: boolean = true;
   // currentTime: string = '0:00';
   // durationTime: string = '0:00';
   // seekValue: number = 0;
@@ -47,7 +47,7 @@ export class UploadFileComponent {
     public uploadDialogRef: MatDialogRef<UploadFileComponent>,
     private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public targetGrps: { targetGrpArr: any[] },
-    private audioServ:AudioService
+    private audioServ: AudioService
   ) { }
 
   ngOnInit() {
@@ -331,11 +331,11 @@ export class UploadFileComponent {
 
   audioProcessing() {
     const formData = new FormData();
-    var Project:any;
-    var TargetGrp:any = [];
-    var tgArr:any[] = [];
-    for(let i= 0;i< this.targetGrps.targetGrpArr.length;i++) {
-      if(i==0) {
+    var Project: any;
+    var TargetGrp: any = [];
+    var tgArr: any[] = [];
+    for (let i = 0; i < this.targetGrps.targetGrpArr.length; i++) {
+      if (i == 0) {
         Project = {
           ProjName: this.targetGrps.targetGrpArr[i].projectName,
           userid: localStorage.getItem('User'),
@@ -357,35 +357,37 @@ export class UploadFileComponent {
         noOfSpek: this.targetGrps.targetGrpArr[i].numSpeakers,
         filePath: ""
       }
-      formData.append('files',this.targetGrps.targetGrpArr[i].audioList[0].data);
+      const originalExtension = this.targetGrps.targetGrpArr[i].audioList[0].data.name.substring(this.targetGrps.targetGrpArr[i].audioList[0].data.name.lastIndexOf('.'));
+      const renamedFile = new File([this.targetGrps.targetGrpArr[i].audioList[0].data], `${this.targetGrps.targetGrpArr[i].name}${originalExtension}`, { type: this.targetGrps.targetGrpArr[i].audioList[0].data.type });
+      formData.append('files', renamedFile);
       TargetGrp.push(temp)
-      tgArr.push(this.targetGrps.targetGrpArr[i].name)
+      tgArr.push(this.targetGrps.targetGrpArr[i].name);
     }
     Project["TGIds"] = tgArr;
 
-    formData.append('Project',Project);
-    formData.append('TargetGrp',TargetGrp);
+    formData.append('Project', JSON.stringify(Project));
+    formData.append('TargetGrp', JSON.stringify(TargetGrp));
+    this.audioServ.uploadForm('audio/upload', formData).subscribe((res: any) => {
+      console.log('res', res);
+      this.closeProjectDialog();
+      this.closeUploadDailog();
 
-    // this.audioServ.uploadForm('audio/upload',formData).subscribe((res:any)=> {
-    //   console.log('res',res);
-    // },(err:any)=> {
-    //   debugger
-    //   console.log('err',err)
-    // })
-    this.closeProjectDialog();
-    this.closeUploadDailog();
-    
-    this.dialog.open(InfoComponent, {
-      height: '50vh',
-      width: '40vw',
-      disableClose: true,
-      data:  { info: 'Process' }
-    });
+      this.dialog.open(InfoComponent, {
+        height: '50vh',
+        width: '40vw',
+        disableClose: true,
+        data: { info: 'Process' }
+      });
+    }, (err: any) => {
+      console.log('err', err)
+    })
+
   }
   closeProjectDialog() {
     this.audioServ.closeDialog.next(true);
   }
   closeUploadDailog() {
-      this.uploadDialogRef.close();
+    this.uploadDialogRef.close();
   }
+
 }

@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { AudioService } from '../service/audio.service';
 
 @Component({
   selector: 'app-audio-details',
@@ -11,8 +12,30 @@ export class AudioDetailsComponent {
   currentTime: string = '0:00';
   durationTime: string = '0:00';
   seekValue: number = 0;
+  tgId:string = 'IN_Test_final';
+  tgName:string = 'IN_Test_final'
 
   isPlaying = false;
+  audioDetails : any;
+  filePath:string = '';
+
+  constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef) {
+
+  }
+
+  ngOnInit() {
+    this.getAudioDetails();
+  }
+
+  getAudioDetails() {
+    this.audioServ.getDetails('audio/details',this.tgId, this.tgName).subscribe((res:any)=> {
+      this.audioDetails = res.data;
+      console.log(this.audioDetails);
+      this.filePath = res.data.FilePath;
+    },(err:any)=> {
+      
+    })
+  }
 
   ngAfterViewInit(): void {
     // Set initial value for seek bar, if necessary
@@ -58,6 +81,9 @@ export class AudioDetailsComponent {
   togglePlayPause(): void {
     const audio = this.audioPlayer.nativeElement;
     if (audio.paused) {
+      if(this.currentTime === '0:00') {
+        audio.load();
+      }
       audio.play();
       this.isPlaying = true;
     } else {

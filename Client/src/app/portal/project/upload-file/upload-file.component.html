@@ -30,7 +30,7 @@
                       <div class="controls">
                         <div class="file-name">
                           <img src="../../../../assets/Img/dashboard/file.png" alt="">
-                          <span>{{ file.name }}</span>
+                          <span>{{ file.name | truncate:25 }}</span>
                         </div>
                         <div class="control">
                           <!-- <button (click)="togglePlayPause(i, exp.audioList, 'expansion')">
@@ -74,7 +74,7 @@
                   <div class="controls">
                     <div class="file-name">
                       <img src="../../../../assets/Img/dashboard/file.png" alt="">
-                      <span>{{ file.name }}</span>
+                      <span>{{ file.name | truncate:25}}</span>
                     </div>
                     <div class="control">
                       <button (click)="togglePlayPause(i, audioFiles,'audioFiles')">
@@ -203,6 +203,6 @@
               </mat-option>
             </mat-select>
         </mat-form-field>
-        <button (click)="audioProcessing()">Submit For Processing</button>
+        <button (click)="audioProcessing()" [disabled]="isProcessingDisable">Submit For Processing</button>
     </div>
 </div>

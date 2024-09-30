@@ -238,5 +238,9 @@
             color: #ffffff;
             border-radius: 4px;
         }
+        button[disabled] {
+            background: #757575;
+            cursor: not-allowed;
+        }
     }
 }
