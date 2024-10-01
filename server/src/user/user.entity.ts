@@ -17,5 +17,11 @@ export class User{
     email:string;
 
     @Prop({ required: true })
-    access:number[];
+    //access:number[];
+    access: string = 'read'; 
 }
+
+
+// 
+
+  
