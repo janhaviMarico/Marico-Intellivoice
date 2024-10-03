@@ -1,0 +1,44 @@
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="add-project">
+            <img class="uploadfile-logo" src="../../../assets/Img/dashboard/uploadfile.png" alt="">
+            <button class="add-btn" (click)="showAudioPopup()"><img id="add-logo" src="../../../assets/Img/dashboard/add.png" alt=""> Add New Audio</button>
+            <span>Please select the files in correct order, Maximum upload size is 4gb
+            </span>
+            <span>Format supported are MP3,MP4.</span>
+        </div>
+    </div>
+    <div class="dashboard-body">
+        <div class="dashboard-body-title">
+            <label>File History</label> <span>100 files</span>
+        </div>
+        <div class="dashboard-body-table card">
+            <p-table #dt2 [value]="project" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [loading]="loading" [paginator]="true">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Country</th>
+                        <th>State</th>
+                        <th>Target Group</th>
+                        <th>Age Group</th>
+                        <th>Competetion</th>
+                        <th>Marico Product</th>
+                        <th>Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-project>
+                    <tr>
+                        <td>{{ project.name }}</td>
+                        <td>{{ project.country }}</td>
+                        <td>{{ project.state }}</td>
+                        <td>{{ project.targetGroup }}</td>
+                        <td>{{ project.ageGroup }}</td>
+                        <td>{{ project.competition }}</td>
+                        <td>{{ project.maricoProduct }}</td>
+                        <td style="display: flex;justify-content: center;"> <p-tag value="View Data" /></td>
+                    </tr>
+                </ng-template>
+            </p-table>
+          </div>
+    </div>
+</div>

@@ -1,0 +1,208 @@
+<div class="upload-container">
+    <div class="upload-header">
+        <h3>Upload files</h3>
+        <button><img src="../../../../assets/Img/dashboard/close-project.png" alt="" (click)="closeUploadDailog()"></button>
+    </div>
+    <div class="upload-body">
+        <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)">
+            <input type="file" #fileDropRef id="fileDropRef" (change)="onFileSelected($event)" multiple
+                accept="audio/*">
+            <img src="../../../../assets/Img/dashboard/upload-file.png" alt="upload-file">
+            <label for="fileDropRef">Drag your file(s) or <span>browser</span></label>
+        </div>
+        <div class="upload-list">
+            <h3>Selected Audios And Assign Target Groups</h3>
+            <mat-accordion *ngIf="expansionArr.length > 0" class="expansion-section">
+              <mat-expansion-panel 
+                *ngFor="let exp of expansionArr; let expIndex = index" 
+                (opened)="panelOpenState.set(true)" 
+                (closed)="panelOpenState.set(false)">
+                  
+                <mat-expansion-panel-header>
+                  <mat-panel-title> {{exp.name | truncate:29 }} </mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <ul>
+                  <li class="expanse-li" *ngFor="let file of exp.audioList; let i = index">
+                    <button><img src="../../../../assets/Img/dashboard/drag.png" alt="" (click)="removeFileFromExpansionList(expIndex, i)"></button>
+                    <div class="upload-player">
+                      <div class="controls">
+                        <div class="file-name">
+                          <img src="../../../../assets/Img/dashboard/file.png" alt="">
+                          <span>{{ file.name | truncate:25 }}</span>
+                        </div>
+                        <div class="control">
+                          <!-- <button (click)="togglePlayPause(i, exp.audioList, 'expansion')">
+                            <img src="../../../../assets/Img/dashboard/play-btn.png" alt="" />
+                          </button> -->
+                          <button (click)="removeFileFromExpansionList(expIndex, i , true)">
+                            <img src="../../../../assets/Img/dashboard/delete-btn.png" alt="" />
+                          </button>
+                        </div>
+                      </div>
+                      <div class="slider">
+                        <span id="current-time">{{ file.currentTime || '0:00' }}</span>
+                        <input 
+                          type="range" 
+                          class="seek-bar" 
+                          [value]="file.seekValue || 0" 
+                          max="100" 
+                          (input)="seekAudio($event, i, exp.audioList)" 
+                        />
+                        <span id="duration-time">{{ file.durationTime || '0:00' }}</span>
+                        <audio 
+                          #audioPlayer 
+                          controls 
+                          (timeupdate)="updateProgress($event, i, exp.audioList)" 
+                          [src]="file.url"
+                        ></audio>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                
+              </mat-expansion-panel>
+            </mat-accordion>
+            <ul class="audio-files-section">
+              <li *ngFor="let file of audioFiles; let i = index">
+                <input 
+                  type="checkbox" 
+                  (change)="toggleSelectFile(file, $event)" 
+                />
+                <div class="upload-player">
+                  <div class="controls">
+                    <div class="file-name">
+                      <img src="../../../../assets/Img/dashboard/file.png" alt="">
+                      <span>{{ file.name | truncate:25}}</span>
+                    </div>
+                    <div class="control">
+                      <button (click)="togglePlayPause(i, audioFiles,'audioFiles')">
+                        <img 
+                          src="../../../../assets/Img/dashboard/play-btn.png" 
+                          alt=""
+                        />
+                      </button>
+                      <button (click)="deleteFile(i)">
+                        <img 
+                          src="../../../../assets/Img/dashboard/delete-btn.png" 
+                          alt=""
+                        />
+                      </button>
+                    </div>
+                  </div>
+                  <div class="slider">
+                    <span id="current-time">{{ file.currentTime || '0:00' }}</span>
+                    <input 
+                      type="range" 
+                      class="seek-bar" 
+                      [value]="file.seekValue || 0" 
+                      max="100" 
+                      (input)="seekAudio($event, i, audioFiles)" 
+                    />
+                    <span id="duration-time">{{ file.durationTime || '0:00' }}</span>
+                    <audio 
+                      #audioPlayer 
+                      controls 
+                      (timeupdate)="updateProgress($event, i, audioFiles)" 
+                      [src]="file.url"
+                    ></audio>
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <!-- <ul>
+                <li>
+                    <input type="checkbox" name="" id="">
+                    <div class="upload-player">
+                        <div class="controls">
+                            <div class="file-name">
+                                <img src="../../../../assets/Img/dashboard/file.png" alt="">
+                                <span>Audio 1</span>
+                            </div>
+                            <div class="control">
+                                <button><img src="../../../../assets/Img/dashboard/play-btn.png" alt="" (click)="togglePlayPause()"></button>
+                                <button><img src="../../../../assets/Img/dashboard/delete-btn.png" alt=""></button>
+                            </div>
+                        </div>
+                        <div class="slider">
+                            <span id="current-time">{{ currentTime }}</span>
+                            <input type="range" class="seek-bar" [value]="seekValue" max="100" (input)="seekAudio($event)">
+                            <span id="duration-time">{{ durationTime }}</span>
+                            <audio #audioPlayer controls (timeupdate)="updateProgress($event)">
+                              <source src="../../../../assets/Sachin_Sachin.mp3" />
+                              Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                </li>
+            </ul> -->
+        </div>
+
+    </div>
+    <div class="upload-footer">
+        <mat-form-field>
+            <mat-label>Select Target Group</mat-label>
+            <mat-select (selectionChange)="assignTargetGrp($event)">
+              <mat-option *ngFor="let tg of targetGrps?.targetGrpArr; let i = index" [value]="tg.name" (mouseenter) ="mouseEnter(tg)">
+                <div appTooltip>
+                  <div class="targetTooltip" >
+                    <div class="targetGroupPopop">
+                        <h6>{{target?.name | truncate:30 }}</h6>
+                        <div class="target-data-wrapper">
+                            <div class="data-group">
+                                <div class="target">
+                                    <span class="label">Project Name</span>
+                                    <span class="value">{{target?.projectName}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Country</span>
+                                    <span class="value">{{target?.country}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">State</span>
+                                    <span class="value">{{target?.state}}</span>
+                                </div>
+                            </div>
+                            <div class="data-group">
+                                <div class="target">
+                                    <span class="label">Competitor Products</span>
+                                    <span class="value">{{target?.competitors}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Marico Product</span>
+                                    <span class="value">{{target?.maricoProduct}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Min Age - Max Age</span>
+                                    <span class="value">{{target?.minAge}} - {{target?.maxAge}}</span>
+                                </div>
+                            </div>
+                            <div class="data-group">
+                                <div class="target">
+                                    <span class="label">Primary Lang</span>
+                                    <span class="value">{{target?.primaryLang}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">Other Lang</span>
+                                    <span class="value">{{target?.otherLangs}}</span>
+                                </div>
+                                <div class="target">
+                                    <span class="label">No. Of Speakers</span>
+                                    <span class="value">{{target?.numSpeakers}}</span>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+                  Target {{i+1}}
+                </div>
+                
+              </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <button (click)="audioProcessing()" [disabled]="isProcessingDisable">Submit For Processing</button>
+    </div>
+</div>

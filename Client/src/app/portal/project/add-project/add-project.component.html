@@ -1,0 +1,202 @@
+<div class="project-container">
+    <div class="project-header">
+        <h3>Add Details Of New Audio</h3>
+        <button type="button"><img src="../../../../assets/Img/dashboard/close-project.png" alt="" (click)="closeDailog()"></button>
+    </div>
+    <form [formGroup]="targetForm" (ngSubmit)="onSubmit()">
+        <div class="project-detail">
+            <h3>Project Details</h3>
+            <mat-form-field>
+                <mat-label>Project Name</mat-label>
+                <input matInput placeholder="Enter Project Name" formControlName="projectName">
+                <mat-error *ngIf="targetForm.get('projectName')?.hasError('required')">
+                    Project Name is required
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="tg-detail">
+            <h3>Target Group Details</h3>
+            <button type="button">Clear</button>
+        </div>
+        <div class="dp-detail">
+            <h3>Demographic & Products Involved</h3>
+            <div class="form-field">
+                <mat-form-field>
+                    <mat-label>Select Country</mat-label>
+                    <mat-select formControlName="country">
+                        <mat-option [value]="con.name" *ngFor="let con of countries">{{con.name}}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="targetForm.get('country')?.hasError('required')">
+                        Country is required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Select State</mat-label>
+                    <mat-select formControlName="state">
+                        <mat-option [value]="state.name" *ngFor="let state of states">{{state.name}}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="targetForm.get('state')?.hasError('required')">
+                        State is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-form-field>
+                    <mat-label>Competitors Product</mat-label>
+                    <mat-select multiple formControlName="competitors">
+                        <mat-option [value]="com.name" *ngFor="let com of competitors">{{com.name}}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="targetForm.get('competitors')?.hasError('required')">
+                        Please select at least one competitor
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Marico Product</mat-label>
+                    <mat-select formControlName="maricoProduct">
+                        <mat-option [value]="pro.name" *ngFor="let pro of products">{{pro.name}}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="targetForm.get('maricoProduct')?.hasError('required')">
+                        Marico Product is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-form-field>
+                    <mat-label>Minimum Age of the Group {{targetForm.errors?.['ageRangeInvalid']}}</mat-label>
+                    <input matInput type="number" formControlName="minAge"
+                        placeholder="Enter Minimum Age">
+                    <mat-error *ngIf="targetForm.get('minAge')?.hasError('required')">
+                        Minimum Age is required
+                    </mat-error>
+                    <mat-error *ngIf="targetForm.get('minAge')?.hasError('min')">
+                        Minimum Age cannot be less than 18
+                    </mat-error>
+                    <mat-error *ngIf="targetForm.errors?.['ageRangeInvalid']">
+                        Maximum Age must be greater than Minimum Age.
+                      </mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Maximum Age of the Group {{targetForm.errors?.['ageRangeInvalid']}}</mat-label>
+                    <input matInput type="number" formControlName="maxAge"
+                        placeholder="Enter Maximum Age">
+                    <mat-error *ngIf="targetForm.get('maxAge')?.hasError('required')">
+                        Maximum Age is required
+                    </mat-error>
+                    <mat-error *ngIf="targetForm.get('maxAge')?.hasError('max')">
+                        Maximum Age cannot exceed 50
+                    </mat-error>
+                    <mat-error *ngIf="targetForm.errors?.['ageRangeInvalid']">
+                        Maximum Age must be greater than Minimum Age.
+                      </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="dp-detail">
+            <h3>Languages & Speakers</h3>
+            <div class="form-field">
+                <mat-form-field>
+                    <mat-label>Primary Language</mat-label>
+                    <mat-select formControlName="primaryLang">
+                        <mat-option [value]="pl.name" *ngFor="let pl of primaryLang">{{pl.name}}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="targetForm.get('primaryLang')?.hasError('required')">
+                        Primary Language is required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Secondary Language</mat-label>
+                    <mat-select multiple formControlName="otherLangs">
+                        <mat-option [value]="ol.name" *ngFor="let ol of filteredOtherLang">{{ol.name}}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="targetForm.get('otherLangs')?.hasError('required')">
+                        At least one Secondary Language is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-form-field>
+                    <mat-label>No. of Speakers</mat-label>
+                    <input matInput type="number" formControlName="numSpeakers"
+                        placeholder="Enter Maximum Age">
+                    <mat-error *ngIf="targetForm.get('numSpeakers')?.hasError('required')">
+                        Number of Speakers is required
+                    </mat-error>
+                    <mat-error *ngIf="targetForm.get('numSpeakers')?.hasError('min')">
+                        Number of Speakers cannot be less than 2
+                    </mat-error>
+                    <mat-error *ngIf="targetForm.get('numSpeakers')?.hasError('max')">
+                        Number of Speakers cannot exceed 10
+                    </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="new-tg-grp">
+            <button type="submit" [disabled]="targetForm.invalid">Create New Target Group</button>
+        </div>
+        <div class="tg-list">
+            <mat-grid-list cols="2"rowHeight="5:1" *ngIf="true">
+            <!-- <mat-grid-list cols="2"rowHeight="5:1" *ngIf="targetGrpArr.length > 0"> -->
+                <mat-grid-tile *ngFor="let tg of targetGrpArr; let i = index">
+                       <div class="tg-name" appTooltip (mouseenter) ="mouseEnter(tg)">
+                            <div class="targetTooltip" >
+                                <div class="targetGroupPopop">
+                                    <h6>{{target?.name | truncate:30 }}</h6>
+                                    <div class="target-data-wrapper">
+                                        <div class="data-group">
+                                            <div class="target">
+                                                <span class="label">Project Name</span>
+                                                <span class="value">{{target?.projectName}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">Country</span>
+                                                <span class="value">{{target?.country}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">State</span>
+                                                <span class="value">{{target?.state}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="data-group">
+                                            <div class="target">
+                                                <span class="label">Competitor Products</span>
+                                                <span class="value">{{target?.competitors}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">Marico Product</span>
+                                                <span class="value">{{target?.maricoProduct}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">Min Age - Max Age</span>
+                                                <span class="value">{{target?.minAge}} - {{target?.maxAge}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="data-group">
+                                            <div class="target">
+                                                <span class="label">Primary Lang</span>
+                                                <span class="value">{{target?.primaryLang}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">Other Lang</span>
+                                                <span class="value">{{target?.otherLangs}}</span>
+                                            </div>
+                                            <div class="target">
+                                                <span class="label">No. Of Speakers</span>
+                                                <span class="value">{{target?.numSpeakers}}</span>
+                                            </div>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                            <button><img src="../../../../assets/Img/dashboard/info.png" alt=""></button>
+                            <span>{{ tg.name | truncate:25 }}</span>
+                            <button (click)="removeTargetGroup(i)"><img src="../../../../assets/Img/dashboard/close-project.png" alt=""></button>
+                       </div>
+                </mat-grid-tile>
+            </mat-grid-list>
+        </div>
+    </form>
+    <div class="project-footer">
+        <button type="button" [disabled]="targetGrpArr.length === 0" (click)="openAudioFileDialog()">Next</button>
+    </div>
+</div>

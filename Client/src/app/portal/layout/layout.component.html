@@ -1,0 +1,36 @@
+<header>
+    <div class="logo">
+        <img src="../../../assets/Img/header/Logo.png" alt="Marico-Logo">
+        <label>Intelli-Voice</label>
+    </div>
+    <div class="section">
+        <div class="search">
+            <i class="search-icon"><img src="../../../assets/Img/header/search.png" alt="Search"></i> <!-- This can be replaced by an icon font like Font Awesome -->
+            <input type="text" class="search-bar"
+                placeholder="Search Files, Projects, Target Groups, Competitors, Products">
+        </div>
+        <div class="profile">
+            <img src="../../../assets/Img/header/help.png" alt="Help">
+            <img src="../../../assets/Img/header/settings.png" alt="Setting">
+            <img src="../../../assets/Img/header/profile.png" (click)="logout()" alt="Profile">
+        </div>
+    </div>
+</header>
+<div class="main-body">
+    <div class="sidebar">
+        <ul>
+            <li routerLink="dashboard" [routerLinkActive]="['active']" #dashboardActive="routerLinkActive">
+                <img [src]="dashboardActive.isActive ? '../../../assets/Img/sidebar/dashboard-active.png' : '../../../assets/Img/sidebar/dashboard-inactive.png'" alt="Dashboard">Dashboard
+            </li>
+            <li routerLink="allFiles" [routerLinkActive]="['active']" #allFilesActive="routerLinkActive">
+                <img [src]="allFilesActive.isActive ? '../../../assets/Img/sidebar/files-active.png' : '../../../assets/Img/sidebar/files-inactive.png'" alt="Files">All Files
+            </li>
+            <li routerLink="feedback" [routerLinkActive]="['active']" #feedbackActive="routerLinkActive">
+                <img [src]="feedbackActive.isActive ? '../../../assets/Img/sidebar/feedback-inactive.png' : '../../../assets/Img/sidebar/files-inactive.png'" alt="Feedback">Feedback Form
+            </li>
+        </ul>
+    </div>
+    <div class="body">
+        <router-outlet></router-outlet>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query } from '@nestjs/common';
 import { AudioService } from './audio.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
@@ -90,12 +90,11 @@ export class AudioController {
 
   @Get('details')
   async getAudioDetails(
-  @Body('tgId') tgId: string,
-  @Body('tgName') tgName: string
+  @Query('tgId') tgId: string,
+  @Query('tgName') tgName: string
 ) {
     try {
       // Fetch details from the service
-      console.log('Input params',tgId,tgName);
       
       const audioDetails = await this.audioService.getAudioDetails(tgId, tgName);
       return { data: audioDetails, message: 'Audio details fetched successfully' };
