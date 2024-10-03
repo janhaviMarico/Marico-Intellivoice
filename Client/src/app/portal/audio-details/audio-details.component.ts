@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { AudioService } from '../service/audio.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-audio-details',
@@ -12,26 +13,31 @@ export class AudioDetailsComponent {
   currentTime: string = '0:00';
   durationTime: string = '0:00';
   seekValue: number = 0;
-  tgId:string = 'IN_Test_final';
-  tgName:string = 'IN_Test_final'
+  tgId:string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761';
+  tgName:string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761'
 
   isPlaying = false;
   audioDetails : any;
   filePath:string = '';
+  isLoading: boolean = true;
 
-  constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef) {
+  constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef,private activeRoute: ActivatedRoute,
+    private router:Router
+  ) {
 
   }
 
   ngOnInit() {
+    this.tgId = this.activeRoute.snapshot.paramMap.get("tgId") ?? "";
+    this.tgName = this.activeRoute.snapshot.paramMap.get("tgName") ?? "";
     this.getAudioDetails();
   }
 
   getAudioDetails() {
-    this.audioServ.getDetails('audio/details',this.tgId, this.tgName).subscribe((res:any)=> {
+    this.audioServ.getDetails('audio/details',this.tgName, this.tgName).subscribe((res:any)=> {
       this.audioDetails = res.data;
-      console.log(this.audioDetails);
       this.filePath = res.data.FilePath;
+      this.isLoading = false;
     },(err:any)=> {
       
     })
@@ -102,5 +108,9 @@ export class AudioDetailsComponent {
   seekBackward(): void {
     const audio = this.audioPlayer.nativeElement;
     audio.currentTime = Math.max(audio.currentTime - 10, 0); // Ensure it doesn't go below 0
+  }
+
+  back() {
+    this.router.navigate(["portal/allFiles"]);
   }
 }
