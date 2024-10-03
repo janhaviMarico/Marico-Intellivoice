@@ -18,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatButtonModule} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import {TableModule} from 'primeng/table';
 import { DropdownModule } from 'primeng/dropdown';
@@ -68,7 +69,8 @@ import { HttpClientModule } from '@angular/common/http';
     ReactiveFormsModule,
     MatGridListModule,
     SharedModule,
-    HttpClientModule
+    HttpClientModule,
+    MatProgressSpinnerModule
   ],
   providers: [DialogService, AudioService]
 })

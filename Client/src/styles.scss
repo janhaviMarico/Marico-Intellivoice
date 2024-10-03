@@ -108,3 +108,10 @@ button {
   font-weight: 500;
   color: #000;
 }
+
+.spinner {
+  position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(50px, 50px)
+}

@@ -15,7 +15,7 @@ const routes: Routes = [
       {path:'dashboard',component:DashboardComponent, canActivate: [authGuard]},
       {path:'allFiles',component:AllFilesComponent, canActivate: [authGuard]},
       {path:'feedback',component:FeedbackComponent, canActivate: [authGuard]},
-      {path:'audioDetails',component:AudioDetailsComponent, canActivate: [authGuard]},
+      {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent, canActivate: [authGuard]},
       {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
     ]
   }

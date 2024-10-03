@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AudioDetailsComponent } from '../audio-details/audio-details.component';
 import { AudioService } from '../service/audio.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-all-files',
@@ -11,9 +12,9 @@ import { AudioService } from '../service/audio.service';
 export class AllFilesComponent {
   isAllFiles: boolean = true;
   project:any[] = [];
-  loading: boolean = true;
   userId:string = 'testuser4';
-  constructor(private audioServ:AudioService) {
+  isLoading: boolean = true;
+  constructor(private audioServ:AudioService,private router:Router) {
 
   }
 
@@ -24,14 +25,18 @@ export class AllFilesComponent {
   getProjectData() {
     this.audioServ.getData('audio/list', this.userId).subscribe((res:any)=> {
       this.project = res.data;
-      this.loading = false;
+      this.isLoading = false;
     }, (err:any)=> {
-      this.loading = false;
+      this.isLoading = false;
     })
   }
 
   changeFileOption(val:string) {
     this.isAllFiles = (val === 'all');
+  }
+
+  viewDetails(tgId:string, tgName:string) {
+    this.router.navigate(["portal/allFiles/audioDetails/"+tgId+"/"+tgName]);
   }
 
 }
