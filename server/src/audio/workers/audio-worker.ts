@@ -218,7 +218,6 @@ async function getTranscriptionResult(transcriptionUrl, headers, project_name: s
   for(let i=0;i<audioDataArray.length;i++) {
     combinedTranslation+= audioDataArray[i].translation;
   }
-console.log('combinedTranslation',combinedTranslation)
   const summaryResponse =await getSummaryAndSentiments(SUMMARY,combinedTranslation);
   const sentimentResponse=await getSummaryAndSentiments(SENTIMENT_ANALYSIS,combinedTranslation);
   const transcriptionDocument = {
