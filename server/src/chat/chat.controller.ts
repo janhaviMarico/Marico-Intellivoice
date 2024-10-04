@@ -20,6 +20,7 @@ export class ChatController {
       this.logger.warn('Invalid input: question or vectorId is missing');
       throw new BadRequestException('Both question and vectorId are required');
     }
+
     try {
       // Step 1: Fetch document based on vector ID
       this.logger.log(`Fetching document for vector ID: ${vectorId}`);
