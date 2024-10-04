@@ -101,7 +101,7 @@
           <div class="ask-header" *ngIf="false">
             <p>Ask me anything about the selected audio</p>
           </div>
-          <div class="chat-dashboard">
+          <!-- <div class="chat-dashboard">
             <div class="question-format">
               <div class="question">
                 <img src="../../../assets/Img/header/profile.png" alt="profile">
@@ -117,30 +117,30 @@
                   in voluptate velit esse cillum dolore eu fugiat nulla</p>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- Use NgFor -->
-          <!-- <div class="chat-dashboard">
-            <div *ngFor="let message of messages">
+          <div class="chat-dashboard">
+            <div *ngFor="let message of chatHistory">
               <div *ngIf="message.from === 'user'" class="question-format">
                 <div class="question">
                   <img src="../../../assets/Img/header/profile.png" alt="profile">
-                  <p>{{ message.msg }}</p>
+                  <p>{{ message.message }}</p>
                 </div>
               </div>
               
               <div *ngIf="message.from === 'AI'" class="answer-format">
                 <div class="answer">
                   <img src="../../../assets/Img/header/Logo.png" alt="logo">
-                  <p>Moderator : {{ message.msg }}</p>
+                  <pre>Moderator : {{ message.message }}</pre>
                 </div>
               </div>
             </div>
-          </div> -->
+          </div>
         </div>
         <div class="tab-content-search">
           <div class="input-container">
-            <input type="text" placeholder="Start Typing Here!..." class="text-input" />
-            <button class="send-button">
+            <input type="text" placeholder="Start Typing Here!..." class="text-input" [(ngModel)]="question"/>
+            <button class="send-button" (click)="sendQuery()">
               <img src="../../../assets/Img/AudioDetails/enter.png" alt="Send" />
             </button>
           </div>
