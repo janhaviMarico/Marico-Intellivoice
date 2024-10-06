@@ -117,11 +117,9 @@ export class AddProjectComponent {
           ...this.targetForm.value,
           name: targetGroupName
         });
-        const projectNameValue = this.targetForm.get('projectName')?.value;
-        this.targetForm.reset();
-        this.targetForm.patchValue({
-          projectName: projectNameValue
-        });
+
+        this.targetForm.controls['projectName'].disable();
+        this.clearForm();
       } else {
         alert('This target group already exists!');
       }
@@ -165,6 +163,7 @@ export class AddProjectComponent {
   removeTargetGroup(index: number): void {
     this.targetGrpArr.splice(index, 1);
     if(this.targetGrpArr.length === 0) {
+      this.targetForm.controls['projectName'].enable();
       document.body.querySelectorAll('.tooltips').forEach(element => {
         element.remove();
       });
@@ -177,5 +176,13 @@ export class AddProjectComponent {
 
   closeDailog() {
     this.dialogRef.close();
+  }
+
+  clearForm() {
+    const projectNameValue = this.targetForm.get('projectName')?.value;
+    this.targetForm.reset();
+    this.targetForm.patchValue({
+      projectName: projectNameValue
+    });
   }
 }

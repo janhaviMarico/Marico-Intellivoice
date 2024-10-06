@@ -12,6 +12,9 @@
             background: none;
             margin-right: 15px;
         }
+        h3 {
+            font-size: 1.4em;
+        }
     }
 
     .tab-group {
@@ -34,6 +37,10 @@
                 color: #77747B;
                 font-size: 15px;
             }
+            span.active {
+                color: #3f51b5;
+                font-weight: 600;
+            }
         }
 
         .tab-content {
@@ -54,6 +61,7 @@
                     color: #000000;
                     margin-bottom: 10px;
                     text-wrap: wrap;
+                    line-height: 20px;
 
                     .moderator {
                         font-weight: 550;
@@ -190,10 +198,11 @@
 
             .tab-content-chat {
                 height: 80%;
-                display: flex;
-                justify-content: center;
+                // display: flex;
+                // justify-content: center;
+                overflow-y: auto;
+                width: 100%;
                 .ask-header {
-                    width: 80%;
                     padding-top: 50px;
                     p {
                         text-align: center;
@@ -203,7 +212,8 @@
                     }
                 }
                 .chat-dashboard {
-                    overflow: auto;
+                    width: 100%;
+                    //overflow: auto;
                     .question-format, .answer-format {
                         margin: 15px 0;
                         display: flex;

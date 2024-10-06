@@ -25,6 +25,8 @@ export class AudioDetailsComponent {
   vectorId:string = "doc-1727791233780";
   chatHistory:any[] = [];
 
+  selectedTabIndex: number = 0;
+
   constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef,private activeRoute: ActivatedRoute,
     private router:Router
   ) {
