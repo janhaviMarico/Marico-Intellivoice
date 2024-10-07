@@ -15,15 +15,15 @@
                 margin-bottom: 15px;
             }
             .add-btn {
-                padding: 12px 20px 12px 12px;
+                padding: 15px 20px;
                 background-color: #014FA1;
                 border: 1px solid #014FA1;
                 color: #ffffff;
                 border-radius: 4px;
                 margin-bottom: 15px;
-                #add-logo {
-                    margin-right: 10px;
-                }
+                gap: 10px;
+                display: flex;
+                justify-content: center;
             }
             span {
                 font-size: 15px;

@@ -16,7 +16,7 @@
         </div>
         <div class="tg-detail">
             <h3>Target Group Details</h3>
-            <button type="button">Clear</button>
+            <button type="button" (click)="clearForm()">Clear</button>
         </div>
         <div class="dp-detail">
             <h3>Demographic & Products Involved</h3>
@@ -136,8 +136,8 @@
         <div class="tg-list">
             <mat-grid-list cols="2"rowHeight="5:1" *ngIf="true">
             <!-- <mat-grid-list cols="2"rowHeight="5:1" *ngIf="targetGrpArr.length > 0"> -->
-                <mat-grid-tile *ngFor="let tg of targetGrpArr; let i = index">
-                       <div class="tg-name" appTooltip (mouseenter) ="mouseEnter(tg)">
+                <mat-grid-tile *ngFor="let tg of targetGrpArr; let i = index" (mouseenter) ="mouseEnter(tg)">
+                       <div class="tg-name" appTooltip >
                             <div class="targetTooltip" >
                                 <div class="targetGroupPopop">
                                     <h6>{{target?.name | truncate:30 }}</h6>

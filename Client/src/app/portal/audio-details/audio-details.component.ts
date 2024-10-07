@@ -19,7 +19,13 @@ export class AudioDetailsComponent {
   isPlaying = false;
   audioDetails : any;
   filePath:string = '';
-  isLoading: boolean = true;
+  isLoading: boolean = false;
+
+  question:string = "";
+  vectorId:string = "";
+  chatHistory:any[] = [];
+
+  selectedTabIndex: number = 0;
 
   constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef,private activeRoute: ActivatedRoute,
     private router:Router
@@ -31,12 +37,19 @@ export class AudioDetailsComponent {
     this.tgId = this.activeRoute.snapshot.paramMap.get("tgId") ?? "";
     this.tgName = this.activeRoute.snapshot.paramMap.get("tgName") ?? "";
     this.getAudioDetails();
+    this.audioServ.getMessageHistory().subscribe((res:any)=> {
+      if(res) {
+        this.chatHistory.push(res);
+      }
+    })
   }
 
   getAudioDetails() {
-    this.audioServ.getDetails('audio/details',this.tgName, this.tgName).subscribe((res:any)=> {
+    this.isLoading = true;
+    this.audioServ.getDetails('audio/details',this.tgId, this.tgName).subscribe((res:any)=> {
       this.audioDetails = res.data;
       this.filePath = res.data.FilePath;
+      this.vectorId = res.data.vectorId;
       this.isLoading = false;
     },(err:any)=> {
       
@@ -112,5 +125,27 @@ export class AudioDetailsComponent {
 
   back() {
     this.router.navigate(["portal/allFiles"]);
+  }
+
+  sendQuery() {
+    this.isLoading = true;
+    if(this.question !== "") {
+      const payload = {
+        question: this.question,
+        vectorId: this.vectorId
+      }
+      this.audioServ.sendQueryAI('chat/chatVectorId',payload).subscribe((res:any)=> {
+        this.isLoading = false;
+        this.audioServ.messageHistory.next({
+          from: 'AI',
+          message: res.answer
+        });
+        this.question = '';
+      },(err:any)=> {
+        console.log('err',err);
+      })
+    } else {
+      console.log("Enter Your Question");
+    }
   }
 }

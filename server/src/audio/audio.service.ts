@@ -93,6 +93,7 @@ export class AudioService {
         TGIds: project.TGIds,
       };
       const audioProcessDtoArray: {
+        TGId:string,
         TGName: string, 
         mainLang: string, 
         SecondaryLang: string[], 
@@ -125,6 +126,7 @@ export class AudioService {
         };
          await this.targetContainer.items.create(targetGroupEntity);
          audioProcessDtoArray.push({
+          TGId:targetGroupEntity.TGId,
           TGName: groupObj.TGName,
           mainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
@@ -133,7 +135,6 @@ export class AudioService {
          })
          this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${projectName.ProjName}`);
       }
-      console.log('Before queue',audioProcessDtoArray);    
       this.logger.log(`Starting Audio transcibe ${projectName.ProjName}`);  
       this.runBackgroundTranscription(audioProcessDtoArray);
       return true;
@@ -144,6 +145,7 @@ export class AudioService {
   }
 
    runBackgroundTranscription(audioProcessDtoArray: {
+    TGId:string,
     TGName: string,
     mainLang: string,
     SecondaryLang: string[],
@@ -281,7 +283,6 @@ export class AudioService {
           //{name:'@id',value:"113536ec-41e6-445b-8324-bf99bd93d5cd"}
         ],
       };
-      console.log(querySpecTarget.query);
       const { resources: targetData } = await this.targetContainer.items
         .query(querySpecTarget)
         .fetchAll();
@@ -320,6 +321,7 @@ export class AudioService {
         AudioData: transcriptionItem.audiodata, // Transcription and Translation
         Summary: transcriptionItem.summary, // Summary from Transcription Container
         SentimentAnalysis: transcriptionItem.sentiment_analysis, // Sentiment Analysis from Transcription Container
+        vectorId:transcriptionItem.vectorId
       };
       return combinedData;
     } catch (error) {

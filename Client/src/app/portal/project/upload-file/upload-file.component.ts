@@ -32,6 +32,7 @@ export class UploadFileComponent {
   expansionArr: any[] = [];
   target: any;
   isProcessingDisable: boolean = true;
+  isLoading: boolean = false;
   // currentTime: string = '0:00';
   // durationTime: string = '0:00';
   // seekValue: number = 0;
@@ -330,6 +331,7 @@ export class UploadFileComponent {
   }
 
   audioProcessing() {
+    this.isLoading = true;
     const formData = new FormData();
     var Project: any;
     var TargetGrp: any = [];
@@ -368,6 +370,7 @@ export class UploadFileComponent {
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
     this.audioServ.uploadForm('audio/upload', formData).subscribe((res: any) => {
+      this.isLoading = false;
       this.closeProjectDialog();
       this.closeUploadDailog();
 

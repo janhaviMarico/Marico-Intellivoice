@@ -6,27 +6,37 @@ import { AzureOpenAI } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY } from "src/constants";
 import { Logger } from "@nestjs/common";
+import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
 
+export interface Document {
+  id: string;             // Document ID
+  metadata: string;         // The text content of the document
+  embeding_vector: number[];     // The embedding vector (array of numbers)
+}
 
 const logger = new Logger('Audio-worker');
 const configService = new ConfigService();
 const apiKey = configService.get<string>('TRANSALATION_APIKEY');
 const endpoint = configService.get<string>('COSMOS_DB_ENDPOINT');
 const key = configService.get<string>('COSMOS_DB_KEY')
+let azureSearchClient: SearchClient<Document>;
 
 const AZURE_OPENAI_ENDPOINT = configService.get<string>('AZURE_OPENAI_ENDPOINT');
 const AZURE_OPENAI_API_KEY = configService.get<string>('AZURE_OPENAI_API_KEY');
 const AZURE_OPENAI_DEPLOYMENT = configService.get<string>('AZURE_OPENAI_DEPLOYMENT');
-const AZURE_OPEN_AI_VERSION = configService.get<string>('AZURE_OPEN_AI_VERSION');
+const AZURE_OPEN_AI_VERSION = "2024-07-01-preview";
+const AZURE_OPENAI_EMBEDDING_MODEL=configService.get<string>('AZURE_OPENAI_EMBEDDING_DEPLOY');
 
 const translateClient = new Translate({ key: apiKey });
 const client = new CosmosClient({
   endpoint: endpoint,
   key: key
 });
-
 const database = client.database('marico-gpt');
 const transcriptionContainer = database.container('Transcription');
+
+
+
 //  const axios = require('axios');
 
 // Listen for the 'message' event to receive data from the parent process
@@ -57,12 +67,12 @@ async function transcribeAudio(audioProcessDtoArray) {
   try {
     // Map through the array of audio data, transcribing each audio file
     const transcriptionPromises = audioProcessDtoArray.map(async (audioData) => {
-      const { TGName, sasToken, mainLang, SecondaryLang, noOfSpek } = audioData;
-
-      console.log(`Starting transcription for TG: ${TGName}`);
+      const { TGId,TGName, sasToken, mainLang, SecondaryLang, noOfSpek } = audioData;
+      logger.log(`Transcription Audio Initialization ${TGName}`);
 
       // Call the transcribe function for each audio file
       const transcriptionResult = await transcribe(
+        TGId,
         TGName,          // Project name (TGName)
         sasToken,        // SAS URL
         mainLang,        // Main language
@@ -89,6 +99,7 @@ async function transcribeAudio(audioProcessDtoArray) {
  * Function to transcribe a single audio file using Azure Cognitive Services
  */
 async function transcribe(
+  tgId,
   project_name,      // The name of the project or Target Group (TG)
   sas_url,           // The SAS URL of the audio file
   main_language,     // The main language of the audio
@@ -96,7 +107,6 @@ async function transcribe(
   number_of_speakers // Number of speakers in the audio
 ) {
   logger.log(`Transcription of ${project_name} initiated`)
-  console.log('Inside function transcibe', project_name, other_languages);
   try {
     const SUBSCRIPTION_KEY = configService.get<string>('SUBSCRIPTION_KEY'); // Replace with your Azure subscription key
     const SERVICE_REGION = configService.get<string>('SERVICE_REGION'); // Adjust region based on your Azure region
@@ -114,12 +124,9 @@ async function transcribe(
 
     // Determine the main language locale for Azure
     const LOCALE = language_dict[main_language];
-    console.log(LOCALE);
     const all_languages = [LOCALE, ...other_languages.map((lang) => language_dict[lang])];
-    console.log(all_languages);
 
     const apiUrl = `https://${SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.1/transcriptions`;
-    console.log('apiurl', apiUrl)
     const headers = {
       'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY,
       'Content-Type': 'application/json',
@@ -127,7 +134,7 @@ async function transcribe(
 
     const transcriptionRequest = {
       contentUrls: [sas_url],
-      properties: {
+       properties: {
         diarizationEnabled: true,
         speakers: number_of_speakers,
         candidateLocales: all_languages,
@@ -149,7 +156,7 @@ async function transcribe(
     logger.log(`Transcription started for ${project_name} with ID: ${transcriptionId}`);
 
     // Poll the status of the transcription until it is complete
-    return await getTranscriptionResult(transcriptionUrl, headers, project_name);
+    return await getTranscriptionResult(transcriptionUrl, headers, project_name,tgId);
 
   } catch (error) {
     console.error(`Error starting transcription for ${project_name}:`, error.message);
@@ -160,10 +167,10 @@ async function transcribe(
 /**
  * Polling function to check the transcription result status
  */
-async function getTranscriptionResult(transcriptionUrl, headers, project_name: string) {
+async function getTranscriptionResult(transcriptionUrl, headers, project_name: string,tgId:string) {
   let isCompleted = false;
   let transcriptionData;
-
+  logger.log(`Getting Transcription for ${transcriptionUrl}`);  
   while (!isCompleted) {
     try {
       // Check transcription status
@@ -186,6 +193,7 @@ async function getTranscriptionResult(transcriptionUrl, headers, project_name: s
     }
   }
 
+  logger.log(`Transcription ended with status : ${transcriptionData.status}`);
   // Retrieve the transcription result
   const filesUrl = transcriptionData.links.files;
   const resultResponse = await axios.get(filesUrl, { headers });
@@ -218,20 +226,20 @@ async function getTranscriptionResult(transcriptionUrl, headers, project_name: s
   for(let i=0;i<audioDataArray.length;i++) {
     combinedTranslation+= audioDataArray[i].translation;
   }
-console.log('combinedTranslation',combinedTranslation)
   const summaryResponse =await getSummaryAndSentiments(SUMMARY,combinedTranslation);
   const sentimentResponse=await getSummaryAndSentiments(SENTIMENT_ANALYSIS,combinedTranslation);
+  const vectorId= await generateEmbeddings(combinedTranslation)  
   const transcriptionDocument = {
     TGName: project_name,
-    TGId: project_name,
+    TGId: tgId,
     audiodata: audioDataArray,
     summary:summaryResponse,
     sentiment_analysis:sentimentResponse,
-    combinedTranslation:combinedTranslation
+    combinedTranslation:combinedTranslation,
+    vectorId:vectorId
   }
-  //console.log(transcriptionDocument.audiodata); 
   const response = await saveTranscriptionDocument(transcriptionDocument);
-  return transcriptionDocument;
+  return response;
 }
 
 async function saveTranscriptionDocument(transcriptionDocument) {
@@ -270,12 +278,6 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function convertToTimeFormat1(timeStr: any): string {
-  const hours = Math.floor(timeStr / 3600);
-  const minutes = Math.floor((timeStr % 3600) / 60);
-  const seconds = timeStr % 60;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toFixed(2).padStart(5, '0')}`;
-}
 
 function convertToTimeFormat(timeStr) {
   let hours = 0, minutes = 0, seconds = 0;
@@ -340,4 +342,42 @@ function generateSummarizationPrompt(text:string) {
 
 function generateSentimenAnalysisPrompt(text:string) {
   return SENTIMENT_ANALYSIS_PROMPT(text); 
+}
+
+async function generateEmbeddings(translation:string){
+  try {
+    const options ={ 
+      endpoint:AZURE_OPENAI_ENDPOINT,
+      apiKey: AZURE_OPENAI_API_KEY,
+      apiVersion:AZURE_OPEN_AI_VERSION,
+      embeddingModel:AZURE_OPENAI_EMBEDDING_MODEL
+      };
+      const azureOpenAi = new AzureOpenAI(options);
+    
+      azureSearchClient = new SearchClient(
+        configService.get<string>('VECTOR_STORE_ADDRESS'),
+        configService.get<string>('AZURE_INDEX_NAME'),
+          new AzureKeyCredential(configService.get<string>('VECTOR_STORE_PASSWORD'))
+        );
+    const model=AZURE_OPENAI_EMBEDDING_MODEL;
+    const embeddings=await azureOpenAi.embeddings.create(
+      { 
+        input:translation,
+       model,
+      });
+
+      const embeddingArray = embeddings.data[0].embedding; 
+        const documents:Document ={
+        id: `doc-${Date.now()}`,
+        metadata: translation,
+        embeding_vector: embeddingArray,  // The 1536-dimensional embedding array
+        };
+        const uploadResult = await azureSearchClient.uploadDocuments([documents]);
+        const vectorId = uploadResult.results[0]?.key;
+        return vectorId;
+  }
+  catch(error){
+    throw new Error(`Embedding generation failed ${error}`);
+  }
+
 }

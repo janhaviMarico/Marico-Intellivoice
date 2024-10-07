@@ -203,6 +203,11 @@
               </mat-option>
             </mat-select>
         </mat-form-field>
-        <button (click)="audioProcessing()" [disabled]="isProcessingDisable">Submit For Processing</button>
+        <button (click)="audioProcessing()">Submit For Processing</button> 
+        <!-- [disabled]="isProcessingDisable" -->
     </div>
+</div>
+
+<div *ngIf="isLoading" class="spinner">
+  <mat-spinner></mat-spinner>
 </div>
