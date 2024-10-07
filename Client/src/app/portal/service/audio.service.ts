@@ -9,7 +9,8 @@ export class AudioService {
 
   closeDialog : Subject<any> = new Subject<any>();
   constructor(private http:HttpClient) { }
-  baseUrl = environment.BASE_URL;
+  //baseUrl = environment.BASE_URL;
+  baseUrl = 'http://intellivoice.atriina.com/';
   public messageHistory: BehaviorSubject<any> = new BehaviorSubject(null);
 
   uploadForm(url: string, payload: any): Observable<any> {
