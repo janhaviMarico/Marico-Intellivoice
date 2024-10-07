@@ -22,7 +22,7 @@ export class AudioDetailsComponent {
   isLoading: boolean = false;
 
   question:string = "";
-  vectorId:string = "doc-1727791233780";
+  vectorId:string = "";
   chatHistory:any[] = [];
 
   selectedTabIndex: number = 0;
@@ -46,9 +46,10 @@ export class AudioDetailsComponent {
 
   getAudioDetails() {
     this.isLoading = true;
-    this.audioServ.getDetails('audio/details',this.tgName, this.tgName).subscribe((res:any)=> {
+    this.audioServ.getDetails('audio/details',this.tgId, this.tgName).subscribe((res:any)=> {
       this.audioDetails = res.data;
       this.filePath = res.data.FilePath;
+      this.vectorId = res.data.vectorId;
       this.isLoading = false;
     },(err:any)=> {
       
