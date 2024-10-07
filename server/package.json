@@ -38,6 +38,7 @@
     "mongoose": "^8.7.0",
     "nanoid": "^3.3.7",
     "openai": "^4.65.0",
+    "pdfkit": "^0.15.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
