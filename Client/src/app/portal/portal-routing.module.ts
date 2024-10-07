@@ -12,10 +12,15 @@ const routes: Routes = [
     path:'',
     component:LayoutComponent,
     children: [
-      {path:'dashboard',component:DashboardComponent, canActivate: [authGuard]},
-      {path:'allFiles',component:AllFilesComponent, canActivate: [authGuard]},
-      {path:'feedback',component:FeedbackComponent, canActivate: [authGuard]},
-      {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent, canActivate: [authGuard]},
+      // {path:'dashboard',component:DashboardComponent, canActivate: [authGuard]},
+      // {path:'allFiles',component:AllFilesComponent, canActivate: [authGuard]},
+      // {path:'feedback',component:FeedbackComponent, canActivate: [authGuard]},
+      // {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent, canActivate: [authGuard]},
+      // {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
+      {path:'dashboard',component:DashboardComponent},
+      {path:'allFiles',component:AllFilesComponent},
+      {path:'feedback',component:FeedbackComponent},
+      {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent},
       {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
     ]
   }
