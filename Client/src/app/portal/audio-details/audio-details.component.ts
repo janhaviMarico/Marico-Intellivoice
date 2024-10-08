@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { AudioService } from '../service/audio.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-audio-details',
@@ -24,6 +25,7 @@ export class AudioDetailsComponent {
   question:string = "";
   vectorId:string = "";
   chatHistory:any[] = [];
+  private messageHistorySub!: Subscription;
 
   selectedTabIndex: number = 0;
 
@@ -37,7 +39,7 @@ export class AudioDetailsComponent {
     this.tgId = this.activeRoute.snapshot.paramMap.get("tgId") ?? "";
     this.tgName = this.activeRoute.snapshot.paramMap.get("tgName") ?? "";
     this.getAudioDetails();
-    this.audioServ.getMessageHistory().subscribe((res:any)=> {
+    this.messageHistorySub = this.audioServ.getMessageHistory().subscribe((res:any)=> {
       if(res) {
         this.chatHistory.push(res);
       }
@@ -124,6 +126,10 @@ export class AudioDetailsComponent {
   }
 
   back() {
+    this.chatHistory = [];
+    if (this.messageHistorySub) {
+      this.messageHistorySub.unsubscribe();
+    }
     this.router.navigate(["portal/allFiles"]);
   }
 

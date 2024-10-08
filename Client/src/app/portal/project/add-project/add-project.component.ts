@@ -129,7 +129,7 @@ export class AddProjectComponent {
   generateTargetGroupName(): string {
 
     // Extract form values
-  const projectName = this.targetForm.get('projectName')?.value || 'Project';
+  const projectName = this.targetForm.get('projectName')?.value.replace(/\s+/g, '')|| 'Project';
   const countryName = this.targetForm.get('country')?.value || 'Country';
   const stateName = this.targetForm.get('state')?.value || 'State';
   const competitorNames = this.targetForm.get('competitors')?.value || [];
