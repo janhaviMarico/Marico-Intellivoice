@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { AudioService } from '../service/audio.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-audio-details',
@@ -28,7 +29,7 @@ export class AudioDetailsComponent {
   selectedTabIndex: number = 0;
 
   constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef,private activeRoute: ActivatedRoute,
-    private router:Router
+    private router:Router, private toastr: ToastrService
   ) {
 
   }
@@ -128,12 +129,12 @@ export class AudioDetailsComponent {
   }
 
   sendQuery() {
-    this.isLoading = true;
     if(this.question !== "") {
       const payload = {
         question: this.question,
         vectorId: this.vectorId
       }
+      this.isLoading = true;
       this.audioServ.sendQueryAI('chat/chatVectorId',payload).subscribe((res:any)=> {
         this.isLoading = false;
         this.audioServ.messageHistory.next({
@@ -142,10 +143,11 @@ export class AudioDetailsComponent {
         });
         this.question = '';
       },(err:any)=> {
-        console.log('err',err);
+        this.isLoading = false;
+        this.toastr.error('Something Went Wrong!')
       })
     } else {
-      console.log("Enter Your Question");
+      this.toastr.warning('Enter Your Question');
     }
   }
 }

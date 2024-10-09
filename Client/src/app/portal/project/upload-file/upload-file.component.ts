@@ -3,8 +3,8 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { InfoComponent } from '../info/info.component';
-import { AddProjectComponent } from '../add-project/add-project.component';
 import { AudioService } from '../../service/audio.service';
+import { ToastrService } from 'ngx-toastr';
 
 interface AudioFile {
   name: string;
@@ -48,7 +48,7 @@ export class UploadFileComponent {
     public uploadDialogRef: MatDialogRef<UploadFileComponent>,
     private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public targetGrps: { targetGrpArr: any[] },
-    private audioServ: AudioService
+    private audioServ: AudioService, private toastr: ToastrService
   ) { }
 
   ngOnInit() {
@@ -310,7 +310,7 @@ export class UploadFileComponent {
 
       this.selectedArr = [];
     } else {
-      console.log('Please Select Audio')
+      this.toastr.warning('Please Select Audio');
     }
   }
 
@@ -381,7 +381,8 @@ export class UploadFileComponent {
         data: { info: 'Process' }
       });
     }, (err: any) => {
-      console.log('err', err)
+      this.isLoading = false;
+      this.toastr.error('Somthing Went Wrong');
     })
 
   }
