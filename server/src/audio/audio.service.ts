@@ -10,6 +10,8 @@ import { fork } from 'child_process';
 import { join } from 'path';
 import { TranscriptionEntity } from './entity/transcription.entity';
 import { nanoid } from 'nanoid';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 
 
@@ -22,10 +24,16 @@ export class AudioService {
     @InjectModel(ProjectEntity) private readonly projectContainer: Container,
     @InjectModel(TargetGroupEntity) private readonly targetContainer: Container,
     @InjectModel(TranscriptionEntity) private readonly transcriptContainer: Container,
+    @InjectQueue('audio') private readonly audioQueue: Queue,
     private readonly config: ConfigService ) 
     {
     this.blobServiceClient = BlobServiceClient.fromConnectionString(this.config.get<string>('AZURE_STORAGE_CONNECTION_STRING'));
     this.containerClient = this.blobServiceClient.getContainerClient(this.config.get<string>('AUDIO_UPLOAD_BLOB_CONTAINER'));
+    this.audioQueue.isReady().then(() => {
+      this.logger.log('Connected to Redis and audio queue is ready');
+    }).catch(err => {
+      this.logger.error('Failed to connect to Redis:', err);
+    });
     }
 
   // Handle audio processing logic
@@ -35,6 +43,7 @@ export class AudioService {
       const uploadPromises = files.map(async (file) => {
         try {
           const blockBlobClient = this.containerClient.getBlockBlobClient(file.originalname);
+          console.log('file.originalname',file.originalname);
           const uploadBlobResponse = await blockBlobClient.uploadData(file.buffer);
           this.logger.log(`Blob ${file.originalname} uploaded successfully: ${uploadBlobResponse.requestId}`); 
           const sasUri=blockBlobClient.url;
@@ -144,7 +153,7 @@ export class AudioService {
     }
   }
 
-   runBackgroundTranscription(audioProcessDtoArray: {
+    runBackgroundTranscription(audioProcessDtoArray: {
     TGId:string,
     TGName: string,
     mainLang: string,
@@ -152,22 +161,15 @@ export class AudioService {
     noOfSpek: number,
     sasToken: string,
   }[]) {
-    const child = fork(join(__dirname, '../../dist/audio/workers/audio-worker.js'));
-
-    // Send the data to the worker process
-    child.send(audioProcessDtoArray
-    );
-
-    // Listen for a message from the worker process (transcription result)
-    child.on('message', (result) => {
-      console.log('Received transcription result from worker:', result);
-      // Save the result to the database or handle it as needed
-    });
-
-    // Handle worker process exit
-    child.on('exit', (code) => {
-      console.log(`Child process exited with code ${code}`);
-    });
+    this.logger.log('Enqueuing audio transcription job...');   
+    try {
+      // Add the job to Bull queue
+      this.audioQueue.add('transcribe-audio', { audioProcessDtoArray });
+      this.logger.log('Audio transcription job enqueued successfully.');
+    } catch (error) {
+      this.logger.error(`Failed to enqueue transcription job: ${error.message}`);
+      throw new InternalServerErrorException('Failed to enqueue transcription job');
+    }
   }
 
   generateBlobSasUrl(fileName: string): Promise<string> {
@@ -312,6 +314,7 @@ export class AudioService {
       }   
       const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
      this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);  
+     console.log('during fetch url',targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1));
      const filenameurl=await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
       // 3. Combine Target and Transcription Data
       const combinedData = {
