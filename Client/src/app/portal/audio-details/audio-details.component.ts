@@ -3,6 +3,7 @@ import { AudioService } from '../service/audio.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-audio-details',
@@ -15,8 +16,8 @@ export class AudioDetailsComponent {
   currentTime: string = '0:00';
   durationTime: string = '0:00';
   seekValue: number = 0;
-  tgId: string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761';
-  tgName: string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761'
+  tgId: string = '';
+  tgName: string = ''
 
   isPlaying = false;
   audioDetails: any;
@@ -26,6 +27,7 @@ export class AudioDetailsComponent {
   question: string = "";
   vectorId: string = "";
   chatHistory: any[] = [];
+  private messageHistorySub!: Subscription;
 
   selectedTabIndex: number = 0;
 
@@ -33,7 +35,7 @@ export class AudioDetailsComponent {
 
   currentText: string = '';
   replaceText: string = '';
-  tempAudioData:any = [];
+  tempAudioData: any = [];
 
   constructor(private audioServ: AudioService, private cdr: ChangeDetectorRef, private activeRoute: ActivatedRoute,
     private router: Router, private toastr: ToastrService, private dialog: MatDialog,
@@ -47,7 +49,11 @@ export class AudioDetailsComponent {
     this.getAudioDetails();
     this.audioServ.getMessageHistory().subscribe((res: any) => {
       if (res) {
-        this.chatHistory.push(res);
+        this.messageHistorySub = this.audioServ.getMessageHistory().subscribe((res: any) => {
+          if (res) {
+            this.chatHistory.push(res);
+          }
+        })
       }
     })
   }
@@ -58,57 +64,56 @@ export class AudioDetailsComponent {
       this.audioDetails = res.data;
       this.filePath = res.data.FilePath;
       this.vectorId = res.data.vectorId;
-      this.tempAudioData = res.data.AudioData.map((x:any) => Object.assign({}, x));
+      this.tempAudioData = res.data.AudioData.map((x: any) => Object.assign({}, x));
       this.isLoading = false;
     }, (err: any) => {
 
     })
-  }
+    }
 
   ngAfterViewInit(): void {
-    // Set initial value for seek bar, if necessary
-    this.seekValue = 0;
-  }
+      this.seekValue = 0;
+    }
 
   updateProgress(event: any): void {
-    const audio = this.audioPlayer.nativeElement;
-    const currentTime = audio.currentTime;
-    const duration = audio.duration;
+      const audio = this.audioPlayer.nativeElement;
+      const currentTime = audio.currentTime;
+      const duration = audio.duration;
 
-    // Calculate percentage for the seek bar
-    this.seekValue = (currentTime / duration) * 100;
+      // Calculate percentage for the seek bar
+      this.seekValue = (currentTime / duration) * 100;
 
-    // Update the displayed time
-    this.currentTime = this.formatTime(currentTime);
-    this.durationTime = this.formatTime(duration);
+      // Update the displayed time
+      this.currentTime = this.formatTime(currentTime);
+      this.durationTime = this.formatTime(duration);
 
-    // Update slider track color
-    this.updateSliderTrack();
-  }
+      // Update slider track color
+      this.updateSliderTrack();
+    }
 
   seekAudio(event: any): void {
-    const audio = this.audioPlayer.nativeElement;
-    const newTime = (event.target.value / 100) * audio.duration;
-    audio.currentTime = newTime;
-  }
+      const audio = this.audioPlayer.nativeElement;
+      const newTime = (event.target.value / 100) * audio.duration;
+      audio.currentTime = newTime;
+    }
 
   updateSliderTrack(): void {
-    const slider = document.querySelector('.seek-bar') as HTMLInputElement;
-    if (slider) {
-      const value = (this.seekValue / 100) * slider.offsetWidth;
-      slider.style.background = `linear-gradient(to right, #007bff ${this.seekValue}%, #d3d3d3 ${this.seekValue}%)`;
+      const slider = document.querySelector('.seek-bar') as HTMLInputElement;
+      if(slider) {
+        const value = (this.seekValue / 100) * slider.offsetWidth;
+        slider.style.background = `linear-gradient(to right, #007bff ${this.seekValue}%, #d3d3d3 ${this.seekValue}%)`;
+      }
     }
-  }
 
   formatTime(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
-  }
+      const minutes = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
+    }
 
   togglePlayPause(): void {
-    const audio = this.audioPlayer.nativeElement;
-    if (audio.paused) {
+      const audio = this.audioPlayer.nativeElement;
+      if(audio.paused) {
       if (this.currentTime === '0:00') {
         audio.load();
       }
@@ -133,6 +138,10 @@ export class AudioDetailsComponent {
   }
 
   back() {
+    this.chatHistory = [];
+    if (this.messageHistorySub) {
+      this.messageHistorySub.unsubscribe();
+    }
     this.router.navigate(["portal/allFiles"]);
   }
 
@@ -163,12 +172,12 @@ export class AudioDetailsComponent {
     this.isEdit = true
   }
   cancelEdit() {
-    this.audioDetails.AudioData = this.tempAudioData.map((x:any) => Object.assign({}, x));
+    this.audioDetails.AudioData = this.tempAudioData.map((x: any) => Object.assign({}, x));
     this.isEdit = false;
   }
   updateTranslation() {
     this.isEdit = false;
-    this.tempAudioData = this.audioDetails.AudioData.map((x:any) => Object.assign({}, x));
+    this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
   }
 
   replace(dialogTemplate: TemplateRef<any>) {

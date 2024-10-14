@@ -29,8 +29,10 @@
             <div class="controls">
               <button (click)="seekBackward()"><img src="../../../assets/Img/AudioDetails/backward.png"
                   alt="backward"></button>
-              <button (click)="togglePlayPause()" class="playbtn"><img src="../../../assets/Img/AudioDetails/pause.png"
-                  alt="Play/Pause"></button>
+                  <button (click)="togglePlayPause()" class="playbtn">
+                    <img [src]="isPlaying ? '../../../assets/Img/AudioDetails/pause.png' : '../../../assets/Img/dashboard/play-btn.png'"
+                         alt="Play/Pause">
+                  </button>
               <button (click)="seekForward()"><img src="../../../assets/Img/AudioDetails/front.png"
                   alt="forward"></button>
             </div>
