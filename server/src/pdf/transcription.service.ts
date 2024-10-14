@@ -3,11 +3,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/azure-database';
 import { TranscriptionEntity } from './transcription.entity';
 import { Container, SqlQuerySpec } from '@azure/cosmos';
+import nodemailer from 'nodemailer';
 import fs from 'fs'; // Import File System module
 import PDFDocument from 'pdfkit'; // Import PDFKit
 
 @Injectable()
 export class TranscriptionService {
+  mailService: any;
   constructor(
     @InjectModel(TranscriptionEntity) private readonly transcriptionContainer: Container
 
@@ -32,33 +34,4 @@ export class TranscriptionService {
     
     return items.length > 0 ? items[0] : null;
   }
-  
-  // generatePDF(res, data) {
-  //   const { TGID, summary } = data;
-
-  //   // Create the PDF document
-  //   const doc = new PDFDocument();
-
-  //   // Set PDF Headers
-  //   res.setHeader('Content-Type', 'application/pdf');
-  //   res.setHeader(
-  //     'Content-Disposition',
-  //     `attachment; filename=transcription_${TGID}.pdf`,
-  //   );
-
-  //   // Pipe the document to the response
-  //   doc.pipe(res);
-
-  //   // Add content to PDF
-  //   doc.fontSize(25).text(`Transcription Summary for TGID: ${TGID}`, {
-  //     align: 'center',
-  //   });
-  //   doc.moveDown();
-  //   doc.fontSize(16).text(`Summary: ${summary}`, {
-  //     align: 'left',
-  //   });
-
-  //   // Finalize the PDF and end the stream
-  //   doc.end();
-  // }
 }
