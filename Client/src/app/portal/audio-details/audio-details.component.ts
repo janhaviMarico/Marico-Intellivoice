@@ -1,7 +1,8 @@
-import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, TemplateRef, ViewChild } from '@angular/core';
 import { AudioService } from '../service/audio.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-audio-details',
@@ -10,26 +11,32 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AudioDetailsComponent {
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
-  
+
   currentTime: string = '0:00';
   durationTime: string = '0:00';
   seekValue: number = 0;
-  tgId:string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761';
-  tgName:string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761'
+  tgId: string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761';
+  tgName: string = 'IN_MH_DG-NN_PR_5_10_HN_EN-MR_4_test-pranay_1727708204761'
 
   isPlaying = false;
-  audioDetails : any;
-  filePath:string = '';
+  audioDetails: any;
+  filePath: string = '';
   isLoading: boolean = false;
 
-  question:string = "";
-  vectorId:string = "";
-  chatHistory:any[] = [];
+  question: string = "";
+  vectorId: string = "";
+  chatHistory: any[] = [];
 
   selectedTabIndex: number = 0;
 
-  constructor(private audioServ:AudioService, private cdr: ChangeDetectorRef,private activeRoute: ActivatedRoute,
-    private router:Router, private toastr: ToastrService
+  isEdit: boolean = false;
+
+  currentText: string = '';
+  replaceText: string = '';
+  tempAudioData:any = [];
+
+  constructor(private audioServ: AudioService, private cdr: ChangeDetectorRef, private activeRoute: ActivatedRoute,
+    private router: Router, private toastr: ToastrService, private dialog: MatDialog,
   ) {
 
   }
@@ -38,8 +45,8 @@ export class AudioDetailsComponent {
     this.tgId = this.activeRoute.snapshot.paramMap.get("tgId") ?? "";
     this.tgName = this.activeRoute.snapshot.paramMap.get("tgName") ?? "";
     this.getAudioDetails();
-    this.audioServ.getMessageHistory().subscribe((res:any)=> {
-      if(res) {
+    this.audioServ.getMessageHistory().subscribe((res: any) => {
+      if (res) {
         this.chatHistory.push(res);
       }
     })
@@ -47,13 +54,14 @@ export class AudioDetailsComponent {
 
   getAudioDetails() {
     this.isLoading = true;
-    this.audioServ.getDetails('audio/details',this.tgId, this.tgName).subscribe((res:any)=> {
+    this.audioServ.getDetails('audio/details', this.tgId, this.tgName).subscribe((res: any) => {
       this.audioDetails = res.data;
       this.filePath = res.data.FilePath;
       this.vectorId = res.data.vectorId;
+      this.tempAudioData = res.data.AudioData.map((x:any) => Object.assign({}, x));
       this.isLoading = false;
-    },(err:any)=> {
-      
+    }, (err: any) => {
+
     })
   }
 
@@ -101,7 +109,7 @@ export class AudioDetailsComponent {
   togglePlayPause(): void {
     const audio = this.audioPlayer.nativeElement;
     if (audio.paused) {
-      if(this.currentTime === '0:00') {
+      if (this.currentTime === '0:00') {
         audio.load();
       }
       audio.play();
@@ -129,25 +137,67 @@ export class AudioDetailsComponent {
   }
 
   sendQuery() {
-    if(this.question !== "") {
+    if (this.question !== "") {
       const payload = {
         question: this.question,
         vectorId: this.vectorId
       }
       this.isLoading = true;
-      this.audioServ.sendQueryAI('chat/chatVectorId',payload).subscribe((res:any)=> {
+      this.audioServ.sendQueryAI('chat/chatVectorId', payload).subscribe((res: any) => {
         this.isLoading = false;
         this.audioServ.messageHistory.next({
           from: 'AI',
           message: res.answer
         });
         this.question = '';
-      },(err:any)=> {
+      }, (err: any) => {
         this.isLoading = false;
         this.toastr.error('Something Went Wrong!')
       })
     } else {
       this.toastr.warning('Enter Your Question');
     }
+  }
+
+  editTranslation() {
+    this.isEdit = true
+  }
+  cancelEdit() {
+    this.audioDetails.AudioData = this.tempAudioData.map((x:any) => Object.assign({}, x));
+    this.isEdit = false;
+  }
+  updateTranslation() {
+    this.isEdit = false;
+    this.tempAudioData = this.audioDetails.AudioData.map((x:any) => Object.assign({}, x));
+  }
+
+  replace(dialogTemplate: TemplateRef<any>) {
+    this.dialog.open(dialogTemplate, {
+      height: '40vh',
+      width: '25vw',
+      disableClose: true,
+    });
+  }
+
+  replaceTextFunct() {
+    if (this.replaceText === '') {
+      this.toastr.error('Replace Text is Empty')
+      return;
+    }
+    if (this.currentText === '') {
+      this.toastr.error('Current Text is Empty')
+      return;
+    }
+    this.isLoading = true;
+    const regex = new RegExp(`\\b${this.currentText}\\b`, 'gi');
+    this.audioDetails.AudioData.forEach((item: any) => {
+      if (item.translation) {
+        // Replace the text in the translation key
+        item.translation = item.translation.replace(regex, this.replaceText);
+      }
+    });
+    this.isLoading = false;
+    this.currentText = '';
+    this.replaceText = '';
   }
 }

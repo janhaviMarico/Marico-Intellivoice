@@ -7,9 +7,10 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <label>
-          <img [src]="selectedTabIndex === 0 ? '../../../assets/Img/AudioDetails/trascriptor-a.png' : '../../../assets/Img/AudioDetails/transcriptor-i.png'"
+          <img
+            [src]="selectedTabIndex === 0 ? '../../../assets/Img/AudioDetails/trascriptor-a.png' : '../../../assets/Img/AudioDetails/transcriptor-i.png'"
             alt=""><span [ngClass]="{'active': selectedTabIndex === 0}">Trascript</span>
-          </label>
+        </label>
       </ng-template>
       <div class="tab-content">
         <div class="tab-content-text">
@@ -57,14 +58,18 @@
         <div class="tab-content-text">
           <p class="text" *ngFor="let audioData of audioDetails?.AudioData">
             <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
-            {{audioData?.translation}}
+            <span *ngIf="!isEdit">{{audioData?.translation}}</span>
+            <textarea *ngIf="isEdit" name="" id="" [(ngModel)]="audioData.translation" class="edit-textarea"></textarea>
           </p>
         </div>
         <div class="tab-content-model translation">
-          <button><img src="../../../assets/Img/AudioDetails/Edit-trans.png" alt="Edit-trans">Edit</button>
-          <button class="cancel-btn"><img src="../../../assets/Img/AudioDetails/cancle-trans.png"
-              alt="cancle-trans">Cancel</button>
-          <button><img src="../../../assets/Img/AudioDetails/save-trans.png" alt="save-trans">Update</button>
+          <button *ngIf="!isEdit" (click)="replace(dialogTemplate)">Replace</button>
+          <button *ngIf="!isEdit" (click)="editTranslation()"><img src="../../../assets/Img/AudioDetails/Edit-trans.png"
+              alt="Edit-trans">Edit</button>
+          <button class="cancel-btn" *ngIf="isEdit" (click)="cancelEdit()"><img
+              src="../../../assets/Img/AudioDetails/cancle-trans.png" alt="cancle-trans">Cancel</button>
+          <button *ngIf="isEdit" (click)="updateTranslation()"><img
+              src="../../../assets/Img/AudioDetails/save-trans.png" alt="save-trans">Update</button>
         </div>
       </div>
     </mat-tab>
@@ -135,7 +140,8 @@
         </div>
         <div class="tab-content-search">
           <div class="input-container">
-            <input type="text" placeholder="Start Typing Here!..." class="text-input" [(ngModel)]="question"  (keyup.enter)="sendQuery()"/>
+            <input type="text" placeholder="Start Typing Here!..." class="text-input" [(ngModel)]="question"
+              (keyup.enter)="sendQuery()" />
             <button class="send-button" (click)="sendQuery()">
               <img src="../../../assets/Img/AudioDetails/enter.png" alt="Send" />
             </button>
@@ -149,3 +155,23 @@
 <div *ngIf="isLoading" class="spinner">
   <mat-spinner></mat-spinner>
 </div>
+
+<ng-template #dialogTemplate>
+  <div class="dialog-container">
+    <h1 mat-dialog-title class="dialog-title">Replace Text</h1>
+    <div mat-dialog-content>
+      <mat-form-field>
+        <mat-label>Current Text</mat-label>
+        <input matInput [(ngModel)]="currentText" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Replace Text</mat-label>
+        <input matInput [(ngModel)]="replaceText" />
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions class="btns">
+      <button mat-button mat-dialog-close (click)="replaceTextFunct()">Replace</button>
+      <button mat-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
