@@ -1,4 +1,4 @@
-import { Injectable, Logger, InternalServerErrorException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/azure-database';
 import { Container } from '@azure/cosmos';
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
@@ -10,6 +10,8 @@ import { fork } from 'child_process';
 import { join } from 'path';
 import { TranscriptionEntity } from './entity/transcription.entity';
 import { nanoid } from 'nanoid';
+import { EditTranscriptionDto } from './dto/edit-transcription.dto';
+import { Console } from 'console';
 
 
 
@@ -18,6 +20,7 @@ export class AudioService {
   private readonly logger = new Logger(AudioService.name);
   private blobServiceClient: BlobServiceClient;
   private containerClient: any;
+  configService: any;
   constructor(
     @InjectModel(ProjectEntity) private readonly projectContainer: Container,
     @InjectModel(TargetGroupEntity) private readonly targetContainer: Container,
@@ -329,5 +332,52 @@ export class AudioService {
       throw new InternalServerErrorException('Failed to fetch audio details');
     }
   }
+
+
+  //translation edit
+  async editTranscription(data: EditTranscriptionDto) {
+    this.logger.log(`Attempting to edit transcription for TGId: ${data.TGId}`);
+    
+    const container = this.transcriptContainer;
+
+    try {
+        //this.logger.log(`TGId is: ${data.TGId}`);
+        
+        if (!data.TGId) {
+            throw new Error('TGId is undefined or empty');
+        }
+
+        // Check item using the query method
+        const { resources: items } = await container.items
+            .query(`SELECT * FROM c WHERE c.TGId = '${data.TGId}'`)
+            .fetchAll();
+
+        if (items.length === 0) {
+            this.logger.warn(`No item found with TGId: ${data.TGId}`);
+            throw new NotFoundException('Item not found');
+        }
+
+        const existingItem = items[0];
+       // this.logger.log(`Existing item: ${JSON.stringify(existingItem)}`);
+
+        const updatedItem = {
+            ...existingItem,
+            audiodata: data.audiodata,
+        };
+
+        const { resource: updatedResource } = await container.items.upsert(updatedItem);
+        this.logger.log(`Transcription updated successfully for TGId: ${data.TGId}`);
+        
+        // Return a simple success message
+        return {
+          statusCode: 200,  // HTTP status code for success
+          message: `Translation updated successfully.`,
+      };
+
+    } catch (error) {
+        this.logger.error(`Failed to edit transcription: ${error.message}`);
+        throw error;
+    }
+}
 
 }
