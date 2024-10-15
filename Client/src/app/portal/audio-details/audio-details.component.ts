@@ -25,7 +25,7 @@ export class AudioDetailsComponent {
   isLoading: boolean = false;
 
   question: string = "";
-  vectorId: string = "";
+  vectorId: string[] = [];
   chatHistory: any[] = [];
   private messageHistorySub!: Subscription;
 
@@ -172,8 +172,22 @@ export class AudioDetailsComponent {
     this.isEdit = false;
   }
   updateTranslation() {
-    this.isEdit = false;
+    this.isLoading = true;
     this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
+    const payload = {
+      TGId : this.tgId,
+      audiodata: this.tempAudioData
+    }
+    this.audioServ.postAPI('audio/edit',payload).subscribe((res:any)=> {
+      if(res.statusCode === 200) {
+        this.toastr.success(res.message);
+        this.isLoading = false;
+        this.isEdit = false;
+      }
+    },(err:any)=> {
+      this.isLoading = false;
+      this.toastr.error('Something Went Wrong!');
+    });
   }
 
   replace(dialogTemplate: TemplateRef<any>) {
@@ -201,8 +215,23 @@ export class AudioDetailsComponent {
         item.translation = item.translation.replace(regex, this.replaceText);
       }
     });
-    this.isLoading = false;
-    this.currentText = '';
-    this.replaceText = '';
+    this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
+    const payload = {
+      TGId : this.tgId,
+      audiodata: this.tempAudioData
+    }
+    this.audioServ.postAPI('audio/edit',payload).subscribe((res:any)=> {
+      if(res.statusCode === 200) {
+        this.toastr.success(res.message);
+        this.isLoading = false;
+        this.currentText = '';
+        this.replaceText = '';
+      }
+    },(err:any)=> {
+      this.audioDetails.AudioData = this.tempAudioData.map((x: any) => Object.assign({}, x));
+      this.isLoading = false;
+      this.toastr.error('Something Went Wrong!');
+    })
+   
   }
 }

@@ -369,7 +369,7 @@ export class UploadFileComponent {
 
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
-    this.audioServ.uploadForm('audio/upload', formData).subscribe((res: any) => {
+    this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
       this.closeProjectDialog();
       this.closeUploadDailog();
