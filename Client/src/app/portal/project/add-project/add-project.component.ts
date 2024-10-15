@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { UploadFileComponent } from '../upload-file/upload-file.component';
@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./add-project.component.scss']
 })
 export class AddProjectComponent {
+  @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr:any[] = [];
   target:any;
@@ -88,11 +89,17 @@ export class AddProjectComponent {
   }
 
   onSubmit() {
+    if (this.targetForm.invalid) {
+      this.targetForm.markAllAsTouched();
+      return;
+  }
     if(this.targetForm.value.minAge > this.targetForm.value.maxAge) {
       this.toastr.warning('Minimum Age is less than Maximum Age');
       return;
     }
     if (this.targetForm.valid) {
+      this.targetForm.controls['projectName'].enable();
+
       const currentFormValues = { ...this.targetForm.value };
       delete currentFormValues.name;
 
@@ -114,9 +121,12 @@ export class AddProjectComponent {
         this.targetForm.controls['projectName'].disable();
         this.clearForm();
       } else {
-        alert('This target group already exists!');
+        this.toastr.warning('This target group already exists!');
       }
     }
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 200);
   }
 
   generateTargetGroupName(): string {
@@ -177,5 +187,9 @@ export class AddProjectComponent {
     this.targetForm.patchValue({
       projectName: projectNameValue
     });
+  }
+
+  scrollToBottom(): void {
+    this.formEnd.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 }

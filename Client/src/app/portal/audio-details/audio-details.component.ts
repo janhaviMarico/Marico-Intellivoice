@@ -47,13 +47,9 @@ export class AudioDetailsComponent {
     this.tgId = this.activeRoute.snapshot.paramMap.get("tgId") ?? "";
     this.tgName = this.activeRoute.snapshot.paramMap.get("tgName") ?? "";
     this.getAudioDetails();
-    this.audioServ.getMessageHistory().subscribe((res: any) => {
+    this.messageHistorySub = this.audioServ.getMessageHistory().subscribe((res: any) => {
       if (res) {
-        this.messageHistorySub = this.audioServ.getMessageHistory().subscribe((res: any) => {
-          if (res) {
-            this.chatHistory.push(res);
-          }
-        })
+        this.chatHistory.push(res);
       }
     })
   }
@@ -69,51 +65,51 @@ export class AudioDetailsComponent {
     }, (err: any) => {
 
     })
-    }
+  }
 
   ngAfterViewInit(): void {
-      this.seekValue = 0;
-    }
+    this.seekValue = 0;
+  }
 
   updateProgress(event: any): void {
-      const audio = this.audioPlayer.nativeElement;
-      const currentTime = audio.currentTime;
-      const duration = audio.duration;
+    const audio = this.audioPlayer.nativeElement;
+    const currentTime = audio.currentTime;
+    const duration = audio.duration;
 
-      // Calculate percentage for the seek bar
-      this.seekValue = (currentTime / duration) * 100;
+    // Calculate percentage for the seek bar
+    this.seekValue = (currentTime / duration) * 100;
 
-      // Update the displayed time
-      this.currentTime = this.formatTime(currentTime);
-      this.durationTime = this.formatTime(duration);
+    // Update the displayed time
+    this.currentTime = this.formatTime(currentTime);
+    this.durationTime = this.formatTime(duration);
 
-      // Update slider track color
-      this.updateSliderTrack();
-    }
+    // Update slider track color
+    this.updateSliderTrack();
+  }
 
   seekAudio(event: any): void {
-      const audio = this.audioPlayer.nativeElement;
-      const newTime = (event.target.value / 100) * audio.duration;
-      audio.currentTime = newTime;
-    }
+    const audio = this.audioPlayer.nativeElement;
+    const newTime = (event.target.value / 100) * audio.duration;
+    audio.currentTime = newTime;
+  }
 
   updateSliderTrack(): void {
-      const slider = document.querySelector('.seek-bar') as HTMLInputElement;
-      if(slider) {
-        const value = (this.seekValue / 100) * slider.offsetWidth;
-        slider.style.background = `linear-gradient(to right, #007bff ${this.seekValue}%, #d3d3d3 ${this.seekValue}%)`;
-      }
+    const slider = document.querySelector('.seek-bar') as HTMLInputElement;
+    if (slider) {
+      const value = (this.seekValue / 100) * slider.offsetWidth;
+      slider.style.background = `linear-gradient(to right, #007bff ${this.seekValue}%, #d3d3d3 ${this.seekValue}%)`;
     }
+  }
 
   formatTime(seconds: number): string {
-      const minutes = Math.floor(seconds / 60);
-      const sec = Math.floor(seconds % 60);
-      return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
-    }
+    const minutes = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
+  }
 
   togglePlayPause(): void {
-      const audio = this.audioPlayer.nativeElement;
-      if(audio.paused) {
+    const audio = this.audioPlayer.nativeElement;
+    if (audio.paused) {
       if (this.currentTime === '0:00') {
         audio.load();
       }
