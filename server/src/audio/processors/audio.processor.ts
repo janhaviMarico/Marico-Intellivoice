@@ -11,7 +11,7 @@ import { ChatCompletionMessageParam } from 'openai/resources';
 import { Container } from '@azure/cosmos';
 import { TranscriptionEntity } from '../entity/transcription.entity';
 import { InjectModel } from '@nestjs/azure-database';
-import { SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY, TEMP_TEXT } from 'src/constants';
+import { SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY } from 'src/constants';
 import { fork } from 'child_process';
 import { join } from 'path';
 
