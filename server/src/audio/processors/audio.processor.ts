@@ -11,7 +11,9 @@ import { ChatCompletionMessageParam } from 'openai/resources';
 import { Container } from '@azure/cosmos';
 import { TranscriptionEntity } from '../entity/transcription.entity';
 import { InjectModel } from '@nestjs/azure-database';
-import { SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY } from 'src/constants';
+import { SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY, TEMP_TEXT } from 'src/constants';
+import { fork } from 'child_process';
+import { join } from 'path';
 
 
 export interface Document {
@@ -228,7 +230,8 @@ export class AudioProcessor {
     }
     const summaryResponse =await this.getSummaryAndSentiments(SUMMARY,combinedTranslation);
     const sentimentResponse=await this.getSummaryAndSentiments(SENTIMENT_ANALYSIS,combinedTranslation);
-    const vectorId= await this.generateEmbeddings(combinedTranslation)  
+    const vectorId = await this.generateEmbeddings(combinedTranslation);
+    console.log('vectorId',vectorId);
     const transcriptionDocument = {
       TGName: project_name,
       TGId: tgId,
@@ -354,25 +357,59 @@ export class AudioProcessor {
         //     new AzureKeyCredential(this.configService.get<string>('VECTOR_STORE_PASSWORD'))
         //   );
       const model=this.AZURE_OPENAI_EMBEDDING_MODEL;
-      const embeddings=await azureOpenAi.embeddings.create(
-        { 
-          input:translation,
-         model,
-        });
-  
-        const embeddingArray = embeddings.data[0].embedding; 
-          const documents:Document ={
-          id: `doc-${Date.now()}`,
-          metadata: translation,
-          embeding_vector: embeddingArray,  // The 1536-dimensional embedding array
-          };
-          const uploadResult = await this.azureSearchClient.uploadDocuments([documents]);
-          const vectorId = uploadResult.results[0]?.key;
-          return vectorId;
+      // Chunk the text into manageable sizes
+        const chunkSize = 10897;
+        const textChunks = this.getChunks(translation, chunkSize);
+        
+        const vectorIds:string[] = [];
+        // Map over textChunks and process embeddings in parallel with the limit
+        for (const chunk of textChunks) {
+            // Generate embeddings for each chunk of text
+            const embeddings = await azureOpenAi.embeddings.create({
+              input: chunk,
+              model  // Azure OpenAI Embedding Model
+            });
+    
+            // Extract the embeddings array from the API response
+            const embeddingArray = embeddings.data[0].embedding; 
+            // Prepare document object to upload to VectorStore
+            const document: Document = {
+              id: `doc-${Date.now()}`,  // Unique ID for this document
+              metadata: "Some metadata for the document.",  // Metadata related to the text chunk
+              embeding_vector: embeddingArray  // The generated embeddings array
+            };
+    
+            // Upload the document with embedding vector to your VectorStore (e.g., Azure Search)
+            const uploadResult = await this.azureSearchClient.uploadDocuments([document]);
+    
+            // Return vector ID from the result
+            const vectorId = uploadResult.results[0]?.key;
+            vectorIds.push(vectorId);
+            
+            // Optionally, log progress
+            console.log(`Uploaded chunk with vector ID: ${vectorId}`);
+          }
+        // Return all generated vector IDs for the document chunks
+        return vectorIds;
     }
     catch(error){
       throw new Error(`Embedding generation failed ${error}`);
     }
   
   }
+
+  getChunks(text: string, chunkSize: number): string[] {
+    const chunks: string[] = [];
+    let currentPosition = 0;
+    
+    while (currentPosition < text.length) {
+      const chunk = text.slice(currentPosition, currentPosition + chunkSize);
+      chunks.push(chunk);
+      currentPosition += chunkSize;
+    }
+    
+    return chunks;
+  }
+
+  
 }

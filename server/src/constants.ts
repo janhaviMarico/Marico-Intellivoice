@@ -25,5 +25,5 @@ ${text}
 Sentiment Analysis & NPS Score: 
 `;
 
-export const SUMMARY="Summary"
-export const SENTIMENT_ANALYSIS="SA"
+export const SUMMARY="Summary";
+export const SENTIMENT_ANALYSIS="SA";
