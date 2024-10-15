@@ -46,19 +46,40 @@ export class ChatService {
   /**
    * Get a document by its vector ID from Azure Cognitive Search
    */
-  async getTextByVectorId(vectorId: string): Promise<Document | null> {
+  // async getTextByVectorId(vectorId: string): Promise<Document | null> {
+  //   try {
+  //     this.logger.log(`Fetching document with vector ID: ${vectorId}`);
+  //     const document = await this.azureSearchClient.getDocument(vectorId);
+  //     return document;
+  //   } catch (error) {
+  //     this.logger.error(`Error fetching document for vector ID: ${vectorId}`, error.stack);
+  //     if (error.statusCode === 404) {
+  //       return null;  // Handle 404 case (document not found)
+  //     }
+  //     throw new InternalServerErrorException('Failed to retrieve document from Azure Search');
+  //   }
+  // }
+
+  async getTextsByVectorIds(vectorIds: string[]): Promise<Document[]> {
     try {
-      this.logger.log(`Fetching document with vector ID: ${vectorId}`);
-      const document = await this.azureSearchClient.getDocument(vectorId);
-      return document;
-    } catch (error) {
-      this.logger.error(`Error fetching document for vector ID: ${vectorId}`, error.stack);
-      if (error.statusCode === 404) {
-        return null;  // Handle 404 case (document not found)
+      this.logger.log(`Fetching documents with vector IDs: ${vectorIds}`);
+      const documents: Document[] = [];
+  
+      // Fetch documents for each vector ID
+      for (const vectorId of vectorIds) {
+        const document = await this.azureSearchClient.getDocument(vectorId);
+        if (document) {
+          documents.push(document); // Only push if document exists
+        }
       }
-      throw new InternalServerErrorException('Failed to retrieve document from Azure Search');
+  
+      return documents;
+    } catch (error) {
+      this.logger.error(`Error fetching documents for vector IDs: ${vectorIds}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve documents from Azure Search');
     }
   }
+  
 
   /**
    * Generate an answer to a user's question using OpenAI based on related documents' context
@@ -68,8 +89,9 @@ export class ChatService {
       this.logger.warn('No related documents provided to generate the answer');
       return 'Sorry, I could not find enough information to answer your question.';
     }
-
+ console.log("related doc",relatedDocs)
     const context = relatedDocs.map(doc => doc.metadata).join('\n');
+    console.log("Generated Context:", context);
     try {
       this.logger.log('Generating answer from OpenAI based on related documents');
       const completionResponse = await this.openaiClientChat.chat.completions.create({
