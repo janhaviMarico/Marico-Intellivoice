@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { PdfService } from './pdf.service';
 import { TranscriptionService } from './transcription.service';
 import { Response } from 'express';
@@ -20,6 +20,10 @@ export class TranscriptionController {
     }
 
     // Pass the data to pdfService to generate the PDF
+    this.pdfService.generatePDF(res, data);
+  }
+  @Post('chat')
+  generateChatPDF(@Res() res: Response, @Body() data: any) {
     this.pdfService.generatePDF(res, data);
   }
 }
