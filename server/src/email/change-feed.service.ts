@@ -1,112 +1,59 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { CosmosClient } from '@azure/cosmos';
+import { Container } from '@azure/cosmos';
 import nodemailer from 'nodemailer';
 
 @Injectable()
 export class ChangeFeedService implements OnModuleInit {
-  private client: CosmosClient;
-  private container: any;
+  private lastCheckedTime: number;
+  private readonly container: Container;
 
-  constructor() {
-    this.client = new CosmosClient({ endpoint: 'https://marico-gpt-db.documents.azure.com:443/', key: 'A8sHzgvKfrrARuSNHYY3B6nbVzqt8AgVTI7GXfMXXon0t8JUApe8ASy4NE7FrU8VndKv8Jqx82DHACDbHltAZA==' });
-    this.container = this.client.database('marico-gpt').container('Transcription');
+  constructor(container: Container) {
+    this.container = container;
+    this.lastCheckedTime = Math.floor(Date.now() / 1000); // Initialize with the current Unix timestamp
   }
 
   async onModuleInit() {
     await this.listenToChangeFeed();
   }
 
-//   private async listenToChangeFeed() {
-//     const query = 'SELECT * FROM c';
-//     const changeFeedIterator = this.container.items.query(query);
-
-//     while (true) {
-//       const { resources: changes } = await changeFeedIterator.fetchNext();
-//       if (changes.length > 0) {
-//         for (const change of changes) {
-//           await this.sendEmail(change);
-//         }
-//       }
-//       // Add a delay to avoid overwhelming the DB
-//       await new Promise(resolve => setTimeout(resolve, 5000));
-//     }
-//   }
-// private async listenToChangeFeed() {
-//     const partitionKeyValues = await this.getDistinctPartitionKeys();
-//     //console.log('Found partition keys:', partitionKeyValues);
-  
-//     const iterators = partitionKeyValues.map(keyValue => 
-//       this.container.items.changeFeed({ partitionKey: keyValue })
-//     );
-  
-//     while (true) {
-//       for (const changeFeedIterator of iterators) {
-//         try {
-//           const response = await changeFeedIterator.fetchNext();
-//          // console.log('Change feed response:', response); // Log the response
-  
-//           const changes = response.resources;
-  
-//           if (changes && Array.isArray(changes) && changes.length > 0) {
-//             for (const change of changes) {
-//               await this.sendEmail(change);
-//             }
-//           } else {
-//             //console.log('No changes detected.');
-//           }
-//         } catch (error) {
-//          // console.error('Error fetching changes:', error);
-//         }
-//       }
-//       await new Promise(resolve => setTimeout(resolve, 5000));
-//     }
-//   }
-
-
-  // private async getDistinctPartitionKeys(): Promise<string[]> {
-  //   const query = 'SELECT * FROM c'; // Adjust based on your partition key field
-  //   const { resources } = await this.container.items.query(query).fetchAll();
-  //   const keys = resources.map(item => item.tgid); // Adjust to extract the partition key correctly
-  //   console.log("key is",resources)
-  //   console.log('Distinct partition keys:',); // Log the keys
-  //   return keys;
-  // }
-
-
   private async listenToChangeFeed() {
-    try {
-      // Fetch the change feed without any partition key
-      const changeFeedIterator = this.container.items.changeFeed(); 
-      
-      while (true) {
-        // Fetch changes
-        const { resources: changes } = await changeFeedIterator.fetchNext();
+    setInterval(async () => {
+        try {
+            console.log('Polling Cosmos DB for changes...');
+            
+            // Log the last checked time for debugging
+            console.log('Last Checked Time:', this.lastCheckedTime);
 
-        if (changes.length > 0) {
-          console.log('Changes detected:', changes);
-          for (const change of changes) {
-            await this.sendEmail(change); // Send email for each change
-          }
+            // Create the query with parameters
+            const query = {
+                query: 'SELECT * FROM c WHERE c._ts > @lastCheckedTime',
+                parameters: [{ name: '@lastCheckedTime', value: this.lastCheckedTime }],
+            };
+
+            // Fetch changes from Cosmos DB
+            const changeFeedIterator = this.container.items.query(query);
+            const { resources: changes } = await changeFeedIterator.fetchNext();
+
+            // Process the changes
+            if (Array.isArray(changes) && changes.length > 0) {
+                console.log(`Found ${changes.length} new insertions/updates.`);
+                for (const change of changes) {
+                    await this.sendEmail(change);
+                }
+
+                // Update lastCheckedTime to the highest _ts value of the fetched changes
+                const latestChangeTs = Math.max(...changes.map(change => change._ts));
+                this.lastCheckedTime = latestChangeTs;
+            } else {
+                console.log('No new insertions/updates detected.');
+            }
+        } catch (error) {
+            console.error('Error fetching changes:', error);
         }
-        // Add a delay to avoid overwhelming the DB
-        await new Promise(resolve => setTimeout(resolve, 5000));
-      }
-    } catch (error) {
-      console.error('Error in Change Feed:', error);
-    }
-  }
+    }, 5000); // Poll every 5 seconds
+}
 
-  // private async getDistinctPartitionKeys(): Promise<string[]> {
-  //   const query = 'SELECT DISTINCT c.TGId FROM c';
-  //   const { resources } = await this.container.items.query(query).fetchAll();
-  //   const keys = resources.map(item => item.TGId);
-  //   console.log("TGIds are", resources);
-  //   console.log('Distinct TGIds:', keys);
-  //   return keys;
-  // }
 
-  
-  
   private async sendEmail(change: any) {
     const transporter = nodemailer.createTransport({
       service: 'gmail', // or any other service
