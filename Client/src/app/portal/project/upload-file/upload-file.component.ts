@@ -1,6 +1,6 @@
 import { Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSelectChange } from '@angular/material/select';
+import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { InfoComponent } from '../info/info.component';
 import { AudioService } from '../../service/audio.service';
@@ -26,9 +26,10 @@ export class UploadFileComponent {
   audioFiles: AudioFile[] = [];
   //@ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+  @ViewChild('selectElement') selectElement!: MatSelect;
   selectedArr: AudioFile[] = []; // Array for selected files
   isPlayingIndex: number | null = null;
-  selectedTargetGrp: string = '';
+  selectedTargetGrp = null;
   expansionArr: any[] = [];
   target: any;
   isProcessingDisable: boolean = true;
@@ -309,8 +310,13 @@ export class UploadFileComponent {
       );
 
       this.selectedArr = [];
+      this.selectedTargetGrp = null;
+      this.selectElement.value = null;
+      this.processBtnDisable();
     } else {
       this.toastr.warning('Please Select Audio');
+      this.selectedTargetGrp = null;
+      this.selectElement.value = null;
     }
   }
 
@@ -324,6 +330,7 @@ export class UploadFileComponent {
     if (this.expansionArr[expIndex].audioList.length === 0) {
       this.expansionArr.splice(expIndex, 1);
     }
+    this.processBtnDisable();
   }
 
   mouseEnter(tg: any) {
@@ -391,6 +398,10 @@ export class UploadFileComponent {
   }
   closeUploadDailog() {
     this.uploadDialogRef.close();
+  }
+
+  processBtnDisable() {
+    this.isProcessingDisable = !(this.audioFiles.length === 0 && this.expansionArr.length > 0);
   }
 
 }

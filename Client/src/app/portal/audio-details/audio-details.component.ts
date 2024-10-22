@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
+import {environment} from '../../../environments/environment'
 
 @Component({
   selector: 'app-audio-details',
@@ -233,5 +234,14 @@ export class AudioDetailsComponent {
       this.toastr.error('Something Went Wrong!');
     })
    
+  }
+
+  downloadSummary() {
+    const url = `${environment.BASE_URL}transcription/generate-pdf?tgid=${this.tgId}`;
+    this.audioServ.getDownload(url);
+  }
+
+  isValidNumber(value: any): boolean {
+    return typeof value === 'number' && !isNaN(value);
   }
 }
