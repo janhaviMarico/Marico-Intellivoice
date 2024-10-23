@@ -7,7 +7,11 @@ import { ProjectEntity } from './entity/project.entity';
 import { ConfigModule } from '@nestjs/config';
 import { TranscriptionEntity } from './entity/transcription.entity';
 import { BullModule } from '@nestjs/bull';
-import { AudioProcessor } from './processors/audio.processor';
+import { TranscriptionProcessor } from './processors/transcription.processor';
+import { TranslationProcessor } from './processors/translation.processor';
+import { AudioUtils } from './audio.utils';
+import { SummarySentimentsProcessor } from './processors/summarySentiments.processor';
+import { EmbeddingProcessor } from './processors/embedding.processor';
 
 @Module({
     imports:[AzureCosmosDbModule.forFeature([
@@ -32,10 +36,22 @@ BullModule.forRoot({
   },
 }),
 BullModule.registerQueue({
-  name: 'audio',  // Name of the queue for audio jobs
+  name: 'transcription',  // Name of the queue for transcription jobs
+}),
+BullModule.registerQueue({
+  name: 'translation',  // Name of the queue for translation jobs
+}),
+BullModule.registerQueue({
+  name: 'audio',  // Name of the queue for transcription jobs
+}),
+BullModule.registerQueue({
+  name: 'summary',  // Name of the queue for transcription jobs
+}),
+BullModule.registerQueue({
+  name: 'embedding',  // Name of the queue for transcription jobs
 }),
 ],
   controllers: [AudioController],
-  providers: [AudioService,AudioProcessor]
+  providers: [AudioService,TranscriptionProcessor,AudioUtils,TranslationProcessor,SummarySentimentsProcessor,EmbeddingProcessor]
 })
 export class AudioModule {}

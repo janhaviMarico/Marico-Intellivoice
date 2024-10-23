@@ -6,8 +6,6 @@ import { ConfigService } from '@nestjs/config';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
 import { ProjectEntity } from './entity/project.entity';
 import { TargetGroupEntity } from './entity/target.entity';
-import { fork } from 'child_process';
-import { join } from 'path';
 import { TranscriptionEntity } from './entity/transcription.entity';
 import { nanoid } from 'nanoid';
 import { InjectQueue } from '@nestjs/bull';
@@ -24,12 +22,12 @@ export class AudioService {
     @InjectModel(ProjectEntity) private readonly projectContainer: Container,
     @InjectModel(TargetGroupEntity) private readonly targetContainer: Container,
     @InjectModel(TranscriptionEntity) private readonly transcriptContainer: Container,
-    @InjectQueue('audio') private readonly audioQueue: Queue,
+    @InjectQueue('transcription') private readonly transcriptionQueue: Queue,
     private readonly config: ConfigService ) 
     {
     this.blobServiceClient = BlobServiceClient.fromConnectionString(this.config.get<string>('AZURE_STORAGE_CONNECTION_STRING'));
     this.containerClient = this.blobServiceClient.getContainerClient(this.config.get<string>('AUDIO_UPLOAD_BLOB_CONTAINER'));
-    this.audioQueue.isReady().then(() => {
+    this.transcriptionQueue.isReady().then(() => {
       this.logger.log('Connected to Redis and audio queue is ready');
     }).catch(err => {
       this.logger.error('Failed to connect to Redis:', err);
@@ -145,6 +143,7 @@ export class AudioService {
          this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${projectName.ProjName}`);
       }
       this.logger.log(`Starting Audio transcibe ${projectName.ProjName}`);  
+      console.log(audioProcessDtoArray);
       this.runBackgroundTranscription(audioProcessDtoArray);
       return true;
     } catch (error) {
@@ -164,8 +163,12 @@ export class AudioService {
     this.logger.log('Enqueuing audio transcription job...');   
     try {
       // Add the job to Bull queue
-      this.audioQueue.add('transcribe-audio', { audioProcessDtoArray });
-      this.logger.log('Audio transcription job enqueued successfully.');
+      for (const audioData of audioProcessDtoArray) {
+        // Enqueue each audio file as a separate job
+        console.log(audioData);
+        this.transcriptionQueue.add('transcribe-audio', audioData);
+        this.logger.log(`Transcription job for ${audioData.TGName} enqueued successfully`);
+    }
     } catch (error) {
       this.logger.error(`Failed to enqueue transcription job: ${error.message}`);
       throw new InternalServerErrorException('Failed to enqueue transcription job');

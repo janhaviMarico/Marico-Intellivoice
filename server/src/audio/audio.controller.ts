@@ -25,7 +25,6 @@ export class AudioController {
     try {
       // Parse the incoming project and target group data
       const projectGroupDto: ProjectGroupDTO = JSON.parse(projectDto);
-      console.log(projectGroupDto,targetGrpDto);
       // Validate the parsed DTO (you could add further validation logic here if necessary)
       // You can also add a validation pipe here to handle DTO validation globally
 

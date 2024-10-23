@@ -31,11 +31,20 @@ async function bootstrap() {
   
   // Inject the audio queue (you should have already configured this in your audio module)
   const audioQueue = app.get<Queue>(getQueueToken('audio')); // Replace 'audio' with the name of your queue
+  const transcriptionQueue=app.get<Queue>(getQueueToken('transcription'));
+  const translationQueue=app.get<Queue>(getQueueToken('translation'));
+  const summaryQueue=app.get<Queue>(getQueueToken('summary'));
+  const embeddingQueue=app.get<Queue>(getQueueToken('embedding'));
+
   
   // Setup Bull-Board to monitor the queue
   createBullBoard({
     queues: [
       new BullAdapter(audioQueue), // Add your queues here (e.g., audioQueue)
+      new BullAdapter(transcriptionQueue),
+      new BullAdapter(translationQueue),
+      new BullAdapter(summaryQueue),
+      new BullAdapter(embeddingQueue)
     ],
     serverAdapter,
   });
