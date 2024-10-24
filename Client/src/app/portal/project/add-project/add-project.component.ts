@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { UploadFileComponent } from '../upload-file/upload-file.component';
 import { AudioService } from '../../service/audio.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-add-project',
@@ -10,6 +11,7 @@ import { AudioService } from '../../service/audio.service';
   styleUrls: ['./add-project.component.scss']
 })
 export class AddProjectComponent {
+  @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr:any[] = [];
   target:any;
@@ -51,7 +53,7 @@ export class AddProjectComponent {
   ];
   filteredOtherLang: any[] = [...this.otherLang];
   constructor(private fb: FormBuilder, private dialog: MatDialog, public dialogRef: MatDialogRef<AddProjectComponent>,
-    private audioServ:AudioService
+    private audioServ:AudioService, private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -66,7 +68,7 @@ export class AddProjectComponent {
       primaryLang: ['', Validators.required],
       otherLangs: [[], Validators.required],  // Multi-select dropdown for other languages
       numSpeakers: [null, [Validators.required, Validators.min(1)]],
-    }, { validator: this.ageRangeValidator('minAge', 'maxAge') });
+    });
 
     this.targetForm.get('primaryLang')?.valueChanges.subscribe((selectedPrimaryLang) => {
       this.filteredOtherLang = this.otherLang.filter(lang => lang.name !== selectedPrimaryLang);
@@ -86,20 +88,18 @@ export class AddProjectComponent {
     })
   }
 
-  ageRangeValidator(minAgeField: string, maxAgeField: string): ValidatorFn {
-    return (formGroup: AbstractControl): { [key: string]: any } | null => {
-      const minAge = formGroup.get(minAgeField)?.value;
-      const maxAge = formGroup.get(maxAgeField)?.value;
-  
-      if (minAge !== null && maxAge !== null && minAge >= maxAge) {
-        return { ageRangeInvalid: true };  // Custom validation error key
-      }
-      return null;
-    };
-  }
-
   onSubmit() {
+    if (this.targetForm.invalid) {
+      this.targetForm.markAllAsTouched();
+      return;
+  }
+    if(this.targetForm.value.minAge > this.targetForm.value.maxAge) {
+      this.toastr.warning('Minimum Age is less than Maximum Age');
+      return;
+    }
     if (this.targetForm.valid) {
+      this.targetForm.controls['projectName'].enable();
+
       const currentFormValues = { ...this.targetForm.value };
       delete currentFormValues.name;
 
@@ -117,19 +117,22 @@ export class AddProjectComponent {
           ...this.targetForm.value,
           name: targetGroupName
         });
-
+        this.toastr.success('Target Grope Created Sucessfully!')
         this.targetForm.controls['projectName'].disable();
         this.clearForm();
       } else {
-        alert('This target group already exists!');
+        this.toastr.warning('This target group already exists!');
       }
     }
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 200);
   }
 
   generateTargetGroupName(): string {
 
     // Extract form values
-  const projectName = this.targetForm.get('projectName')?.value || 'Project';
+  const projectName = this.targetForm.get('projectName')?.value.replace(/\s+/g, '')|| 'Project';
   const countryName = this.targetForm.get('country')?.value || 'Country';
   const stateName = this.targetForm.get('state')?.value || 'State';
   const competitorNames = this.targetForm.get('competitors')?.value || [];
@@ -184,5 +187,9 @@ export class AddProjectComponent {
     this.targetForm.patchValue({
       projectName: projectNameValue
     });
+  }
+
+  scrollToBottom(): void {
+    this.formEnd.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 }

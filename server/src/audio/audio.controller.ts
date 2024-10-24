@@ -5,6 +5,7 @@ import { ProjectGroupDTO } from './dto/upload-audio.dto';
 import { ParseJsonInterceptor } from 'src/utility';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { get } from 'http';
+import { EditTranscriptionDto } from './dto/edit-transcription.dto';
 
 @ApiTags('Audio Management')
 @Controller('audio')
@@ -25,7 +26,6 @@ export class AudioController {
     try {
       // Parse the incoming project and target group data
       const projectGroupDto: ProjectGroupDTO = JSON.parse(projectDto);
-      console.log(projectGroupDto,targetGrpDto);
       // Validate the parsed DTO (you could add further validation logic here if necessary)
       // You can also add a validation pipe here to handle DTO validation globally
 
@@ -104,4 +104,10 @@ export class AudioController {
     }
   }
 
+  //trabslation edit
+  @Post('edit')
+    async editTranscription(@Body() editTranscriptionDto: EditTranscriptionDto) {
+        return this.audioService.editTranscription(editTranscriptionDto);
+    }
+  
 }

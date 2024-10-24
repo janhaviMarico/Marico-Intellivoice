@@ -12,7 +12,7 @@ export class AudioService {
   baseUrl = environment.BASE_URL;
   public messageHistory: BehaviorSubject<any> = new BehaviorSubject(null);
 
-  uploadForm(url: string, payload: any): Observable<any> {
+  postAPI(url: string, payload: any): Observable<any> {
       return this.http.post(this.baseUrl + url, payload);
   }
   getData(url: string, userId: string) {

@@ -1,4 +1,6 @@
 .allfiles-container {
+    height: calc(100vh - 65px);
+    overflow-y: auto;
     .allfiles-container-header {
         padding: 20px 24px 20px 24px;
         button {

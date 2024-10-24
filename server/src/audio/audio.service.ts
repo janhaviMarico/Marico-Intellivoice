@@ -1,4 +1,4 @@
-import { Injectable, Logger, InternalServerErrorException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/azure-database';
 import { Container } from '@azure/cosmos';
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
@@ -6,10 +6,12 @@ import { ConfigService } from '@nestjs/config';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
 import { ProjectEntity } from './entity/project.entity';
 import { TargetGroupEntity } from './entity/target.entity';
-import { fork } from 'child_process';
-import { join } from 'path';
 import { TranscriptionEntity } from './entity/transcription.entity';
 import { nanoid } from 'nanoid';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { EditTranscriptionDto } from './dto/edit-transcription.dto';
+import { Console } from 'console';
 
 
 
@@ -18,14 +20,21 @@ export class AudioService {
   private readonly logger = new Logger(AudioService.name);
   private blobServiceClient: BlobServiceClient;
   private containerClient: any;
+  configService: any;
   constructor(
     @InjectModel(ProjectEntity) private readonly projectContainer: Container,
     @InjectModel(TargetGroupEntity) private readonly targetContainer: Container,
     @InjectModel(TranscriptionEntity) private readonly transcriptContainer: Container,
+    @InjectQueue('transcription') private readonly transcriptionQueue: Queue,
     private readonly config: ConfigService ) 
     {
     this.blobServiceClient = BlobServiceClient.fromConnectionString(this.config.get<string>('AZURE_STORAGE_CONNECTION_STRING'));
     this.containerClient = this.blobServiceClient.getContainerClient(this.config.get<string>('AUDIO_UPLOAD_BLOB_CONTAINER'));
+    this.transcriptionQueue.isReady().then(() => {
+      this.logger.log('Connected to Redis and audio queue is ready');
+    }).catch(err => {
+      this.logger.error('Failed to connect to Redis:', err);
+    });
     }
 
   // Handle audio processing logic
@@ -35,6 +44,7 @@ export class AudioService {
       const uploadPromises = files.map(async (file) => {
         try {
           const blockBlobClient = this.containerClient.getBlockBlobClient(file.originalname);
+          console.log('file.originalname',file.originalname);
           const uploadBlobResponse = await blockBlobClient.uploadData(file.buffer);
           this.logger.log(`Blob ${file.originalname} uploaded successfully: ${uploadBlobResponse.requestId}`); 
           const sasUri=blockBlobClient.url;
@@ -136,6 +146,7 @@ export class AudioService {
          this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${projectName.ProjName}`);
       }
       this.logger.log(`Starting Audio transcibe ${projectName.ProjName}`);  
+      console.log(audioProcessDtoArray);
       this.runBackgroundTranscription(audioProcessDtoArray);
       return true;
     } catch (error) {
@@ -144,7 +155,7 @@ export class AudioService {
     }
   }
 
-   runBackgroundTranscription(audioProcessDtoArray: {
+    runBackgroundTranscription(audioProcessDtoArray: {
     TGId:string,
     TGName: string,
     mainLang: string,
@@ -152,22 +163,19 @@ export class AudioService {
     noOfSpek: number,
     sasToken: string,
   }[]) {
-    const child = fork(join(__dirname, '../../dist/audio/workers/audio-worker.js'));
-
-    // Send the data to the worker process
-    child.send(audioProcessDtoArray
-    );
-
-    // Listen for a message from the worker process (transcription result)
-    child.on('message', (result) => {
-      console.log('Received transcription result from worker:', result);
-      // Save the result to the database or handle it as needed
-    });
-
-    // Handle worker process exit
-    child.on('exit', (code) => {
-      console.log(`Child process exited with code ${code}`);
-    });
+    this.logger.log('Enqueuing audio transcription job...');   
+    try {
+      // Add the job to Bull queue
+      for (const audioData of audioProcessDtoArray) {
+        // Enqueue each audio file as a separate job
+        console.log(audioData);
+        this.transcriptionQueue.add('transcribe-audio', audioData);
+        this.logger.log(`Transcription job for ${audioData.TGName} enqueued successfully`);
+    }
+    } catch (error) {
+      this.logger.error(`Failed to enqueue transcription job: ${error.message}`);
+      throw new InternalServerErrorException('Failed to enqueue transcription job');
+    }
   }
 
   generateBlobSasUrl(fileName: string): Promise<string> {
@@ -312,6 +320,7 @@ export class AudioService {
       }   
       const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
      this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);  
+     console.log('during fetch url',targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1));
      const filenameurl=await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
       // 3. Combine Target and Transcription Data
       const combinedData = {
@@ -329,5 +338,52 @@ export class AudioService {
       throw new InternalServerErrorException('Failed to fetch audio details');
     }
   }
+
+
+  //translation edit
+  async editTranscription(data: EditTranscriptionDto) {
+    this.logger.log(`Attempting to edit transcription for TGId: ${data.TGId}`);
+    
+    const container = this.transcriptContainer;
+
+    try {
+        //this.logger.log(`TGId is: ${data.TGId}`);
+        
+        if (!data.TGId) {
+            throw new Error('TGId is undefined or empty');
+        }
+
+        // Check item using the query method
+        const { resources: items } = await container.items
+            .query(`SELECT * FROM c WHERE c.TGId = '${data.TGId}'`)
+            .fetchAll();
+
+        if (items.length === 0) {
+            this.logger.warn(`No item found with TGId: ${data.TGId}`);
+            throw new NotFoundException('Item not found');
+        }
+
+        const existingItem = items[0];
+       // this.logger.log(`Existing item: ${JSON.stringify(existingItem)}`);
+
+        const updatedItem = {
+            ...existingItem,
+            audiodata: data.audiodata,
+        };
+
+        const { resource: updatedResource } = await container.items.upsert(updatedItem);
+        this.logger.log(`Transcription updated successfully for TGId: ${data.TGId}`);
+        
+        // Return a simple success message
+        return {
+          statusCode: 200,  // HTTP status code for success
+          message: `Translation updated successfully.`,
+      };
+
+    } catch (error) {
+        this.logger.error(`Failed to edit transcription: ${error.message}`);
+        throw error;
+    }
+}
 
 }

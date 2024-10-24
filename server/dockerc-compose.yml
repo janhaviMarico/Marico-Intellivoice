@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: '${CONTAINER_NAME}'
+    ports:
+      - ${HOST_PORT}:3000
+    env_file:
+        - .env
+    networks:
+      docker_network: null
+
+
+networks:
+  docker_network:
+    external: true

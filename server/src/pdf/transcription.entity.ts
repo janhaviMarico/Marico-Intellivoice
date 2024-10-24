@@ -1,4 +1,3 @@
-// src/audio/entities/target-group.entity.ts
 import { CosmosPartitionKey } from '@nestjs/azure-database';
 
 @CosmosPartitionKey('TGID')

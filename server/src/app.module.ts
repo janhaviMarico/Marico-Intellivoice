@@ -6,9 +6,10 @@ import { UserModule } from './user/user.module';
 import { AudioController } from './audio/audio.controller';
 import { AudioModule } from './audio/audio.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TranscriptionModule } from './pdf/transcription.module';
 import { TranscriptionController } from './pdf/transcription.controller';
 import { ChatModule } from './chat/chat.module';
+import { TranscriptionModule } from './pdf/transcription.module';
+import { TranscriptionService } from './pdf/transcription.service';
 import { ChangeFeedService } from './email/change-feed.service';
 import { Container, CosmosClient } from '@azure/cosmos';
 
@@ -22,7 +23,7 @@ import { Container, CosmosClient } from '@azure/cosmos';
     dbName:'marico-gpt',
     endpoint:'https://marico-gpt-db.documents.azure.com:443/',
     key:'A8sHzgvKfrrARuSNHYY3B6nbVzqt8AgVTI7GXfMXXon0t8JUApe8ASy4NE7FrU8VndKv8Jqx82DHACDbHltAZA=='
-  }),UserModule, AudioModule,TranscriptionModule,ChatModule],
+  }),UserModule, AudioModule,ChatModule],
   controllers: [AppController],
   providers: [AppService,
     ChangeFeedService,
