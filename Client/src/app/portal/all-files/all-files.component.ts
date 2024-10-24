@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { AudioDetailsComponent } from '../audio-details/audio-details.component';
 import { AudioService } from '../service/audio.service';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-all-files',
@@ -14,7 +13,7 @@ export class AllFilesComponent {
   project:any[] = [];
   userId:string = 'testuser4';
   isLoading: boolean = true;
-  constructor(private audioServ:AudioService,private router:Router) {
+  constructor(private audioServ:AudioService,private router:Router, private toastr: ToastrService) {
 
   }
 
@@ -28,6 +27,7 @@ export class AllFilesComponent {
       this.isLoading = false;
     }, (err:any)=> {
       this.isLoading = false;
+      this.toastr.error('Something Went Wrong!')
     })
   }
 

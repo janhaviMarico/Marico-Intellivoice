@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { IPublicClientApplication, PublicClientApplication } from '@azure/msal-browser';
 import { MSAL_INSTANCE, MsalModule, MsalService } from '@azure/msal-angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideToastr } from 'ngx-toastr';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -41,7 +42,8 @@ export function initializeMsal(msalService: MsalService): () => Promise<void> {
       useFactory: initializeMsal,
       deps: [MsalService],
       multi: true
-    }
+    },
+    provideToastr()
   ],
   bootstrap: [AppComponent]
 })

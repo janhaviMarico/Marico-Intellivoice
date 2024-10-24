@@ -11,18 +11,36 @@ export const SUMMARIZATION_PROMPT_TEMPLATE = (summaryLength: number, text: strin
   Provide a summary based on the given guidelines.
 `;
 
-export const SENTIMENT_ANALYSIS_PROMPT=(text:string) => `
-You are an expert in sentiment analysis. Given multiple sentiment analysis, your task is to 
-combine them into a cohesive sentiment analysis for each speaker. Be precise the do not provide 
-mixed result give only positive and negative into result, also calculate a NPS score depends on the 
-speakers positive and negative points and provide it at speaker level and at overall level.
-Provide a overall sentiment and them give a breakdown of speaker level sentiment analysis of the
-product feedback  with proper explanation.
+// export const SENTIMENT_ANALYSIS_PROMPT=(text:string) => `
+// You are an expert in sentiment analysis. Given multiple sentiment analysis, your task is to 
+// combine them into a cohesive sentiment analysis for each speaker. Be precise the do not provide 
+// mixed result give only positive and negative into result, also calculate a NPS score depends on the 
+// speakers positive and negative points and provide it at speaker level and at overall level.
+// Provide a overall sentiment and them give a breakdown of speaker level sentiment analysis of the
+// product feedback  with proper explanation.
                             
-Here are the text to combine:
-${text}
+// Here are the text to combine:
+// ${text}
                               
-Sentiment Analysis & NPS Score: 
+// Sentiment Analysis & NPS Score: 
+// `;
+
+export const SENTIMENT_ANALYSIS_PROMPT=(text:string) => `
+You are an expert in sentiment analysis. Given multiple sentiment summaries, your task is to
+                            combine them into a cohesive sentiment analysis.
+                            
+                            List out all the positive, negative and neutral sentiments with proper explanation.
+                            Also provide an overall sentiment of the sentiment and analysis with reason of the sentiment.
+                            
+                            
+                            Context: {context}
+ 
+                            Here are the text to combine:
+                            ${text}
+ 
+                            Based on these, create a comprehensive sentiment analysis and provide breakdown of positive, negative and neutral sentiments with reasons.
+                            If there are conflicting sentiments, indicate the dominant sentiment and provide an explanation.
+                            In case of conflicts answer proper which of sentiment can be considered.
 `;
 
 export const SUMMARY="Summary";

@@ -3,8 +3,8 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { InfoComponent } from '../info/info.component';
-import { AddProjectComponent } from '../add-project/add-project.component';
 import { AudioService } from '../../service/audio.service';
+import { ToastrService } from 'ngx-toastr';
 
 interface AudioFile {
   name: string;
@@ -32,6 +32,7 @@ export class UploadFileComponent {
   expansionArr: any[] = [];
   target: any;
   isProcessingDisable: boolean = true;
+  isLoading: boolean = false;
   // currentTime: string = '0:00';
   // durationTime: string = '0:00';
   // seekValue: number = 0;
@@ -47,7 +48,7 @@ export class UploadFileComponent {
     public uploadDialogRef: MatDialogRef<UploadFileComponent>,
     private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public targetGrps: { targetGrpArr: any[] },
-    private audioServ: AudioService
+    private audioServ: AudioService, private toastr: ToastrService
   ) { }
 
   ngOnInit() {
@@ -309,7 +310,7 @@ export class UploadFileComponent {
 
       this.selectedArr = [];
     } else {
-      console.log('Please Select Audio')
+      this.toastr.warning('Please Select Audio');
     }
   }
 
@@ -330,6 +331,7 @@ export class UploadFileComponent {
   }
 
   audioProcessing() {
+    this.isLoading = true;
     const formData = new FormData();
     var Project: any;
     var TargetGrp: any = [];
@@ -367,7 +369,8 @@ export class UploadFileComponent {
 
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
-    this.audioServ.uploadForm('audio/upload', formData).subscribe((res: any) => {
+    this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
+      this.isLoading = false;
       this.closeProjectDialog();
       this.closeUploadDailog();
 
@@ -378,7 +381,8 @@ export class UploadFileComponent {
         data: { info: 'Process' }
       });
     }, (err: any) => {
-      console.log('err', err)
+      this.isLoading = false;
+      this.toastr.error('Somthing Went Wrong');
     })
 
   }

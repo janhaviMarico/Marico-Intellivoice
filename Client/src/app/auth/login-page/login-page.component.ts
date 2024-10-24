@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login-page',
@@ -9,9 +10,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
   styleUrls: ['./login-page.component.scss']
 })
 export class LoginPageComponent {
-  constructor(private  msalService: MsalService,private router:Router) {
-
-  }
+  constructor(private  msalService: MsalService,private router:Router,private toastr: ToastrService) { }
 
   ngOnInit() {
     this.msalService.instance.handleRedirectPromise().then((res:any)=> {
@@ -31,9 +30,11 @@ export class LoginPageComponent {
     this.msalService.loginPopup().subscribe((res: AuthenticationResult) => {
       localStorage.setItem('User',res.account.username);
       this.msalService.instance.setActiveAccount(res.account);
+
+      localStorage.setItem('LoginTime',new Date().getTime().toString())
       this.router.navigate(['/portal/dashboard'])
     }, (error) => {
-      console.log('Login error:', error);
+      this.toastr.error('Something Went Wrong!')
     });
   }
 }

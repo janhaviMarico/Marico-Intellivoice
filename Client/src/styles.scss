@@ -8,7 +8,7 @@
     box-sizing: border-box;
 }
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; overflow: hidden;}
+body { margin: 0; font-family: "Lato" ; overflow: hidden;font-size: 10px;}
 
 ::-webkit-scrollbar {
     width: 8px;
@@ -44,10 +44,6 @@ button {
 
 .targetTooltip{
   display: none;
-}
-
-.targetGroupPopop{
- 
 }
 
 .tooltips .targetGroupPopop h6{
@@ -113,5 +109,11 @@ button {
   position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(50px, 50px)
+    //transform: translate(50px, 50px);
+    z-index: 1000;
 }
+
+// .cdk-global-overlay-wrapper{
+//   width: calc(100% - 40px) !important;
+//   max-width: 800px !important;
+// }

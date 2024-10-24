@@ -35,6 +35,8 @@ import { InfoComponent } from './project/info/info.component' ;
 import { AudioService } from './service/audio.service';
 import { HttpClientModule } from '@angular/common/http';
 
+import {ToastrModule } from 'ngx-toastr';
+
 @NgModule({
   declarations: [
     DashboardComponent,
@@ -70,7 +72,8 @@ import { HttpClientModule } from '@angular/common/http';
     MatGridListModule,
     SharedModule,
     HttpClientModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    ToastrModule.forRoot(),
   ],
   providers: [DialogService, AudioService]
 })

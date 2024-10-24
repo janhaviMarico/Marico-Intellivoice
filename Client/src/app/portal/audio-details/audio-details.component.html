@@ -3,67 +3,84 @@
     <button (click)="back()"><img src="../../../assets/Img/AudioDetails/back.png" alt="Back-button"></button>
     <h3>{{audioDetails?.TGName}}</h3>
   </div>
-  <mat-tab-group class="tab-group">
+  <mat-tab-group class="tab-group" [(selectedIndex)]="selectedTabIndex">
     <mat-tab>
       <ng-template mat-tab-label>
-        <label><img src="../../../assets/Img/AudioDetails/Trasciptor.png" alt=""><span>Trascript</span></label>
+        <label>
+          <img
+            [src]="selectedTabIndex === 0 ? '../../../assets/Img/AudioDetails/trascriptor-a.png' : '../../../assets/Img/AudioDetails/transcriptor-i.png'"
+            alt=""><span [ngClass]="{'active': selectedTabIndex === 0}">Trascript</span>
+        </label>
       </ng-template>
       <div class="tab-content">
         <div class="tab-content-text">
-              <p class="text" *ngFor="let audioData of audioDetails?.AudioData"> 
-                <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}):   </span>
-                {{audioData?.transcription}}
-              </p>
-            
+          <p class="text" *ngFor="let audioData of audioDetails?.AudioData">
+            <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
+            {{audioData?.transcription}}
+          </p>
         </div>
         <div class="tab-content-model">
-            <div class="model-detail">
-                <h5>Audio 1</h5>
-                <p>Target Group 1</p>
-                <p>Nykka, Nivea Vs Parachute Safolla</p>
+          <div class="model-detail">
+            <h5>Audio 1</h5>
+            <p>Target Group 1</p>
+            <p>Nykka, Nivea Vs Parachute Safolla</p>
+          </div>
+          <div class="model-audio">
+            <div class="controls">
+              <button (click)="seekBackward()"><img src="../../../assets/Img/AudioDetails/backward.png"
+                  alt="backward"></button>
+                  <button (click)="togglePlayPause()" class="playbtn">
+                    <img [src]="isPlaying ? '../../../assets/Img/AudioDetails/pause.png' : '../../../assets/Img/dashboard/play-btn.png'"
+                         alt="Play/Pause">
+                  </button>
+              <button (click)="seekForward()"><img src="../../../assets/Img/AudioDetails/front.png"
+                  alt="forward"></button>
             </div>
-            <div class="model-audio">
-                <div class="controls">
-                    <button (click)="seekBackward()"><img src="../../../assets/Img/AudioDetails/backward.png" alt="backward"></button>
-                    <button (click)="togglePlayPause()" class="playbtn"><img src="../../../assets/Img/AudioDetails/pause.png" alt="Play/Pause"></button>
-                    <button (click)="seekForward()"><img src="../../../assets/Img/AudioDetails/front.png" alt="forward"></button>
-                </div>
-                <div class="audio-player">
-                  <span id="current-time">{{ currentTime }}</span>
-                  <input type="range" class="seek-bar" [value]="seekValue" max="100" (input)="seekAudio($event)">
-                  <span id="duration-time">{{ durationTime }}</span>
-                  <audio #audioPlayer controls (timeupdate)="updateProgress($event)">
-                    <source [src]="filePath" />
-                    Your browser does not support the audio element.
-                  </audio>
-                </div>
+            <div class="audio-player">
+              <span id="current-time">{{ currentTime }}</span>
+              <input type="range" class="seek-bar" [value]="seekValue" max="100" (input)="seekAudio($event)">
+              <span id="duration-time">{{ durationTime }}</span>
+              <audio #audioPlayer controls (timeupdate)="updateProgress($event)">
+                <source [src]="filePath" />
+                Your browser does not support the audio element.
+              </audio>
             </div>
+          </div>
         </div>
       </div>
     </mat-tab>
 
     <mat-tab>
       <ng-template mat-tab-label>
-        <label><img src="../../../assets/Img/AudioDetails/Translation.png" alt=""><span>Translation</span></label>
+        <label><img
+            [src]="selectedTabIndex === 1 ? '../../../assets/Img/AudioDetails/translation-a.png' : '../../../assets/Img/AudioDetails/translation-i.png'"
+            alt=""><span [ngClass]="{'active': selectedTabIndex === 1}">Translation</span></label>
       </ng-template>
       <div class="tab-content">
         <div class="tab-content-text">
-          <p class="text" *ngFor="let audioData of audioDetails?.AudioData"> 
-            <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}):   </span>
-            {{audioData?.translation}}
+          <p class="text" *ngFor="let audioData of audioDetails?.AudioData">
+            <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
+            <span *ngIf="!isEdit">{{audioData?.translation}}</span>
+            <textarea *ngIf="isEdit" name="" id="" [(ngModel)]="audioData.translation" class="edit-textarea"></textarea>
           </p>
-      </div>
+        </div>
         <div class="tab-content-model translation">
-          <button><img src="../../../assets/Img/AudioDetails/Edit-trans.png" alt="Edit-trans">Edit</button>
-          <button class="cancel-btn"><img src="../../../assets/Img/AudioDetails/cancle-trans.png" alt="cancle-trans">Cancel</button>
-          <button><img src="../../../assets/Img/AudioDetails/save-trans.png" alt="save-trans">Update</button>
+          <button *ngIf="!isEdit" (click)="replace(dialogTemplate)">Replace</button>
+          <button *ngIf="!isEdit" (click)="editTranslation()"><img src="../../../assets/Img/AudioDetails/Edit-trans.png"
+              alt="Edit-trans">Edit</button>
+          <button class="cancel-btn" *ngIf="isEdit" (click)="cancelEdit()"><img
+              src="../../../assets/Img/AudioDetails/cancle-trans.png" alt="cancle-trans">Cancel</button>
+          <button *ngIf="isEdit" (click)="updateTranslation()"><img
+              src="../../../assets/Img/AudioDetails/save-trans.png" alt="save-trans">Update</button>
         </div>
       </div>
     </mat-tab>
 
     <mat-tab>
       <ng-template mat-tab-label>
-        <label><img src="../../../assets/Img/AudioDetails/summary.png" alt=""><span>Summary</span></label>
+        <label><img
+            [src]="selectedTabIndex === 2 ? '../../../assets/Img/AudioDetails/summary-a.png' : '../../../assets/Img/AudioDetails/summary-i.png'"
+            alt=""><span [ngClass]="{'active': selectedTabIndex === 2}">Summary</span></label>
       </ng-template>
       <div class="tab-content">
         <div class="tab-content-text">
@@ -77,7 +94,9 @@
 
     <mat-tab>
       <ng-template mat-tab-label>
-        <label><img src="../../../assets/Img/AudioDetails/Senti.png" alt=""><span>Sentiment analysis</span></label>
+        <label><img
+            [src]="selectedTabIndex === 3 ? '../../../assets/Img/AudioDetails/senti-a.png' : '../../../assets/Img/AudioDetails/senti-i.png'"
+            alt=""><span [ngClass]="{'active': selectedTabIndex === 3}">Sentiment analysis</span></label>
       </ng-template>
 
       <div class="tab-content">
@@ -93,54 +112,39 @@
 
     <mat-tab>
       <ng-template mat-tab-label>
-        <label><img src="../../../assets/Img/AudioDetails/chat.png" alt=""><span>Chat</span></label>
+        <label><img
+            [src]="selectedTabIndex === 4 ? '../../../assets/Img/AudioDetails/chat-a.png' : '../../../assets/Img/AudioDetails/chat-i.png'"
+            alt=""><span [ngClass]="{'active': selectedTabIndex === 4}">Chat</span></label>
       </ng-template>
 
       <div class="tab-content">
         <div class="tab-content-chat">
-          <div class="ask-header" *ngIf="false">
+          <div class="ask-header" *ngIf="chatHistory.length === 0">
             <p>Ask me anything about the selected audio</p>
           </div>
           <div class="chat-dashboard">
-            <div class="question-format">
-              <div class="question">
-                <img src="../../../assets/Img/header/profile.png" alt="profile">
-                <p>Prompt 1 about the product, based on the most used prompts?</p>
-              </div>
-            </div>
-            <div class="answer-format">
-              <div class="answer">
-                <img src="../../../assets/Img/header/Logo.png" alt="logo">
-                <p>Moderator : Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
-                  incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
-                  ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit 
-                  in voluptate velit esse cillum dolore eu fugiat nulla</p>
-              </div>
-            </div>
-          </div>
-          <!-- Use NgFor -->
-          <!-- <div class="chat-dashboard">
-            <div *ngFor="let message of messages">
+            <div *ngFor="let message of chatHistory">
               <div *ngIf="message.from === 'user'" class="question-format">
                 <div class="question">
                   <img src="../../../assets/Img/header/profile.png" alt="profile">
-                  <p>{{ message.msg }}</p>
+                  <p>{{ message.message }}</p>
                 </div>
               </div>
-              
+
               <div *ngIf="message.from === 'AI'" class="answer-format">
                 <div class="answer">
                   <img src="../../../assets/Img/header/Logo.png" alt="logo">
-                  <p>Moderator : {{ message.msg }}</p>
+                  <pre>Moderator : {{ message.message }}</pre>
                 </div>
               </div>
             </div>
-          </div> -->
+          </div>
         </div>
         <div class="tab-content-search">
           <div class="input-container">
-            <input type="text" placeholder="Start Typing Here!..." class="text-input" />
-            <button class="send-button">
+            <input type="text" placeholder="Start Typing Here!..." class="text-input" [(ngModel)]="question"
+              (keyup.enter)="sendQuery()" />
+            <button class="send-button" (click)="sendQuery()">
               <img src="../../../assets/Img/AudioDetails/enter.png" alt="Send" />
             </button>
           </div>
@@ -153,3 +157,23 @@
 <div *ngIf="isLoading" class="spinner">
   <mat-spinner></mat-spinner>
 </div>
+
+<ng-template #dialogTemplate>
+  <div class="dialog-container">
+    <h1 mat-dialog-title class="dialog-title">Replace Text</h1>
+    <div mat-dialog-content>
+      <mat-form-field>
+        <mat-label>Current Text</mat-label>
+        <input matInput [(ngModel)]="currentText" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Replace Text</mat-label>
+        <input matInput [(ngModel)]="replaceText" />
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions class="btns">
+      <button mat-button mat-dialog-close>Close</button>
+      <button mat-button mat-dialog-close (click)="replaceTextFunct()">Replace</button>
+    </div>
+  </div>
+</ng-template>
