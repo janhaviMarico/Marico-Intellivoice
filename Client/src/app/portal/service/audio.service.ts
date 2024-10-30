@@ -13,8 +13,13 @@ export class AudioService {
   baseUrl = environment.BASE_URL;
   public messageHistory: Subject<any> = new Subject();
 
-  postAPI(url: string, payload: any): Observable<any> {
+  postAPI(url: string, payload: any , download?:boolean): Observable<any> {
+    if(download) {
+      return this.http.post(this.baseUrl + url, payload, { responseType: 'blob' });
+    } else {
       return this.http.post(this.baseUrl + url, payload);
+    }
+      
   }
   getData(url: string, userId: string) {
     const params = new HttpParams().set('userid', userId);

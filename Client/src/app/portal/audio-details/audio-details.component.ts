@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-import {environment} from '../../../environments/environment'
+import { environment } from '../../../environments/environment'
 
 @Component({
   selector: 'app-audio-details',
@@ -176,16 +176,16 @@ export class AudioDetailsComponent {
     this.isLoading = true;
     this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
     const payload = {
-      TGId : this.tgId,
+      TGId: this.tgId,
       audiodata: this.tempAudioData
     }
-    this.audioServ.postAPI('audio/edit',payload).subscribe((res:any)=> {
-      if(res.statusCode === 200) {
+    this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
+      if (res.statusCode === 200) {
         this.toastr.success(res.message);
         this.isLoading = false;
         this.isEdit = false;
       }
-    },(err:any)=> {
+    }, (err: any) => {
       this.isLoading = false;
       this.toastr.error('Something Went Wrong!');
     });
@@ -218,22 +218,22 @@ export class AudioDetailsComponent {
     });
     this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
     const payload = {
-      TGId : this.tgId,
+      TGId: this.tgId,
       audiodata: this.tempAudioData
     }
-    this.audioServ.postAPI('audio/edit',payload).subscribe((res:any)=> {
-      if(res.statusCode === 200) {
+    this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
+      if (res.statusCode === 200) {
         this.toastr.success(res.message);
         this.isLoading = false;
         this.currentText = '';
         this.replaceText = '';
       }
-    },(err:any)=> {
+    }, (err: any) => {
       this.audioDetails.AudioData = this.tempAudioData.map((x: any) => Object.assign({}, x));
       this.isLoading = false;
       this.toastr.error('Something Went Wrong!');
     })
-   
+
   }
 
   downloadSummary() {
@@ -243,5 +243,29 @@ export class AudioDetailsComponent {
 
   isValidNumber(value: any): boolean {
     return typeof value === 'number' && !isNaN(value);
+  }
+
+  downloadChat() {
+    const month = String(new Date().getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
+    const day = String(new Date().getDate()).padStart(2, '0');
+  
+    const date = `${new Date().getFullYear()}-${month}-${day}`;
+    const param = {
+      "TGId": this.tgId,
+      "date": date,
+      "chat": this.chatHistory
+    };
+    this.audioServ.postAPI('transcription/chat', param,true).subscribe((res: Blob) => {
+      // Handle the PDF response correctly as a Blob
+      const blob = new Blob([res], { type: 'application/pdf' });
+      const downloadURL = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = 'file.pdf'; // Set the filename for download
+      link.click(); // Trigger the download
+    }, (err) => {
+      console.error('Error:', err);
+      this.toastr.error('Something Went Wrong!');
+    });
   }
 }
