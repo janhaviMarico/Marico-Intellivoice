@@ -39,7 +39,7 @@
             <div class="audio-player">
               <span id="current-time">{{ currentTime }}</span>
               <input type="range" class="seek-bar" [value]="seekValue" max="100" (input)="seekAudio($event)">
-              <span id="duration-time">{{ durationTime }}</span>
+              <span id="duration-time">{{ isValidNumber(durationTime) ? durationTime : '00:00' }}</span>
               <audio #audioPlayer controls (timeupdate)="updateProgress($event)">
                 <source [src]="filePath" />
                 Your browser does not support the audio element.
@@ -87,7 +87,7 @@
           <p class="text"> <span class="moderator">Summary : </span>{{audioDetails?.Summary}}</p>
         </div>
         <div class="tab-content-model translation">
-          <button><img src="../../../assets/Img/AudioDetails/Download-sum.png" alt="Down-SUm">Download Summary</button>
+          <button (click)="downloadSummary()"><img src="../../../assets/Img/AudioDetails/Download-sum.png" alt="Down-SUm">Download Summary</button>
         </div>
       </div>
     </mat-tab>
@@ -148,6 +148,9 @@
               <img src="../../../assets/Img/AudioDetails/enter.png" alt="Send" />
             </button>
           </div>
+          <button class="download-chat-button" (click)="downloadChat()">
+            Download Chat
+          </button>
         </div>
       </div>
     </mat-tab>
