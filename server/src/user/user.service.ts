@@ -156,4 +156,22 @@ export class UserService {
       );
     }
   }
+  async getAllUsers(): Promise<User[]> {
+    // const { database } = await this.client.databases.createIfNotExists({
+    //   id: this.databaseId,
+    // });
+    // const { container } = await database.containers.createIfNotExists({
+    //   id: this.containerId,
+    // });
+
+    const querySpec = {
+      query: `SELECT * FROM c`,
+    };
+
+    const { resources: users } = await this.userContainer.items
+      .query(querySpec)
+      .fetchAll();
+
+    return users;
+  }
 }

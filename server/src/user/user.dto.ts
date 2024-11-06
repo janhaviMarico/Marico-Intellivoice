@@ -14,5 +14,6 @@ export interface IUserDto {
     userName: string;
     email: string;
     access?: string;  // Optional with default value 'read'
+    rolecode:string;
   }
   

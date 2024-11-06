@@ -27,18 +27,69 @@ import { Container, CosmosClient } from '@azure/cosmos';
   controllers: [AppController],
   providers: [AppService,
     ChangeFeedService,
+    // {
+    //   provide: Container,
+    //   inject: [ConfigService], // Inject ConfigService to get env variables
+    //   useFactory: (configService: ConfigService): Container => {
+    //     const cosmosClient = new CosmosClient({
+    //       endpoint: configService.get<string>('COSMOS_DB_ENDPOINT'),
+    //       key: configService.get<string>('COSMOS_DB_KEY'),
+    //     });
+    //     const database = cosmosClient.database(configService.get<string>('COSMOS_DBNAME'));
+    //     return database.container('Transcription'); // Replace with your container name
+    //   },
+    // },
+
     {
-      provide: Container,
-      inject: [ConfigService], // Inject ConfigService to get env variables
+      provide: 'TRANSCRIPTION_CONTAINER',
+      inject: [ConfigService],
       useFactory: (configService: ConfigService): Container => {
-        const cosmosClient = new CosmosClient({
+        const client = new CosmosClient({
           endpoint: configService.get<string>('COSMOS_DB_ENDPOINT'),
           key: configService.get<string>('COSMOS_DB_KEY'),
         });
-        const database = cosmosClient.database(configService.get<string>('COSMOS_DBNAME'));
-        return database.container('Transcription'); // Replace with your container name
+        return client.database(configService.get<string>('COSMOS_DBNAME')).container('Transcription');
+      },
+    },
+    // TargetGroups Container
+    {
+      provide: 'TARGET_GROUPS_CONTAINER',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): Container => {
+        const client = new CosmosClient({
+          endpoint: configService.get<string>('COSMOS_DB_ENDPOINT'),
+          key: configService.get<string>('COSMOS_DB_KEY'),
+        });
+        return client.database(configService.get<string>('COSMOS_DBNAME')).container('TargetGroups');
+      },
+    },
+    // Project Container
+    {
+      provide: 'PROJECT_CONTAINER',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): Container => {
+        const client = new CosmosClient({
+          endpoint: configService.get<string>('COSMOS_DB_ENDPOINT'),
+          key: configService.get<string>('COSMOS_DB_KEY'),
+        });
+        return client.database(configService.get<string>('COSMOS_DBNAME')).container('Projects');
+      },
+    },
+    // User Container
+    {
+      provide: 'USER_CONTAINER',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): Container => {
+        const client = new CosmosClient({
+          endpoint: configService.get<string>('COSMOS_DB_ENDPOINT'),
+          key: configService.get<string>('COSMOS_DB_KEY'),
+        });
+        return client.database(configService.get<string>('COSMOS_DBNAME')).container('User');
       },
     },
   ],
+  
 })
 export class AppModule {}
+
+

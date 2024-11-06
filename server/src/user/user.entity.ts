@@ -19,6 +19,9 @@ export class User{
     @Prop({ required: true })
     //access:number[];
     access: string = 'read'; 
+
+    @Prop({ required: true })
+    roleCode:string='3'
 }
 
 
