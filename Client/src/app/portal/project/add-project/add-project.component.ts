@@ -122,6 +122,7 @@ export class AddProjectComponent {
         this.clearForm();
       } else {
         this.toastr.warning('This target group already exists!');
+        this.targetForm.controls['projectName'].disable();
       }
     }
     setTimeout(() => {
@@ -130,7 +131,6 @@ export class AddProjectComponent {
   }
 
   generateTargetGroupName(): string {
-
     // Extract form values
   const projectName = this.targetForm.get('projectName')?.value.replace(/\s+/g, '')|| 'Project';
   const countryName = this.targetForm.get('country')?.value || 'Country';

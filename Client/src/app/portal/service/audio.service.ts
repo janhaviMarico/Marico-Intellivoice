@@ -1,19 +1,25 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {environment} from '../../../environments/environment'
+import { BehaviorSubject, catchError, Observable, Subject, throwError } from 'rxjs';
+import {environment} from '../../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
 @Injectable({
   providedIn: 'root'
 })
 export class AudioService {
 
   closeDialog : Subject<any> = new Subject<any>();
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient, private toastr:ToastrService) { }
   baseUrl = environment.BASE_URL;
-  public messageHistory: BehaviorSubject<any> = new BehaviorSubject(null);
+  public messageHistory: Subject<any> = new Subject();
 
-  postAPI(url: string, payload: any): Observable<any> {
+  postAPI(url: string, payload: any , download?:boolean): Observable<any> {
+    if(download) {
+      return this.http.post(this.baseUrl + url, payload, { responseType: 'blob' });
+    } else {
       return this.http.post(this.baseUrl + url, payload);
+    }
+      
   }
   getData(url: string, userId: string) {
     const params = new HttpParams().set('userid', userId);
@@ -35,5 +41,23 @@ export class AudioService {
 
   public getMessageHistory(): Observable<any> {
     return this.messageHistory.asObservable();
+  }
+
+  getDownload(url: string) {
+    this.http.get(url, { responseType: 'blob' })
+      .pipe(
+        catchError((error) => {
+          this.toastr.error('Something Went Wrong!')
+          return throwError(error);
+        })
+      )
+      .subscribe((response: Blob) => {
+        const blob = new Blob([response], { type: 'application/pdf' });
+        const downloadURL = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadURL;
+        link.download = 'file.pdf';
+        link.click();
+      });
   }
 }
