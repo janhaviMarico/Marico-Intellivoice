@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { ToastrService } from 'ngx-toastr';
+import { CommonService } from 'src/app/portal/service/common.service';
 
 @Component({
   selector: 'app-login-page',
@@ -10,7 +11,11 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./login-page.component.scss']
 })
 export class LoginPageComponent {
-  constructor(private  msalService: MsalService,private router:Router,private toastr: ToastrService) { }
+  userDetails:any;
+  user:any;
+  constructor(private  msalService: MsalService,private router:Router,private toastr: ToastrService,
+    private commonServ:CommonService
+  ) { }
 
   ngOnInit() {
     this.msalService.instance.handleRedirectPromise().then((res:any)=> {
@@ -30,11 +35,29 @@ export class LoginPageComponent {
     this.msalService.loginPopup().subscribe((res: AuthenticationResult) => {
       localStorage.setItem('User',res.account.username);
       this.msalService.instance.setActiveAccount(res.account);
-
+      this.userDetails = res;
+      this.addUserDetails()
       localStorage.setItem('LoginTime',new Date().getTime().toString())
       this.router.navigate(['/portal/dashboard'])
-    }, (error) => {
+    }, (err) => {
       this.toastr.error('Something Went Wrong!')
     });
+  }
+
+  addUserDetails() {
+    const payload = {
+      "userid": this.userDetails.account.tenantId,
+      "userName": this.userDetails.account.name,
+      "email": this.userDetails.account.username,
+      "access": "read",
+      "rolecode": 3
+    }
+    this.commonServ.postAPI('users/create',payload).subscribe((res:any)=> {
+      if(res.response === 200) {
+        this.user = res.user;
+      }
+    },(err)=> {
+      this.toastr.error('Something Went Wrong!');
+    })
   }
 }

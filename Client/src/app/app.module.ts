@@ -7,12 +7,18 @@ import { IPublicClientApplication, PublicClientApplication } from '@azure/msal-b
 import { MSAL_INSTANCE, MsalModule, MsalService } from '@azure/msal-angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
+import { CommonService } from './portal/service/common.service';
+import { HttpClientModule } from '@angular/common/http';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
     auth:{
       clientId: '76227ae6-b2f6-4325-a751-a5b6f94fb870',
       redirectUri: 'http://localhost:4200'
+    },
+    cache: {
+      cacheLocation: 'localStorage',
+      storeAuthStateInCookie: true
     }
   })
 }
@@ -29,7 +35,8 @@ export function initializeMsal(msalService: MsalService): () => Promise<void> {
     BrowserModule,
     AppRoutingModule,
     MsalModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    HttpClientModule
   ],
   providers: [
     {
@@ -43,7 +50,8 @@ export function initializeMsal(msalService: MsalService): () => Promise<void> {
       deps: [MsalService],
       multi: true
     },
-    provideToastr()
+    provideToastr(),
+    CommonService
   ],
   bootstrap: [AppComponent]
 })
