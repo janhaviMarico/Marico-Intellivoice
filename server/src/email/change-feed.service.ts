@@ -254,7 +254,7 @@ export class ChangeFeedService implements OnModuleInit {
       service: 'gmail', // or any other service
       auth: {
         user: 'akanksha.jadhav@atriina.com', // Add your email
-        pass: 'hymv zmve eyyx clpo', // Add your password or an app-specific password
+        pass: 'akkskjak', // Add your password or an app-specific password
       },
     });
 
