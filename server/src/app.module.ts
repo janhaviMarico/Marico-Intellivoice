@@ -12,6 +12,7 @@ import { TranscriptionModule } from './pdf/transcription.module';
 import { TranscriptionService } from './pdf/transcription.service';
 import { ChangeFeedService } from './email/change-feed.service';
 import { Container, CosmosClient } from '@azure/cosmos';
+import { MasterModule } from './Master/master.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { Container, CosmosClient } from '@azure/cosmos';
     dbName:'marico-gpt',
     endpoint:'https://marico-gpt-db.documents.azure.com:443/',
     key:'A8sHzgvKfrrARuSNHYY3B6nbVzqt8AgVTI7GXfMXXon0t8JUApe8ASy4NE7FrU8VndKv8Jqx82DHACDbHltAZA=='
-  }),UserModule, AudioModule,ChatModule],
+  }),UserModule, AudioModule,ChatModule,MasterModule],
   controllers: [AppController],
   providers: [AppService,
     ChangeFeedService,
