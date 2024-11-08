@@ -5,110 +5,6 @@ import { Container } from '@azure/cosmos';
 import { User } from './user.entity';
 import { IUserDto } from './user.dto';
 
-// import { Injectable } from "@azure/cosmos";
-// import { InjectModel } from "@nestjs/azure-database";
-// import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-// import { IUserDto } from "./user.dto";
-
-// @Injectable()
-// export class UserService {
-//   constructor(@InjectModel(User) private readonly userContainer: Container) {}
-
-//   // Fetch all users
-//   async getAllUsers(): Promise<IUserDto[]> {
-//     const sqlQuery = 'SELECT * FROM c';
-//     const cosmosResult = await this.userContainer.items.query<User>(sqlQuery).fetchAll();
-
-//     // Map the results to IUserDto format
-//     return cosmosResult.resources.map<IUserDto>((value) => ({
-//       id: value.id,
-//       userid: value.userid,
-//       email: value.email,
-//       userName: value.userName,
-//       access: value.access,
-//     }));
-//   }
-
-  // Create a new user
-  // async createUser(payload: IUserDto): Promise<{ response: number; message: string }> {
-  //   const newUser = new User();
-  //   newUser.id = '2'; // Ideally, this should be dynamically generated
-  //   newUser.userid = payload.userid;
-  //   newUser.userName = payload.userName;
-  //   newUser.email = payload.email;
-  //   newUser.access = payload.access;
-
-  //   Create user in Cosmos DB
-  //   await this.userContainer.items.create(newUser);
-
-  //   return {
-  //     response: 200,
-  //     message: 'Successfully created',
-  //   };
-  // }
-//}
-
-
-//akanksha code
-
-//create user data
-
-// @Injectable()
-// export class UserService {
-//   //userService: any;
-//   constructor(@InjectModel(User) private readonly userContainer: Container) {}
-
-//   // Create new user
-//   async createUser(payload: IUserDto): Promise<{ response: number; message: string ; user?: User;existingUser?: User}> {
-//     try {
-      
-//       // Check if user already exists 
-//       const querySpec = {
-//         query: 'SELECT * FROM c WHERE c.userid = @userid OR c.email = @Email',
-//         parameters: [
-//           { name: '@userid', value: payload.userid },
-//           { name: '@Email', value: payload.email }
-//         ],
-//       };
-//       const { resources: existingUsers } = await this.userContainer.items.query(querySpec).fetchAll();
-
-//       // If user with the exact data already exists, return a response
-//       if (existingUsers.length > 0) {
-//         const existingUser = existingUsers[0];
-//         return {
-//           response: 409,  // HTTP 409 Conflict
-//           message: 'User with the same data already exists',
-//           existingUser,   // The user already in the database
-//         };
-//       }
-
-//       const newUser = new User();
-//       newUser.userid = payload.userid;
-//       newUser.userName = payload.userName;
-//       newUser.email = payload.email;
-//       newUser.access = payload.access || 'read';  
-
-//       // Create user in database
-//       const { resource: createdUser } = await this.userContainer.items.create(newUser);
-
-//       return {
-//         response: 200,
-//         message: 'User successfully created',
-//         user: createdUser,
-//       };
-     
-//     } catch (error) {
-//       throw new HttpException(
-//         { message: 'Error creating user', error: error.message },
-//         HttpStatus.INTERNAL_SERVER_ERROR,
-//       );
-//     }
-//   }
-// }
-
-
-
-
 @Injectable()
 export class UserService {
   createUser(payload: IUserDto): { response: number; message: string; } | PromiseLike<{ response: number; message: string; }> {
@@ -157,13 +53,6 @@ export class UserService {
     }
   }
   async getAllUsers(): Promise<User[]> {
-    // const { database } = await this.client.databases.createIfNotExists({
-    //   id: this.databaseId,
-    // });
-    // const { container } = await database.containers.createIfNotExists({
-    //   id: this.containerId,
-    // });
-
     const querySpec = {
       query: `SELECT * FROM c`,
     };
