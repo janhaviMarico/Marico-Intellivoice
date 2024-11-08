@@ -5,11 +5,14 @@ import { CosmosPartitionKey } from '@nestjs/azure-database';
 export class MasterEntity {
   id: string;    // Unique identifier for the target group
   master_id:string;
-  country: string[];
-  state: string[];  
+  country: NameValuePair[];
+  state: NameValuePair[]; 
   marico_product:string[] 
   Role: roleData[];   
   Access:accessData[];
+}
+class NameValuePair {
+  name: string;
 }
 
 

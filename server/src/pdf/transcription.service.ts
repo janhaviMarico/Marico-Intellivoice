@@ -43,21 +43,6 @@ export class TranscriptionService {
     return items.length > 0 ? items[0] : null;
   }
 
-  // private async fetchProjectInfo(tgid: string): Promise<any> {
-  //   const querySpec = {
-  //     query: 'SELECT c.ProjId, c.ProjectName FROM c WHERE c.TGId = @tgid',
-  //     parameters: [
-  //       {
-  //         name: '@tgid',
-  //         value: tgid,
-  //       },
-  //     ],
-  //   };
-
-  //   const { resources: items } = await this.projectContainer.items.query(querySpec).fetchAll();
-    
-  //   return items.length > 0 ? items[0] : null;
-  // }
   private async fetchProjectInfo(tgid: string): Promise<any> {
     // Step 1: Fetch ProjId from Target Group container
     const targetGroupQuery = {

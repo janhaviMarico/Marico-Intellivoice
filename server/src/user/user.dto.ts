@@ -1,12 +1,3 @@
-// export interface IUserDto {
-//     id:string;
-//     userid:string;
-//     userName:string;
-//     email:string;
-//     access:number[];
-// }
-
-
 // src/user/dto/user.dto.ts
 export interface IUserDto {
     id?: string;  // Optional because it will be generated on create
