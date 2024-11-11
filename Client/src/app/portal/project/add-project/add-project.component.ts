@@ -92,8 +92,11 @@ export class AddProjectComponent {
 
   getAllMaster() {
     this.commonServ.getAPI('master/all').subscribe((res:any)=> {
-      debugger
-      console.log(res);
+      if(res.statusCode == 200) {
+        this.countries = res.data[0].country;
+        this.states = res.data[0].state;
+        this.products = res.data[0].marico_product;
+      }
     },(err:any)=> {
       this.toastr.error('Something Went Wrong!')
     })
