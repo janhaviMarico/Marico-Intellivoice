@@ -12,5 +12,6 @@ export class LayoutComponent {
 
   logout() {
     this.msalService.logout();
+    localStorage.removeItem('User')
   }
 }

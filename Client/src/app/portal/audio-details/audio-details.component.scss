@@ -260,7 +260,7 @@
                 height: 20%;
                 display: flex;
                 align-items: flex-start;
-                justify-content: center;
+                justify-content: space-around;
 
                 .input-container {
                     display: flex;
@@ -268,7 +268,7 @@
                     border: 1px solid #79747E;
                     border-radius: 5px;
                     padding: 8px 24px 8px 16px;
-                    width: 80%;
+                    width: 75%;
 
                     .text-input {
                         flex: 1;
@@ -288,6 +288,15 @@
                         padding: 0;
                         margin-left: 10px;
                     }
+                }
+
+                .download-chat-button {
+                    background: none;
+                    outline: none;
+                    border: 1px solid #014FA1;
+                    color: #014FA1;
+                    padding: 12px 20px;
+                    border-radius: 4px;
                 }
             }
         }
@@ -322,17 +331,20 @@
         color: #014FA1;
         margin-bottom: 5px;
     }
+
     ::ng-deep mat-form-field {
         width: 100%;
+
         .mat-mdc-text-field-wrapper {
             background: none;
             border: 1px solid #014FA1;
         }
     }
-    
+
     .mat-mdc-dialog-actions {
         justify-content: center;
         padding: 0;
+
         button {
             border-radius: 4px;
             border: 1px solid #014FA1;
@@ -347,7 +359,7 @@
             color: #014FA1;
             gap: 20;
         }
-    
+
         button:hover {
             background-color: #014FA1;
             color: #ffffff;

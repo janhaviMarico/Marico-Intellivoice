@@ -22,36 +22,6 @@ export class PdfService {
     // Pipe the document to the response
     doc.pipe(res);
 
-   
-    // Project Information Section
-    // if (projectInfo) {
-    //   doc.fontSize(18).font('Helvetica-Bold').text('Information:', { underline: true });
-    //   doc.moveDown(0.5);
-    //   doc.fontSize(14).font('Helvetica').text(`Project Name: ${this.capitalizeFirstLetter(projectInfo.ProjName)}`);
-    //   doc.moveDown(1);
-    // }
-
-    // Target Group Information Section
-    // if (targetGroupInfo) {
-    //   const bullet = '• ';
-
-    //   doc.fontSize(18).font('Helvetica-Bold').text('Target Group Information:', { underline: true });
-    //   doc.moveDown(0.5);
-
-    //   const rows = [
-    //     [`Project:${projectInfo.ProjName}`],
-    //     [`Country: ${targetGroupInfo.Country}`, `State: ${targetGroupInfo.State}`],
-    //     [`Competition Products: ${targetGroupInfo.CompetetionProduct.join(', ')}`, `Age Group: ${targetGroupInfo.AgeGrp}`],
-    //     [`Marico Product: ${targetGroupInfo.MaricoProduct}`, `Main Language: ${targetGroupInfo.MainLang}`],
-    //   ];
-
-    //   rows.forEach(row => {
-    //     doc.fontSize(14).font('Helvetica').text(`${bullet}${row[0]}`);
-    //     doc.text(`${bullet}${row[1]}`);
-    //     doc.moveDown(0.5);
-    //   });
-    // }
-
     if (targetGroupInfo) {
 
         const bullet = '• ';
@@ -88,10 +58,6 @@ export class PdfService {
       doc.fontSize(18).font('Helvetica-Bold').text('Summary:', { underline: true });
       doc.moveDown(0.5);
 
-    //   const pageWidth = doc.page.width;
-    //   const marginLeft = 50;
-    //   const marginRight = 50;
-    //   const availableWidth = pageWidth - marginLeft - marginRight;
 
       doc.fontSize(14).font('Helvetica').text(summary, {
         //width: availableWidth,

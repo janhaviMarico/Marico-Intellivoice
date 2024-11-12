@@ -41,7 +41,7 @@
                           </button>
                         </div>
                       </div>
-                      <div class="slider">
+                      <!-- <div class="slider">
                         <span id="current-time">{{ file.currentTime || '0:00' }}</span>
                         <input 
                           type="range" 
@@ -57,7 +57,7 @@
                           (timeupdate)="updateProgress($event, i, exp.audioList)" 
                           [src]="file.url"
                         ></audio>
-                      </div>
+                      </div> -->
                     </div>
                   </li>
                 </ul>
@@ -144,7 +144,7 @@
     <div class="upload-footer">
         <mat-form-field>
             <mat-label>Select Target Group</mat-label>
-            <mat-select (selectionChange)="assignTargetGrp($event)">
+            <mat-select #selectElement [(ngModel)]="selectedTargetGrp" (selectionChange)="assignTargetGrp($event)">
               <mat-option *ngFor="let tg of targetGrps?.targetGrpArr; let i = index" [value]="tg.name" (mouseenter) ="mouseEnter(tg)">
                 <div appTooltip>
                   <div class="targetTooltip" >
@@ -203,8 +203,7 @@
               </mat-option>
             </mat-select>
         </mat-form-field>
-        <button (click)="audioProcessing()">Submit For Processing</button> 
-        <!-- [disabled]="isProcessingDisable" -->
+        <button (click)="audioProcessing()" [disabled]="isProcessingDisable">Submit For Processing</button> 
     </div>
 </div>
 
