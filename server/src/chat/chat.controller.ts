@@ -1,4 +1,4 @@
-import { Body, Controller, Post, BadRequestException, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Body, Controller, Post, BadRequestException, InternalServerErrorException, Logger, Query, Get, UsePipes, ValidationPipe, HttpException, HttpStatus } from "@nestjs/common";
 import { ChatService } from "./chat.service";
 
 @Controller('chat')
@@ -79,4 +79,22 @@ async askQuestionWithVectorIds(
   }
 }
 
+@Get('compare')
+@UsePipes(new ValidationPipe({ transform: true }))
+async compareProjects(
+  @Query('project_1') project1: string,
+  @Query('project_2') project2: string
+): Promise<any> {
+  try {
+    if (!project1 || !project2) {
+      throw new HttpException('Both project_1 and project_2 query parameters are required.', HttpStatus.BAD_REQUEST);
+    }
+    console.log(`Comparing projects: ${project1} and ${project2}`);
+    const result = await this.chatservice.compareProjects(project1, project2);
+    return result;
+  } catch (error) {
+    console.error('Error comparing projects:', error);
+    throw new HttpException('An error occurred while comparing projects.', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
 }

@@ -93,3 +93,13 @@ Analyze and compare the customer feedback for two FMCG products based on the fol
 
 
 `
+
+export const PROJECT_COMPARE_STATIC_INSTRUCTION=`Based on the analyses of the two audio transcripts provided, please create 
+                a precise final summary that compares and contrasts their key points. Highlight 
+                the main themes, differences in perspectives, and any notable similarities. 
+                Additionally, discuss the implications of these findings and how they 
+                contribute to a broader understanding of the topic.
+
+                Here are the analysis:
+
+`
