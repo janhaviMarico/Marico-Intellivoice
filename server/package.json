@@ -29,6 +29,7 @@
     "@bull-board/api": "^6.0.0",
     "@bull-board/express": "^6.0.0",
     "@google-cloud/translate": "^8.5.0",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/azure-database": "^3.0.0",
     "@nestjs/bull": "^10.2.1",
     "@nestjs/common": "^10.0.0",

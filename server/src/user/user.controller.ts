@@ -1,27 +1,22 @@
-import { InjectModel } from '@nestjs/azure-database';
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { User } from './user.entity';
-import { Container } from '@azure/cosmos';
-import { IUserDto } from './user.dto';
-import { response } from 'express';
+import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiTags } from '@nestjs/swagger';
+import { IUserDto } from './user.dto';
+import { get } from 'http';
+import { User } from '@azure/cosmos';
 
-
-@ApiTags('User Management')
-@Controller('user')
+@Controller('users')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Get('all')
-    async getUsers(){
-        return this.userService.getAllUsers();
+    @Post('create') // This sets the route to /users/create
+    async createUser(@Body() payload: IUserDto) {
+    return await this.userService.createUserWithSP(payload);
     }
-
-    @Post('new')
-    async create(@Body() payload:IUserDto){
-        return this.userService.createUser(payload);
-    }  
+    @Get('all') // GET /users/all
+    async getAllUsers() {
+        return await this.userService.getAllUsers();
+    }
+ 
 }
 
 
