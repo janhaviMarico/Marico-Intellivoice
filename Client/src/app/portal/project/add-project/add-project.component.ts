@@ -4,6 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { UploadFileComponent } from '../upload-file/upload-file.component';
 import { AudioService } from '../../service/audio.service';
 import { ToastrService } from 'ngx-toastr';
+import { CommonService } from '../../service/common.service';
 
 @Component({
   selector: 'app-add-project',
@@ -53,10 +54,11 @@ export class AddProjectComponent {
   ];
   filteredOtherLang: any[] = [...this.otherLang];
   constructor(private fb: FormBuilder, private dialog: MatDialog, public dialogRef: MatDialogRef<AddProjectComponent>,
-    private audioServ:AudioService, private toastr: ToastrService
+    private audioServ:AudioService, private toastr: ToastrService, private commonServ:CommonService
   ) {}
 
   ngOnInit() {
+    this.getAllMaster();
     this.targetForm = this.fb.group({
       projectName: ['', Validators.required],
       country: ['', Validators.required],
@@ -85,6 +87,18 @@ export class AddProjectComponent {
       if(res) {
         this.dialogRef.close();
       }
+    })
+  }
+
+  getAllMaster() {
+    this.commonServ.getAPI('master/all').subscribe((res:any)=> {
+      if(res.statusCode == 200) {
+        this.countries = res.data[0].country;
+        this.states = res.data[0].state;
+        this.products = res.data[0].marico_product;
+      }
+    },(err:any)=> {
+      this.toastr.error('Something Went Wrong!')
     })
   }
 

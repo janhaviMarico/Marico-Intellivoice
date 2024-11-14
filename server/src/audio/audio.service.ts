@@ -40,52 +40,21 @@ export class AudioService {
   // Handle audio processing logic
   async processAudioFiles(projectGrp: ProjectGroupDTO, targetGrp: string, files: Express.Multer.File[]) {
     try {
-      const sasUrls: { fileName:string ,sasUri: string, sasToken: string }[] = [];
-      const uploadPromises = files.map(async (file) => {
-        try {
-          const blockBlobClient = this.containerClient.getBlockBlobClient(file.originalname);
-          console.log('file.originalname',file.originalname);
-          const uploadBlobResponse = await blockBlobClient.uploadData(file.buffer);
-          this.logger.log(`Blob ${file.originalname} uploaded successfully: ${uploadBlobResponse.requestId}`); 
-          const sasUri=blockBlobClient.url;
-          const fileName=file.originalname;
-          this.generateBlobSasUrl(file.originalname)
-          .then((sasToken)=>{ sasUrls.push({
-            fileName,
-            sasUri,sasToken
-           })}); 
-        // const temp1=blockBlobClient.getBlockBlobClient(uploadBlobResponse);
-          return {
-            filename: file.originalname,  
-            requestId: uploadBlobResponse.requestId,
-            status: 'success',
-          };
-        } catch (uploadError) {
-          this.logger.error(`Failed to upload blob ${file.originalname}: ${uploadError.message}`);
-          return {
-            filename: file.originalname,
-            status: 'failed',
-            error: uploadError.message,
-          };
-        }
-      });
-      
-      // Execute all file uploads in parallel
-      const uploadResults = await Promise.all(uploadPromises);
-      //Proceed to project and target group creation
-      const finalResult = await this.createProjectAndTargetGroups(projectGrp, targetGrp,sasUrls);
-      // return true;
-      if (finalResult) {
-        return {
-          statusCode: HttpStatus.CREATED,
-          message: 'Project and target groups created successfully',
-          data: uploadResults,
-        };
-      } else {
+      // Step 1: Create Project and Target Groups
+      const projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
+      if (!projectResponse) {
         throw new InternalServerErrorException('Failed to create project and target groups');
       }
-      //return true;
 
+      const response = {
+        statusCode: HttpStatus.CREATED,
+        message: 'Project created successfully, audio files processing in background',
+      };
+  
+      // Run the remaining steps asynchronously (in the background)
+      this.uploadAndProcessFilesInBackground(files, projectGrp, targetGrp);
+  
+      return response;
     } catch (error) {
       this.logger.error(`Failed to process audio files: ${error.message}`);
       throw new InternalServerErrorException('Error processing audio files');
@@ -203,6 +172,8 @@ export class AudioService {
   
       // Process Target Groups
       const targetGrpArray = Object.values(targetGrp);
+      
+  
       for (const group of targetGrpArray) {
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
   
@@ -235,6 +206,7 @@ export class AudioService {
           AgeGrp: groupObj.AgeGrp,
           CompetetionProduct: groupObj.CompetetionProduct,
           MaricoProduct: groupObj.MaricoProduct,
+          MainLang: groupObj.MainLang,
           MainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
