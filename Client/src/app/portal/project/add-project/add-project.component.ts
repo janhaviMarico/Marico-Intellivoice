@@ -129,7 +129,6 @@ export class AddProjectComponent {
   }
 
   onSubmit() {
-    debugger
     if (this.targetForm.invalid) {
       this.targetForm.markAllAsTouched();
       return;

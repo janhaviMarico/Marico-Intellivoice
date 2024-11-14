@@ -119,7 +119,7 @@ export class DashboardComponent {
 
   ngOnInit() {
     this.loading = false;
-    this.showAudioPopup();
+    //this.showAudioPopup();
   }
 
   showAudioPopup() {
