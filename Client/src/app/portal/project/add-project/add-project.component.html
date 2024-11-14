@@ -7,13 +7,25 @@
         <div #formEnd>
             <div class="project-detail">
                 <h3>Project Details</h3>
-                <mat-form-field>
+                <mat-form-field *ngIf="false">
                     <mat-label>Project Name</mat-label>
                     <input matInput placeholder="Enter Project Name" formControlName="projectName">
                     <mat-error *ngIf="targetForm.get('projectName')?.invalid && targetForm.get('projectName')?.touched">
                         Project Name is required
                     </mat-error>
                 </mat-form-field>
+                <mat-form-field class="example-full-width" *ngIf="true">
+                    <mat-label>Number</mat-label>
+                    <input type="text"
+                           placeholder="Pick one"
+                           aria-label="Number"
+                           matInput
+                           [formControl]="myControl"
+                           [matAutocomplete]="auto">
+                    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">{{option}}</mat-option>
+                    </mat-autocomplete>
+                  </mat-form-field>
             </div>
             <div class="tg-detail">
                 <h3>Target Group Details</h3>

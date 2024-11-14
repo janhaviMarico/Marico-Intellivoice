@@ -1,11 +1,12 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { UploadFileComponent } from '../upload-file/upload-file.component';
 import { AudioService } from '../../service/audio.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonService } from '../../service/common.service';
 import { InfoComponent } from '../info/info.component';
+import { map, Observable, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-add-project',
@@ -13,6 +14,9 @@ import { InfoComponent } from '../info/info.component';
   styleUrls: ['./add-project.component.scss']
 })
 export class AddProjectComponent {
+  options: string[] = ['One', 'Two', 'Three'];
+  filteredOptions!: Observable<string[]>;
+  myControl = new FormControl('');
   @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr: any[] = [];
@@ -59,6 +63,11 @@ export class AddProjectComponent {
   ) { }
 
   ngOnInit() {
+   
+    this.filteredOptions = this.myControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || '')),
+    );
     this.getAllMaster();
     this.targetForm = this.fb.group({
       projectName: ['', Validators.required],
@@ -89,6 +98,11 @@ export class AddProjectComponent {
         this.dialogRef.close();
       }
     })
+  }
+
+  private _filter(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.options.filter(option => option.toLowerCase().includes(filterValue));
   }
 
   getAllMaster() {

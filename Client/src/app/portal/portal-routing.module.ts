@@ -6,6 +6,7 @@ import { authGuard } from '../auth/guard/auth.guard';
 import { AllFilesComponent } from './all-files/all-files.component';
 import { FeedbackComponent } from './feedback/feedback.component';
 import { AudioDetailsComponent } from './audio-details/audio-details.component';
+import { UserListComponent } from './user-list/user-list.component';
 
 const routes: Routes = [
   {
@@ -16,6 +17,7 @@ const routes: Routes = [
       {path:'allFiles',component:AllFilesComponent, canActivate: [authGuard]},
       {path:'feedback',component:FeedbackComponent, canActivate: [authGuard]},
       {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent, canActivate: [authGuard]},
+      {path:'userList',component:UserListComponent, canActivate: [authGuard]},
       {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
       // {path:'dashboard',component:DashboardComponent},
       // {path:'allFiles',component:AllFilesComponent},
