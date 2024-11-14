@@ -2,6 +2,12 @@ import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { AzureOpenAI } from "openai";
+import { AudioUtils } from "src/audio/audio.utils";
+import { InjectModel } from "@nestjs/azure-database";
+import { Container } from "@azure/cosmos";
+import { ProjectEntity } from "src/audio/entity/project.entity";
+import { TranscriptionEntity } from "src/audio/entity/transcription.entity";
+import { PROJECT_COMPARE_STATIC_INSTRUCTION, STATIC_INSTRUCTION } from "src/constants";
 
 export interface Document {
   id: string;              // The text content of the document
@@ -14,8 +20,13 @@ export class ChatService {
   private readonly logger = new Logger(ChatService.name);
   private azureSearchClient: SearchClient<Document>;
   private openaiClientChat: AzureOpenAI;
+  
 
-  constructor(private readonly config: ConfigService) {
+  constructor
+  (@InjectModel(TranscriptionEntity) private readonly transcriptionContainer: Container,
+  @InjectModel(ProjectEntity) private readonly projectContainer: Container,
+    private readonly config: ConfigService,
+  ) {
     try {
       this.azureSearchClient = new SearchClient<Document>(
         this.config.get<string>('VECTOR_STORE_ADDRESS'),
@@ -72,7 +83,6 @@ export class ChatService {
           documents.push(document); // Only push if document exists
         }
       }
-  
       return documents;
     } catch (error) {
       this.logger.error(`Error fetching documents for vector IDs: ${vectorIds}`, error.stack);
@@ -89,9 +99,7 @@ export class ChatService {
       this.logger.warn('No related documents provided to generate the answer');
       return 'Sorry, I could not find enough information to answer your question.';
     }
- console.log("related doc",relatedDocs)
     const context = relatedDocs.map(doc => doc.metadata).join('\n');
-    console.log("Generated Context:", context);
     try {
       this.logger.log('Generating answer from OpenAI based on related documents');
       const completionResponse = await this.openaiClientChat.chat.completions.create({
@@ -116,4 +124,138 @@ export class ChatService {
       throw new InternalServerErrorException('Failed to generate an answer from OpenAI');
     }
   }
+  
+
+  async generateAnswerFromDocumentsWithChunks(question: string, relatedDocs: Document[]): Promise<string> {
+    if (!relatedDocs || relatedDocs.length === 0) {
+      this.logger.warn('No related documents provided to generate the answer');
+      return 'Sorry, I could not find enough information to answer your question.';
+    }
+    const context = relatedDocs.map(doc => doc.metadata).join('\n');
+    try {
+      this.logger.log('Generating answer from OpenAI based on related documents');
+      const chunks = this.splitIntoChunks(context, 3000, 250);
+      const responses: string[] = [];
+      for (const chunk of chunks) {
+      const completionResponse = await this.openaiClientChat.chat.completions.create({
+        model: 'gpt-4o',  // Chat model for generating responses
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant. Use the provided context to answer the question.',
+          },
+          {
+            role: 'user',
+            content: `Context: ${context}\n\nQuestion: ${question}`,
+          },
+        ],
+      });
+      const answer = completionResponse.choices[0].message.content;
+      responses.push(answer);
+      this.logger.log('Answer generated successfully');
+      return responses.join('\n');
+    }
+    } catch (error) {
+      this.logger.error('Error generating answer from OpenAI', error.stack);
+      throw new InternalServerErrorException('Failed to generate an answer from OpenAI');
+    }
+  }
+
+  async getPrompResponse(prompt: string, context: string){
+    try {
+      this.logger.log('Generating answer from OpenAI based on related documents');
+      const chunks = this.splitIntoChunks(context, 3000, 250);
+      const responses: string[] = [];
+      for (const chunk of chunks) {
+      const completionResponse = await this.openaiClientChat.chat.completions.create({
+        model: 'gpt-4o',  // Chat model for generating responses
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant. Use the provided context to answer the question.',
+          },
+          {
+            role: 'user',
+            content: `Context: ${context}\n\nQuestion: ${prompt}`,
+          },
+        ],
+      });
+      const answer = completionResponse.choices[0].message.content;
+      responses.push(answer);
+      this.logger.log('Answer generated successfully');
+      return responses.join('\n');
+    }
+    } catch (error) {
+      this.logger.error('Error generating answer from OpenAI', error.stack);
+      throw new InternalServerErrorException('Failed to generate an answer from OpenAI');
+    }
+  }
+
+  async compareProjects(project1: string, project2: string): Promise<any> {
+    try {
+      const vectorIdsProject1 = await this.fetchData(project1);
+      const vectorIdsProject2 = await this.fetchData(project2);
+      
+      const project1Documents = await this.getTextsByVectorIds(vectorIdsProject1);
+      const project2Documents = await this.getTextsByVectorIds(vectorIdsProject2);
+  
+      const targetCompareProject1 = await this.generateAnswerFromDocumentsWithChunks(STATIC_INSTRUCTION, project1Documents);
+      const targetCompareProject2 = await this.generateAnswerFromDocumentsWithChunks(STATIC_INSTRUCTION, project2Documents);
+  
+      const summary = await this.getPrompResponse(PROJECT_COMPARE_STATIC_INSTRUCTION, `${targetCompareProject1}${targetCompareProject2}`);
+      
+      return { targetCompareProject1, targetCompareProject2, summary };
+    } catch (error) {
+      console.error("Error comparing projects:", error);
+      throw new Error("An error occurred while comparing projects.");
+    }
+  }
+
+  async fetchData(projectName: string): Promise<string[]> {
+    try {
+      const querySpec = {
+        query: 'SELECT * FROM c WHERE c.ProjName = @projectName',
+        parameters: [{ name: '@projectName', value: projectName }],
+      };
+  
+      const { resources: existingDocuments } = await this.projectContainer.items.query(querySpec).fetchAll();
+      if (!existingDocuments.length) {
+        throw new Error(`No documents found for project: ${projectName}`);
+      }
+  
+      const projectDocument = existingDocuments[0];
+      const transcriptionIds = projectDocument.TGIds.map(id => `'${id}'`).join(", ");
+  
+      const transcriptionQuery = {
+        query: `SELECT c.vectorId FROM c WHERE c.TGName IN (${transcriptionIds})`,
+      };
+  
+      const { resources: transcriptionData } = await this.transcriptionContainer.items.query(transcriptionQuery).fetchAll();
+      if (!transcriptionData.length) {
+        throw new Error(`No transcription data found for project: ${projectName}`);
+      }
+  
+      return transcriptionData.map(item => item.vectorId[0]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw new Error("An error occurred while fetching data.");
+    }
+  }
+
+splitIntoChunks(text: string, maxTokenLength: number, overlapTokenLength: number): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+
+  while (start < text.length) {
+     
+      let end = start + maxTokenLength;
+      let chunk = text.slice(start, end);
+
+      chunks.push(chunk);
+      start += maxTokenLength - overlapTokenLength;
+  }
+
+  return chunks;
+  }
+
 }

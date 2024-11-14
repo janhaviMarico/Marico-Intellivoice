@@ -58,8 +58,8 @@ export class AudioController {
       //Return the result to the client
       return {
         statusCode: result.statusCode,
-        message: result.message,
-        data: result.data,
+        message: result.message
+        
       };
     } catch (error) {
       // Log the error
