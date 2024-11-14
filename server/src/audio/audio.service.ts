@@ -1,6 +1,6 @@
 import { Injectable, Logger, InternalServerErrorException, HttpStatus, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/azure-database';
-import { Container, SqlQuerySpec } from '@azure/cosmos';
+import { Container } from '@azure/cosmos';
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { ConfigService } from '@nestjs/config';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
@@ -38,20 +38,70 @@ export class AudioService {
     }
 
   // Handle audio processing logic
+  // async processAudioFiles(projectGrp: ProjectGroupDTO, targetGrp: string, files: Express.Multer.File[]) {
+  //   try {
+  //     // Step 1: Create Project and Target Groups
+  //     const projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
+  //     if (!projectResponse) {
+  //       throw new InternalServerErrorException('Failed to create project and target groups');
+  //     }
+
+  //     const response = {
+  //       statusCode: HttpStatus.CREATED,
+  //       message: 'Project created successfully, audio files processing in background',
+  //     };
+  
+  //     // Run the remaining steps asynchronously (in the background)
+  //     this.uploadAndProcessFilesInBackground(files, projectGrp, targetGrp);
+  
+  //     return response;
+  //   } catch (error) {
+  //     this.logger.error(`Failed to process audio files: ${error.message}`);
+  //     throw new InternalServerErrorException('Error processing audio files');
+  //   }
+  // }
+
+  async checkIfProjectExists(projName: string): Promise<boolean> {
+    try {
+      // Query for project by name
+      const querySpec = {
+        query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
+        parameters: [{ name: '@ProjName', value: projName }],
+      };
+      const { resources: existingProjects } = await this.projectContainer.items.query(querySpec).fetchAll();
+  
+      return existingProjects.length > 0; // If project exists, return true
+    } catch (error) {
+      this.logger.error(`Error checking if project exists: ${error.message}`);
+      throw new InternalServerErrorException('Error checking project existence');
+    }
+  }
+  
+
   async processAudioFiles(projectGrp: ProjectGroupDTO, targetGrp: string, files: Express.Multer.File[]) {
     try {
-      // Step 1: Create Project and Target Groups
-      const projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
+      // Step 1: Check if the project exists. If not, create a new project and target groups
+      const projectExists = await this.checkIfProjectExists(projectGrp.ProjName);
+      
+      let projectResponse;
+      if (!projectExists) {
+        // If project doesn't exist, create new project and target groups
+        projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
+      } else {
+        // If project exists, skip creation and just add target groups to the existing project
+        projectResponse = { statusCode: HttpStatus.OK, message: 'Project already exists, adding new targets' };
+      }
+  
       if (!projectResponse) {
         throw new InternalServerErrorException('Failed to create project and target groups');
       }
-
+  
       const response = {
         statusCode: HttpStatus.CREATED,
-        message: 'Project created successfully, audio files processing in background',
+        message: 'Audio files processing in background',
       };
   
-      // Run the remaining steps asynchronously (in the background)
+      // Step 2: Upload and process files in the background
       this.uploadAndProcessFilesInBackground(files, projectGrp, targetGrp);
   
       return response;
@@ -60,10 +110,29 @@ export class AudioService {
       throw new InternalServerErrorException('Error processing audio files');
     }
   }
-
   
-  // private async createProjectAndTargetGroups(project: ProjectGroupDTO, targetGrp: string,
-  //   sasUrls: { fileName: string, sasUri: string, sasToken: string }[]) {
+  
+  private async uploadAndProcessFilesInBackground(
+    files: Express.Multer.File[],
+    projectGrp: ProjectGroupDTO,
+    targetGrp: string
+  ) {
+    try {
+      // Step 2: Upload audio files and generate SAS URLs
+      const sasUrls = await this.uploadAudioFiles(files);
+      // Step 3: Update the SAS URLs in Target Group entities
+      const audioProcessDtoArray = await this.updateTargetGroupsWithSasUrls(projectGrp, targetGrp, sasUrls);
+      console.log('Audio process DTO array:', audioProcessDtoArray);
+      // Optionally, start background transcription
+      await this.runBackgroundTranscription(audioProcessDtoArray);
+  
+    } catch (error) {
+      this.logger.error(`Error processing files in background: ${error.message}`);
+      // Handle or log background processing errors if needed
+    }
+  }
+
+  // async createProjectAndTargetGroups(project: ProjectGroupDTO, targetGrp: string) {
   //   try {
   //     const projectName: ProjectEntity = {
   //       ProjId: project.ProjId,
@@ -71,24 +140,17 @@ export class AudioService {
   //       UserId: project.userid,
   //       TGIds: project.TGIds,
   //     };
-  //     const audioProcessDtoArray: {
-  //       TGId:string,
-  //       TGName: string, 
-  //       mainLang: string, 
-  //       SecondaryLang: string[], 
-  //       noOfSpek: number, 
-  //       sasToken: string
-  //     }[] = [];
+  
   //     const projectResponse = await this.projectContainer.items.create(projectName);
-  //      this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
-
-  //     // Create Target Groups and link to the project
+  //     this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
+  
   //     const targetGrpArray = Object.values(targetGrp);
+      
+  
   //     for (const group of targetGrpArray) {
   //       const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
-  //       const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
   //       const targetGroupEntity: TargetGroupEntity = {
-  //         TGId:nanoid(),
+  //         TGId: nanoid(),
   //         TGName: groupObj.TGName,
   //         ProjId: groupObj.ProjId,
   //         AudioName: groupObj.AudioName,
@@ -97,26 +159,16 @@ export class AudioService {
   //         AgeGrp: groupObj.AgeGrp,
   //         CompetetionProduct: groupObj.CompetetionProduct,
   //         MaricoProduct: groupObj.MaricoProduct,
-  //         MainLang: groupObj.MainLang,  
+  //         MainLang: groupObj.MainLang,
   //         SecondaryLang: groupObj.SecondaryLang,
   //         noOfSpek: groupObj.noOfSpek,
-  //         filePath: matchingSasUrl.sasUri,
-  //         status:0
+  //         filePath: '', // This will be updated after audio upload
+  //         status: 0,
   //       };
-  //        await this.targetContainer.items.create(targetGroupEntity);
-  //        audioProcessDtoArray.push({
-  //         TGId:targetGroupEntity.TGId,
-  //         TGName: groupObj.TGName,
-  //         mainLang: groupObj.MainLang,
-  //         SecondaryLang: groupObj.SecondaryLang,
-  //         noOfSpek: groupObj.noOfSpek,
-  //         sasToken: matchingSasUrl.sasToken
-  //        })
-  //        this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${projectName.ProjName}`);
+  //       await this.targetContainer.items.create(targetGroupEntity);
   //     }
-  //     this.logger.log(`Starting Audio transcibe ${projectName.ProjName}`);  
-  //     console.log(audioProcessDtoArray);
-  //     this.runBackgroundTranscription(audioProcessDtoArray);
+  
+  //     this.logger.log('Target groups linked to project and created successfully.');
   //     return true;
   //   } catch (error) {
   //     this.logger.error(`Failed to create project and target groups: ${error.message}`);
@@ -124,82 +176,63 @@ export class AudioService {
   //   }
   // }
 
-  private async createProjectAndTargetGroups(
-    project: ProjectGroupDTO,
-    targetGrp: string,
-    sasUrls: { fileName: string, sasUri: string, sasToken: string }[]
-  ) {
+  async createProjectAndTargetGroups(project: ProjectGroupDTO, targetGrp: string) {
     try {
-      // Check if the project already exists
-      const existingProjectQuery = await this.projectContainer.items
-        .query({
-          query: `SELECT * FROM Projects p WHERE p.ProjName = @ProjName`,
-          parameters: [{ name: "@ProjName", value: project.ProjName }]
-        } as SqlQuerySpec)
-        .fetchAll();
+      // Step 1: Check if the Project Already Exists
+      const querySpec = {
+        query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
+        parameters: [{ name: '@ProjName', value: project.ProjName }],
+      };
   
-      let projectResponse;
-      let projectId = project.ProjId;
-      let updatedTGIds = [...project.TGIds]; // Initialize with current TGIds
+      const { resources: existingProjects } = await this.projectContainer.items.query(querySpec).fetchAll();
   
-      if (existingProjectQuery.resources.length > 0) {
-        // Project already exists, update TGIds and skip project creation
-        const existingProject = existingProjectQuery.resources[0];
-        projectId = existingProject.ProjId;
-        updatedTGIds = existingProject.TGIds; // Start with existing TGIds
-  
-        this.logger.log(`Linking new target groups to existing project ${existingProject.ProjName}.`);
-      } else {
-        // Project does not exist, create a new one
-        const projectName: ProjectEntity = {
+      let projectName: ProjectEntity;
+      
+      if (existingProjects.length === 0) {
+        // If project doesn't exist, create a new project
+        projectName = {
           ProjId: project.ProjId,
           ProjName: project.ProjName,
           UserId: project.userid,
-          TGIds: updatedTGIds,
+          TGIds: project.TGIds,
         };
-        projectResponse = await this.projectContainer.items.create(projectName);
+  
+        // Create the project in the database
+        await this.projectContainer.items.create(projectName);
         this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
+      } else {
+        // If project exists, use the existing project
+        projectName = existingProjects[0];
+        this.logger.log(`Project ${projectName.ProjName} already exists, using existing project ID ${projectName.ProjId}`);
       }
   
-      const audioProcessDtoArray: {
-        TGId: string,
-        TGName: string,
-        mainLang: string,
-        SecondaryLang: string[],
-        noOfSpek: number,
-        sasToken: string
-      }[] = [];
-  
-      // Process Target Groups
+      // Step 2: Create Target Groups
       const targetGrpArray = Object.values(targetGrp);
-      
   
       for (const group of targetGrpArray) {
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
   
-        // Check for duplicate TG name
-        const existingTargetGroup = await this.targetContainer.items
-          .query({
-            query: `SELECT * FROM TargetGroups t WHERE t.TGName = @TGName`,
-            parameters: [{ name: "@TGName", value: groupObj.TGName }]
-          } as SqlQuerySpec)
-          .fetchAll();
+        // Check if a Target Group with the same TGName already exists
+        const querySpec = {
+          query: 'SELECT * FROM c WHERE c.TGName = @TGName AND c.ProjId = @ProjId',
+          parameters: [
+            { name: '@TGName', value: groupObj.TGName },
+            { name: '@ProjId', value: projectName.ProjId },
+          ],
+        };
   
-        if (existingTargetGroup.resources.length > 0) {
-          // Duplicate TG name found
-          this.logger.error(`Target group with name ${groupObj.TGName} already exists`);
-          throw new ConflictException(`Target group with name ${groupObj.TGName} already exists`);
+        const { resources: existingTargetGroups } = await this.targetContainer.items.query(querySpec).fetchAll();
+  
+        if (existingTargetGroups.length > 0) {
+          // If a target group with the same name already exists, throw an error
+          throw new ConflictException(`Target Group with name '${groupObj.TGName}' already exists for this project.`);
         }
   
-        // Generate a new TGId for the target group
-        const newTGId = nanoid();
-        updatedTGIds.push(newTGId); // Add new TGId to the updated TGIds array
-  
-        const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
+        // Step 3: Create the Target Group
         const targetGroupEntity: TargetGroupEntity = {
-          TGId: newTGId,
+          TGId: nanoid(),
           TGName: groupObj.TGName,
-          ProjId: projectId,  // Link to the existing or new project ID
+          ProjId: projectName.ProjId,  // Link it to the existing or new project
           AudioName: groupObj.AudioName,
           Country: groupObj.Country,
           State: groupObj.State,
@@ -207,37 +240,17 @@ export class AudioService {
           CompetetionProduct: groupObj.CompetetionProduct,
           MaricoProduct: groupObj.MaricoProduct,
           MainLang: groupObj.MainLang,
-          MainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
-          filePath: matchingSasUrl.sasUri,
-          status: 0
+          filePath: '', // This will be updated after audio upload
+          status: 0,
         };
   
+        // Create the Target Group in the database
         await this.targetContainer.items.create(targetGroupEntity);
-        audioProcessDtoArray.push({
-          TGId: newTGId,
-          TGName: groupObj.TGName,
-          mainLang: groupObj.MainLang,
-          SecondaryLang: groupObj.SecondaryLang,
-          noOfSpek: groupObj.noOfSpek,
-          sasToken: matchingSasUrl.sasToken
-        });
-        this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${project.ProjName}`);
       }
   
-      // Update project TGIds in the project container if this is an existing project
-      if (existingProjectQuery.resources.length > 0) {
-        const existingProject = existingProjectQuery.resources[0];
-        existingProject.TGIds = updatedTGIds; // Update with the new TGIds array
-        await this.projectContainer.item(existingProject.id).replace(existingProject);
-        this.logger.log(`Project ${existingProject.ProjName} TGIds updated.`);
-      }
-  
-      this.logger.log(`Starting Audio transcription for ${project.ProjName}`);
-      console.log(audioProcessDtoArray);
-      this.runBackgroundTranscription(audioProcessDtoArray);
-  
+      this.logger.log('Target groups linked to project and created successfully.');
       return true;
     } catch (error) {
       this.logger.error(`Failed to create project and target groups: ${error.message}`);
@@ -245,6 +258,64 @@ export class AudioService {
     }
   }
   
+  
+  
+  async uploadAudioFiles(files: Express.Multer.File[]): Promise<{ fileName: string, sasUri: string, sasToken: string }[]> {
+    try {
+      const sasUrls: { fileName: string, sasUri: string, sasToken: string }[] = [];
+      const uploadPromises = files.map(async (file) => {
+        const blockBlobClient = this.containerClient.getBlockBlobClient(file.originalname);
+        const uploadBlobResponse = await blockBlobClient.uploadData(file.buffer);
+        this.logger.log(`Blob ${file.originalname} uploaded successfully: ${uploadBlobResponse.requestId}`);
+        const sasUri = blockBlobClient.url;
+        const fileName = file.originalname;
+        // Generate SAS token
+        const sasToken = await this.generateBlobSasUrl(file.originalname);
+        sasUrls.push({ fileName, sasUri, sasToken });
+      });
+  
+      await Promise.all(uploadPromises);
+      console.log('sasUrls',sasUrls);
+      return sasUrls;
+    } catch (error) {
+      this.logger.error(`Failed to upload audio files: ${error.message}`);
+      throw new InternalServerErrorException('Error uploading audio files');
+    }
+  }
+  
+  async updateTargetGroupsWithSasUrls(projectGrp: ProjectGroupDTO, targetGrp: string,
+    sasUrls: { fileName: string, sasUri: string, sasToken: string }[]) {
+    const audioProcessDtoArray: any[] = [];
+    try {
+      const targetGrpArray = Object.values(targetGrp);
+      for (const group of targetGrpArray) {
+        const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
+        const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
+        console.log('matchingSasUrl',matchingSasUrl);
+        const querySpec = {
+          query: 'SELECT * FROM c WHERE c.TGName = @TGName',
+        parameters: [{ name: '@TGName', value: groupObj.TGName }]};  
+        const {resources: existingDocuments } = await this.targetContainer.items.query(querySpec).fetchAll();
+        const latestDocument = existingDocuments[0];
+        console.log(latestDocument);
+        latestDocument.filePath=matchingSasUrl.sasToken;
+        audioProcessDtoArray.push({
+          TGId: latestDocument.TGId,
+          TGName: groupObj.TGName,
+          mainLang: groupObj.MainLang,
+          SecondaryLang: groupObj.SecondaryLang,
+          noOfSpek: groupObj.noOfSpek,
+          sasToken: matchingSasUrl.sasToken, // This wil'l be updated later
+        });
+        await this.targetContainer.items.upsert(latestDocument);
+      }
+      this.logger.log('Target groups updated with SAS URLs.');
+      return audioProcessDtoArray;
+    } catch (error) {
+      this.logger.error(`Failed to update target groups: ${error.message}`);
+      throw new InternalServerErrorException('Error updating target groups');
+    }
+  }
   
 
     runBackgroundTranscription(audioProcessDtoArray: {
