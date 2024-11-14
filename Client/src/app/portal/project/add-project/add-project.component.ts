@@ -14,9 +14,6 @@ import { map, Observable, startWith } from 'rxjs';
   styleUrls: ['./add-project.component.scss']
 })
 export class AddProjectComponent {
-  options: string[] = ['One', 'Two', 'Three'];
-  filteredOptions!: Observable<string[]>;
-  myControl = new FormControl('');
   @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr: any[] = [];
@@ -58,17 +55,19 @@ export class AddProjectComponent {
     { name: 'Gujrati', code: 'GJ' }
   ];
   filteredOtherLang: any[] = [...this.otherLang];
+
+  existingProject: any[] = [];
+  filteredProject!: Observable<any[]>;
+  myControl = new FormControl('');
+  isExitingProj:boolean = false;
+
   constructor(private fb: FormBuilder, private dialog: MatDialog, public dialogRef: MatDialogRef<AddProjectComponent>,
     private audioServ: AudioService, private toastr: ToastrService, private commonServ: CommonService
   ) { }
 
   ngOnInit() {
-   
-    this.filteredOptions = this.myControl.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value || '')),
-    );
     this.getAllMaster();
+    this.getExistingProject();
     this.targetForm = this.fb.group({
       projectName: ['', Validators.required],
       country: ['', Validators.required],
@@ -102,7 +101,7 @@ export class AddProjectComponent {
 
   private _filter(value: string): string[] {
     const filterValue = value.toLowerCase();
-    return this.options.filter(option => option.toLowerCase().includes(filterValue));
+    return this.existingProject.filter((option:any) => option.ProjName.toLowerCase().includes(filterValue));
   }
 
   getAllMaster() {
@@ -117,7 +116,20 @@ export class AddProjectComponent {
     })
   }
 
+  getExistingProject() {
+    this.commonServ.getAPI('master/project/all').subscribe((res:any)=> {
+      this.existingProject = res.data;
+      this.filteredProject = this.myControl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filter(value || '')),
+      );
+    },(err:any)=>{
+      this.toastr.error('Something Went Wrong!')
+    })
+  }
+
   onSubmit() {
+    debugger
     if (this.targetForm.invalid) {
       this.targetForm.markAllAsTouched();
       return;
