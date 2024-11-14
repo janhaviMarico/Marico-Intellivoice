@@ -1,6 +1,6 @@
-import { Injectable, Logger, InternalServerErrorException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException, HttpStatus, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/azure-database';
-import { Container } from '@azure/cosmos';
+import { Container, SqlQuerySpec } from '@azure/cosmos';
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { ConfigService } from '@nestjs/config';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
@@ -93,67 +93,187 @@ export class AudioService {
   }
 
   
-  private async createProjectAndTargetGroups(project: ProjectGroupDTO, targetGrp: string,
-    sasUrls: { fileName: string, sasUri: string, sasToken: string }[]) {
+  // private async createProjectAndTargetGroups(project: ProjectGroupDTO, targetGrp: string,
+  //   sasUrls: { fileName: string, sasUri: string, sasToken: string }[]) {
+  //   try {
+  //     const projectName: ProjectEntity = {
+  //       ProjId: project.ProjId,
+  //       ProjName: project.ProjName,
+  //       UserId: project.userid,
+  //       TGIds: project.TGIds,
+  //     };
+  //     const audioProcessDtoArray: {
+  //       TGId:string,
+  //       TGName: string, 
+  //       mainLang: string, 
+  //       SecondaryLang: string[], 
+  //       noOfSpek: number, 
+  //       sasToken: string
+  //     }[] = [];
+  //     const projectResponse = await this.projectContainer.items.create(projectName);
+  //      this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
+
+  //     // Create Target Groups and link to the project
+  //     const targetGrpArray = Object.values(targetGrp);
+  //     for (const group of targetGrpArray) {
+  //       const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
+  //       const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
+  //       const targetGroupEntity: TargetGroupEntity = {
+  //         TGId:nanoid(),
+  //         TGName: groupObj.TGName,
+  //         ProjId: groupObj.ProjId,
+  //         AudioName: groupObj.AudioName,
+  //         Country: groupObj.Country,
+  //         State: groupObj.State,
+  //         AgeGrp: groupObj.AgeGrp,
+  //         CompetetionProduct: groupObj.CompetetionProduct,
+  //         MaricoProduct: groupObj.MaricoProduct,
+  //         MainLang: groupObj.MainLang,  
+  //         SecondaryLang: groupObj.SecondaryLang,
+  //         noOfSpek: groupObj.noOfSpek,
+  //         filePath: matchingSasUrl.sasUri,
+  //         status:0
+  //       };
+  //        await this.targetContainer.items.create(targetGroupEntity);
+  //        audioProcessDtoArray.push({
+  //         TGId:targetGroupEntity.TGId,
+  //         TGName: groupObj.TGName,
+  //         mainLang: groupObj.MainLang,
+  //         SecondaryLang: groupObj.SecondaryLang,
+  //         noOfSpek: groupObj.noOfSpek,
+  //         sasToken: matchingSasUrl.sasToken
+  //        })
+  //        this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${projectName.ProjName}`);
+  //     }
+  //     this.logger.log(`Starting Audio transcibe ${projectName.ProjName}`);  
+  //     console.log(audioProcessDtoArray);
+  //     this.runBackgroundTranscription(audioProcessDtoArray);
+  //     return true;
+  //   } catch (error) {
+  //     this.logger.error(`Failed to create project and target groups: ${error.message}`);
+  //     throw new InternalServerErrorException('Error creating project and target groups');
+  //   }
+  // }
+
+  private async createProjectAndTargetGroups(
+    project: ProjectGroupDTO,
+    targetGrp: string,
+    sasUrls: { fileName: string, sasUri: string, sasToken: string }[]
+  ) {
     try {
-      const projectName: ProjectEntity = {
-        ProjId: project.ProjId,
-        ProjName: project.ProjName,
-        UserId: project.userid,
-        TGIds: project.TGIds,
-      };
+      // Check if the project already exists
+      const existingProjectQuery = await this.projectContainer.items
+        .query({
+          query: `SELECT * FROM Projects p WHERE p.ProjName = @ProjName`,
+          parameters: [{ name: "@ProjName", value: project.ProjName }]
+        } as SqlQuerySpec)
+        .fetchAll();
+  
+      let projectResponse;
+      let projectId = project.ProjId;
+      let updatedTGIds = [...project.TGIds]; // Initialize with current TGIds
+  
+      if (existingProjectQuery.resources.length > 0) {
+        // Project already exists, update TGIds and skip project creation
+        const existingProject = existingProjectQuery.resources[0];
+        projectId = existingProject.ProjId;
+        updatedTGIds = existingProject.TGIds; // Start with existing TGIds
+  
+        this.logger.log(`Linking new target groups to existing project ${existingProject.ProjName}.`);
+      } else {
+        // Project does not exist, create a new one
+        const projectName: ProjectEntity = {
+          ProjId: project.ProjId,
+          ProjName: project.ProjName,
+          UserId: project.userid,
+          TGIds: updatedTGIds,
+        };
+        projectResponse = await this.projectContainer.items.create(projectName);
+        this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
+      }
+  
       const audioProcessDtoArray: {
-        TGId:string,
-        TGName: string, 
-        mainLang: string, 
-        SecondaryLang: string[], 
-        noOfSpek: number, 
+        TGId: string,
+        TGName: string,
+        mainLang: string,
+        SecondaryLang: string[],
+        noOfSpek: number,
         sasToken: string
       }[] = [];
-      const projectResponse = await this.projectContainer.items.create(projectName);
-       this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
-
-      // Create Target Groups and link to the project
+  
+      // Process Target Groups
       const targetGrpArray = Object.values(targetGrp);
       for (const group of targetGrpArray) {
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
+  
+        // Check for duplicate TG name
+        const existingTargetGroup = await this.targetContainer.items
+          .query({
+            query: `SELECT * FROM TargetGroups t WHERE t.TGName = @TGName`,
+            parameters: [{ name: "@TGName", value: groupObj.TGName }]
+          } as SqlQuerySpec)
+          .fetchAll();
+  
+        if (existingTargetGroup.resources.length > 0) {
+          // Duplicate TG name found
+          this.logger.error(`Target group with name ${groupObj.TGName} already exists`);
+          throw new ConflictException(`Target group with name ${groupObj.TGName} already exists`);
+        }
+  
+        // Generate a new TGId for the target group
+        const newTGId = nanoid();
+        updatedTGIds.push(newTGId); // Add new TGId to the updated TGIds array
+  
         const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
         const targetGroupEntity: TargetGroupEntity = {
-          TGId:nanoid(),
+          TGId: newTGId,
           TGName: groupObj.TGName,
-          ProjId: groupObj.ProjId,
+          ProjId: projectId,  // Link to the existing or new project ID
           AudioName: groupObj.AudioName,
           Country: groupObj.Country,
           State: groupObj.State,
           AgeGrp: groupObj.AgeGrp,
           CompetetionProduct: groupObj.CompetetionProduct,
           MaricoProduct: groupObj.MaricoProduct,
-          MainLang: groupObj.MainLang,  
+          MainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
           filePath: matchingSasUrl.sasUri,
-          status:0
+          status: 0
         };
-         await this.targetContainer.items.create(targetGroupEntity);
-         audioProcessDtoArray.push({
-          TGId:targetGroupEntity.TGId,
+  
+        await this.targetContainer.items.create(targetGroupEntity);
+        audioProcessDtoArray.push({
+          TGId: newTGId,
           TGName: groupObj.TGName,
           mainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
           sasToken: matchingSasUrl.sasToken
-         })
-         this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${projectName.ProjName}`);
+        });
+        this.logger.log(`Target group ${targetGroupEntity.TGName} created and linked to project ${project.ProjName}`);
       }
-      this.logger.log(`Starting Audio transcibe ${projectName.ProjName}`);  
+  
+      // Update project TGIds in the project container if this is an existing project
+      if (existingProjectQuery.resources.length > 0) {
+        const existingProject = existingProjectQuery.resources[0];
+        existingProject.TGIds = updatedTGIds; // Update with the new TGIds array
+        await this.projectContainer.item(existingProject.id).replace(existingProject);
+        this.logger.log(`Project ${existingProject.ProjName} TGIds updated.`);
+      }
+  
+      this.logger.log(`Starting Audio transcription for ${project.ProjName}`);
       console.log(audioProcessDtoArray);
       this.runBackgroundTranscription(audioProcessDtoArray);
+  
       return true;
     } catch (error) {
       this.logger.error(`Failed to create project and target groups: ${error.message}`);
       throw new InternalServerErrorException('Error creating project and target groups');
     }
   }
+  
+  
 
     runBackgroundTranscription(audioProcessDtoArray: {
     TGId:string,

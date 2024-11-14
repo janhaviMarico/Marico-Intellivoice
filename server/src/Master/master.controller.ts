@@ -1,6 +1,6 @@
 // src/Master/master.controller.ts
 import { Controller, Get } from '@nestjs/common';
-import { MasterService, GetAllUsersResponse } from './master.service';
+import { MasterService, GetAllUsersResponse, GetAllProjectsResponse } from './master.service';
 
 @Controller('master')
 export class MasterController {
@@ -9,5 +9,11 @@ export class MasterController {
   @Get('all')
   async getAllUsers(): Promise<GetAllUsersResponse> {
     return this.masterService.getAllUsers();
+  }
+
+  @Get('project/all')
+
+  async getAllProjects():Promise<GetAllProjectsResponse>{
+    return this.masterService.getAllProjects();
   }
 }
