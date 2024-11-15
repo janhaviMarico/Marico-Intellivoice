@@ -30,7 +30,20 @@
         .project-detail {
             padding: 15px 0;
             border-bottom: 1px solid #E7E7E7;
-
+            .project-card {
+                display: flex;
+                align-items: self-start;
+                
+                button {
+                    background-color: #014FA1;
+                    color: white;
+                    outline: none;
+                    border: none;
+                    padding: 10px 15px;
+                    border-radius: 4px;
+                    margin-left: 2rem;
+                }
+            }
             h3 {
                 font-size: 19px;
                 color: #0B0B0B;

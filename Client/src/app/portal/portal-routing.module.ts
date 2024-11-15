@@ -23,6 +23,7 @@ const routes: Routes = [
       // {path:'allFiles',component:AllFilesComponent},
       // {path:'feedback',component:FeedbackComponent},
       // {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent},
+      // {path:'userList',component:UserListComponent},
       // {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
     ]
   }
