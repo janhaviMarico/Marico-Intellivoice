@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AddProjectComponent } from '../add-project/add-project.component';
+import { CommonService } from '../../service/common.service';
 
 @Component({
   selector: 'app-info',
@@ -8,10 +9,14 @@ import { AddProjectComponent } from '../add-project/add-project.component';
   styleUrls: ['./info.component.scss']
 })
 export class InfoComponent {
+  infoObj:any;
   constructor(private dialog: MatDialog, 
-    public infoDialogRef: MatDialogRef<InfoComponent>
+    public infoDialogRef: MatDialogRef<InfoComponent>,
+    @Inject(MAT_DIALOG_DATA) public info: {name?:string,title?:string},
+    private commonServ:CommonService
   ) {
-
+    console.log('info',info)
+    this.infoObj = info;
   }
 
   closeInfo() {
@@ -25,5 +30,10 @@ export class InfoComponent {
       width: '40vw',
       disableClose: true
     });
+  }
+
+  deleteTarget() {
+    this.commonServ.deleteTarget.next(true);
+    this.closeInfo();
   }
 }

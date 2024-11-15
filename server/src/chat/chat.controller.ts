@@ -68,7 +68,7 @@ async askQuestionWithVectorIds(
 
     // Step 3: Generate answer based on the documents and question
     this.logger.log(`Generating answer for question: "${question}" with vector IDs: ${vectorIds}`);
-    const answer = await this.chatservice.generateAnswerFromDocuments(question, documents);
+    const answer = await this.chatservice.generateAnswerFromDocumentsWithChunks(question, documents);
 
     // Step 4: Return the question and answer
     return { question, answer };
