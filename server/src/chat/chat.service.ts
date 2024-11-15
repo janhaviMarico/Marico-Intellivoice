@@ -176,7 +176,7 @@ export class ChatService {
           },
           {
             role: 'user',
-            content: `Context: ${context}\n\nQuestion: ${prompt}`,
+            content: `Context: ${chunk}\n\nQuestion: ${prompt}`,
           },
         ],
       });

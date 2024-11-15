@@ -12,6 +12,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EditTranscriptionDto } from './dto/edit-transcription.dto';
 import { Console } from 'console';
+import { AudioUtils } from './audio.utils';
 
 
 
@@ -26,6 +27,7 @@ export class AudioService {
     @InjectModel(TargetGroupEntity) private readonly targetContainer: Container,
     @InjectModel(TranscriptionEntity) private readonly transcriptContainer: Container,
     @InjectQueue('transcription') private readonly transcriptionQueue: Queue,
+    private readonly audioUtils: AudioUtils,
     private readonly config: ConfigService ) 
     {
     this.blobServiceClient = BlobServiceClient.fromConnectionString(this.config.get<string>('AZURE_STORAGE_CONNECTION_STRING'));
@@ -71,7 +73,6 @@ export class AudioService {
       const sasUrls = await this.uploadAudioFiles(files);
       // Step 3: Update the SAS URLs in Target Group entities
       const audioProcessDtoArray = await this.updateTargetGroupsWithSasUrls(projectGrp, targetGrp, sasUrls);
-      console.log('Audio process DTO array:', audioProcessDtoArray);
       // Optionally, start background transcription
       await this.runBackgroundTranscription(audioProcessDtoArray);
   
@@ -139,7 +140,6 @@ export class AudioService {
       });
   
       await Promise.all(uploadPromises);
-      console.log('sasUrls',sasUrls);
       return sasUrls;
     } catch (error) {
       this.logger.error(`Failed to upload audio files: ${error.message}`);
@@ -155,14 +155,12 @@ export class AudioService {
       for (const group of targetGrpArray) {
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
         const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
-        console.log('matchingSasUrl',matchingSasUrl);
         const querySpec = {
           query: 'SELECT * FROM c WHERE c.TGName = @TGName',
         parameters: [{ name: '@TGName', value: groupObj.TGName }]};  
         const {resources: existingDocuments } = await this.targetContainer.items.query(querySpec).fetchAll();
         const latestDocument = existingDocuments[0];
-        console.log(latestDocument);
-        latestDocument.filePath=matchingSasUrl.sasToken;
+        latestDocument.filePath=matchingSasUrl.sasUri;
         audioProcessDtoArray.push({
           TGId: latestDocument.TGId,
           TGName: groupObj.TGName,
@@ -195,7 +193,6 @@ export class AudioService {
       // Add the job to Bull queue
       for (const audioData of audioProcessDtoArray) {
         // Enqueue each audio file as a separate job
-        console.log(audioData);
         this.transcriptionQueue.add('transcribe-audio', audioData);
         this.logger.log(`Transcription job for ${audioData.TGName} enqueued successfully`);
     }
@@ -345,9 +342,8 @@ export class AudioService {
       if (transcriptionData.length === 0) {
         return { message: 'Transcription data not found' };
       }   
-      const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
+    const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
      this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);  
-     console.log('during fetch url',targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1));
      const filenameurl=await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
       // 3. Combine Target and Transcription Data
       const combinedData = {

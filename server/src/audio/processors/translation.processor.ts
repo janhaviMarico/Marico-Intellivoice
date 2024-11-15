@@ -16,9 +16,9 @@ export class TranslationProcessor {
     const { transcriptionData, TGName,TGId } = job.data;
     await job.log(`Processing translation job for ${TGName}`);  
     try {
-        const { translatedTextArray, combinedTranslation }= await this.audioUtils.translateText(transcriptionData);
+        const { updatedTextArray, combinedTranslation }= await this.audioUtils.translateText(transcriptionData);
       await job.log('Translation job completed');
-      await this.summaryQueue.add('summarize-audio',{translatedTextArray, combinedTranslation,TGName,TGId});
+      await this.summaryQueue.add('summarize-audio',{updatedTextArray, combinedTranslation,TGName,TGId});
       // You can then move to further processing like Summary or Sentiment Analysis here if needed.
       //return {translatedTextArray, combinedTranslation,TGName,TGId};
     } catch (error) {
