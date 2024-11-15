@@ -174,7 +174,7 @@ export class AudioUtils{
     }
     return item;
   });
-        const combinedTranslation = updatedTextArray.map(data => data.translation).join(' ');
+        const combinedTranslation = updatedTextArray.map(data => `${data.speaker} : ${data.translation}`).join('\n\n');
         return { updatedTextArray, combinedTranslation };
       }
       
