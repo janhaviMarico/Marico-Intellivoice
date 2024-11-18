@@ -167,10 +167,10 @@ export class ChangeFeedService implements OnModuleInit {
   private async listenToChangeFeed() {
     setInterval(async () => {
       try {
-        console.log('Polling Cosmos DB for changes...');
+        //console.log('Polling Cosmos DB for changes...');
         
         // Log the last checked time for debugging
-        console.log('Last Checked Time:', this.lastCheckedTime);
+        //console.log('Last Checked Time:', this.lastCheckedTime);
 
         // Create the query with parameters
         const query = {
