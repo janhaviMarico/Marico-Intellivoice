@@ -7,6 +7,8 @@ import { AllFilesComponent } from './all-files/all-files.component';
 import { FeedbackComponent } from './feedback/feedback.component';
 import { AudioDetailsComponent } from './audio-details/audio-details.component';
 import { UserListComponent } from './user-list/user-list.component';
+import { CompareComponent } from './compare/compare.component';
+import { CompareDetailComponent } from './compare/compare-detail/compare-detail.component';
 
 const routes: Routes = [
   {
@@ -18,6 +20,8 @@ const routes: Routes = [
       {path:'feedback',component:FeedbackComponent, canActivate: [authGuard]},
       {path:'allFiles/audioDetails/:tgId/:tgName',component:AudioDetailsComponent, canActivate: [authGuard]},
       {path:'userList',component:UserListComponent, canActivate: [authGuard]},
+      {path:'comparison',component:CompareComponent, canActivate: [authGuard]},
+      {path:'comparison/comparison-detail',component:CompareDetailComponent, canActivate: [authGuard]},
       {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
       // {path:'dashboard',component:DashboardComponent},
       // {path:'allFiles',component:AllFilesComponent},

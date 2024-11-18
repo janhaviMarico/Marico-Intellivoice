@@ -31,6 +31,9 @@
             <li routerLink="userList" [routerLinkActive]="['active']" #usersActive="routerLinkActive">
                 <img [src]="usersActive.isActive ? '../../../assets/Img/sidebar/files-active.png' : '../../../assets/Img/sidebar/files-inactive.png'" alt="Files">User List
             </li>
+            <li routerLink="comparison" [routerLinkActive]="['active']" #compareActive="routerLinkActive">
+                <img [src]="compareActive.isActive ? '../../../assets/Img/sidebar/compare.png' : '../../../assets/Img/sidebar/compare-in.png'" alt="Files">Compare Projects/ TGs
+            </li>
         </ul>
     </div>
     <div class="body">

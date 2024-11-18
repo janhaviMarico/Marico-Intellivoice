@@ -1,0 +1,54 @@
+<div class="select-container">
+    <div class="select-tab">
+      <button [ngClass]="isProjectCompare ? 'active' : ''" id="projbtn" (click)="changeOption(true)">
+        <img *ngIf="isProjectCompare" src="../../../assets/Img/AudioDetails/save-trans.png" alt="">
+        Compare Projects
+      </button>
+      <button [ngClass]="!isProjectCompare ? 'active' : ''" id="tgbtn" (click)="changeOption(false)">
+        <img *ngIf="!isProjectCompare" src="../../../assets/Img/AudioDetails/save-trans.png" alt="">
+        Compare Target Groups
+      </button>
+    </div>
+    <hr>
+    <div class="select-options">
+      <div class="select-options-proj">
+        <form [formGroup]="targetForm" (ngSubmit)="onSubmit()">
+          <div class="project-grid" formArrayName="projects">
+            <div *ngFor="let project of projects.controls; let i = index" [formGroupName]="i" class="project-field">
+              <mat-form-field class="example-full-width">
+                <mat-label>Project Name</mat-label>
+                <input
+                  type="text"
+                  placeholder="Project Name"
+                  aria-label="Project Name"
+                  matInput
+                  formControlName="projectName"
+                  [matAutocomplete]="auto"
+                />
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                  <mat-option *ngFor="let option of filteredProject | async" [value]="option.ProjName">
+                    {{ option.ProjName }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="projects.at(i).get('projectName')?.invalid && projects.at(i).get('projectName')?.touched">
+                  Project Name is required
+                </mat-error>
+
+                <button class="removeBtn" type="button" (click)="removeProject(i)">
+                  X
+                </button>
+              </mat-form-field>
+              
+            </div>
+          </div>
+          <div class="btns">
+            <button type="button" (click)="addProject()">
+              Add Project
+            </button>
+            <button type="submit">Compare Selected Project</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,90 @@
+.select-container {
+    border: 5px solid #D4E5F7;
+    margin: 20px;
+    height: 70%;
+    .select-tab {
+        display: flex;
+        justify-content: center;
+        padding: 2rem 0 2rem 0;
+        button {
+            padding: 10px 12px 10px 12px;
+            font-weight: 500;
+            font-size: 16px;
+            outline: none;
+            border: 1px solid #79747E;
+            background-color: #ffffff;
+            span {
+                background-color: #014FA1;
+                color: #ffffff;
+                border-radius: 16px;
+                font-size: 14px;
+                padding: 2px 8px 2px 8px;
+                margin-left: 10px;
+            }
+            &.active {
+                background-color: #D4E5F7;
+                transition: 0.5s;
+            }
+        }
+        #projbtn {
+            border-radius: 100px 0px 0px 100px;
+        }
+        #tgbtn {
+            border-radius: 0px 100px 100px 0px;
+        }
+    }
+    hr {
+        width: 80%;
+        margin: auto;
+    }
+    .select-options {
+        .select-options-proj {
+            .project-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                padding: 20px;
+
+                .project-field {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    border-radius: 5px;
+                    
+                  }
+                  
+                  .removeBtn {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    outline: none;
+                    font-size: 16px;
+                    font-weight: 550;
+                    color: #000;
+                    padding: 4px;
+                    border: none;
+                    background: transparent;
+                    z-index: 1000;
+                    color: #014FA1;
+                    box-shadow: none;
+    
+                  }
+              }
+              .btns {
+                display: flex;
+                justify-content: center;
+                button {
+                    border: none;
+                    outline: none;
+                    background-color: #014FA1;
+                    color: #ffffff;
+                    padding: 10px 15px;
+                    border-radius: 4px;
+                    gap: 20;
+                    margin: 0 5px;
+                }
+              }
+              
+        }
+    }
+}

@@ -38,6 +38,8 @@ import { HttpClientModule } from '@angular/common/http';
 
 import {ToastrModule } from 'ngx-toastr';
 import { UserListComponent } from './user-list/user-list.component';
+import { CompareComponent } from './compare/compare.component';
+import { CompareDetailComponent } from './compare/compare-detail/compare-detail.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,8 @@ import { UserListComponent } from './user-list/user-list.component';
     TooltipDirective,
     InfoComponent,
     UserListComponent,
+    CompareComponent,
+    CompareDetailComponent,
   ],
   imports: [
     CommonModule,
