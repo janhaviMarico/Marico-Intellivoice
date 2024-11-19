@@ -3,14 +3,16 @@ import { FormGroup, FormBuilder, Validators, FormArray, FormControl } from '@ang
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable, startWith } from 'rxjs';
 import { CommonService } from '../service/common.service';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-compare',
   templateUrl: './compare.component.html',
-  styleUrls: ['./compare.component.scss']
+  styleUrls: ['./compare.component.scss'],
 })
 export class CompareComponent implements OnInit {
   isProjectCompare: boolean = true;
+  projectForm: FormGroup;
   targetForm: FormGroup;
 
   existingProject: any[] = [];
@@ -19,14 +21,21 @@ export class CompareComponent implements OnInit {
 
   constructor(private fb: FormBuilder,private toastr: ToastrService, private commonServ: CommonService) {
 
+    this.projectForm = this.fb.group({
+      projects: this.fb.array([]),
+    });
+
     this.targetForm = this.fb.group({
-      projects: this.fb.array([]), // Use 'projects' as the key
+      targets: this.fb.array([]),
+      project: new FormControl('', Validators.required)
     });
   }
 
   ngOnInit(): void {
     this.addProject();
     this.addProject(); // Add an initial project
+    this.addTargetGrp();
+    this.addTargetGrp();
     this.getExistingProject();
   }
 
@@ -51,12 +60,10 @@ export class CompareComponent implements OnInit {
     this.isProjectCompare =isCompProj;
   }
 
-  // Getter to access the FormArray
   get projects(): FormArray {
-    return this.targetForm.get('projects') as FormArray;
+    return this.projectForm.get('projects') as FormArray;
   }
 
-  // Add a new project to the FormArray
   addProject(): void {
     if(this.projects.length < 5) {
       const projectGroup = this.fb.group({
@@ -66,21 +73,44 @@ export class CompareComponent implements OnInit {
     } else {
       this.toastr.warning('Maximum 5 project limit for comparison!')
     }
-    
   }
 
-  // Remove a project by index
   removeProject(index: number): void {
     if(this.projects.length === 2) {
       this.toastr.warning('Minimum 2 Project required for Comparison!')
     } else {
-      this.projects.removeAt(index); // Use the getter to access the FormArray
+      this.projects.removeAt(index);
     }
-    
   }
 
-  // Handle form submission
-  onSubmit(): void {
+  onSubmitProject(): void {
+    console.log(this.projectForm.value);
+  }
+
+  get targets(): FormArray {
+    return this.targetForm.get('targets') as FormArray;
+  }
+
+  addTargetGrp(): void {
+    if(this.targets.length < 5) {
+      const targetGroup = this.fb.group({
+        projectName: ['', Validators.required]
+      });
+      this.targets.push(targetGroup); // Use the getter to access the FormArray
+    } else {
+      this.toastr.warning('Maximum 5 Target limit for comparison!')
+    }
+  }
+
+  removeTargetGrp(index: number): void {
+    if(this.targets.length === 2) {
+      this.toastr.warning('Minimum 2 Target required for Comparison!')
+    } else {
+      this.targets.removeAt(index);
+    }
+  }
+
+  onSubmitTarget(): void {
     console.log(this.targetForm.value);
   }
 }

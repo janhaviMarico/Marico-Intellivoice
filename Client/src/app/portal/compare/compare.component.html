@@ -11,12 +11,71 @@
     </div>
     <hr>
     <div class="select-options">
-      <div class="select-options-proj">
-        <form [formGroup]="targetForm" (ngSubmit)="onSubmit()">
-          <div class="project-grid" formArrayName="projects">
-            <div *ngFor="let project of projects.controls; let i = index" [formGroupName]="i" class="project-field">
+      <div class="select-options-proj" *ngIf="isProjectCompare">
+          <form [formGroup]="projectForm" (ngSubmit)="onSubmitProject()">
+            <div class="project-grid" formArrayName="projects">
+              <div *ngFor="let project of projects.controls; let i = index" [formGroupName]="i" class="project-field">
+                <mat-form-field class="example-full-width">
+                  <mat-label>Project Name</mat-label>
+                  <input
+                    type="text"
+                    placeholder="Project Name"
+                    aria-label="Project Name"
+                    matInput
+                    formControlName="projectName"
+                    [matAutocomplete]="auto"
+                  />
+                  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredProject | async" [value]="option.ProjName">
+                      {{ option.ProjName }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <mat-error *ngIf="projects.at(i).get('projectName')?.invalid && projects.at(i).get('projectName')?.touched">
+                    Project Name is required
+                  </mat-error>
+  
+                  <button class="removeBtn" type="button" (click)="removeProject(i)">
+                    X
+                  </button>
+                </mat-form-field>
+                
+              </div>
+            </div>
+            <div class="btns">
+              <button type="button" (click)="addProject()">
+                Add Project
+              </button>
+              <button type="submit">Compare Selected Project</button>
+            </div>
+          </form>
+      </div>
+
+      <div class="select-options-proj" *ngIf="!isProjectCompare">
+        <form [formGroup]="targetForm" (ngSubmit)="onSubmitTarget()">
+          <h3 class="heading proj">Project Details</h3>
+         <div class="project-selection">
+          <mat-form-field class="example-full-width proj-field">
+            <mat-label>Project Name</mat-label>
+            <input type="text"
+                   placeholder="Project Name"
+                   aria-label="Project Name"
+                   matInput
+                   formControlName="project"
+                   [matAutocomplete]="auto">
+            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                <mat-option *ngFor="let option of filteredProject | async" [value]="option.ProjName">{{option.ProjName}}</mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="targetForm.get('project')?.invalid && targetForm.get('project')?.touched">
+                Project Name is required
+            </mat-error>
+          </mat-form-field>
+         </div>
+
+          <h3 class="heading">Target Group Details</h3>
+          <div class="project-grid" formArrayName="targets">
+            <div *ngFor="let project of targets.controls; let i = index" [formGroupName]="i" class="project-field">
               <mat-form-field class="example-full-width">
-                <mat-label>Project Name</mat-label>
+                <mat-label>Target Group Name</mat-label>
                 <input
                   type="text"
                   placeholder="Project Name"
@@ -30,11 +89,11 @@
                     {{ option.ProjName }}
                   </mat-option>
                 </mat-autocomplete>
-                <mat-error *ngIf="projects.at(i).get('projectName')?.invalid && projects.at(i).get('projectName')?.touched">
-                  Project Name is required
+                <mat-error *ngIf="targets.at(i).get('projectName')?.invalid && targets.at(i).get('projectName')?.touched">
+                  Target Group Name is required
                 </mat-error>
 
-                <button class="removeBtn" type="button" (click)="removeProject(i)">
+                <button class="removeBtn" type="button" (click)="removeTargetGrp(i)">
                   X
                 </button>
               </mat-form-field>
@@ -42,10 +101,10 @@
             </div>
           </div>
           <div class="btns">
-            <button type="button" (click)="addProject()">
-              Add Project
+            <button type="button" (click)="addTargetGrp()">
+              Add Target Group
             </button>
-            <button type="submit">Compare Selected Project</button>
+            <button type="submit">Compare Selected Target Group</button>
           </div>
         </form>
       </div>

@@ -1,11 +1,14 @@
 .select-container {
     border: 5px solid #D4E5F7;
     margin: 20px;
-    height: 70%;
+    //height: 80%;
+    padding-bottom: 1rem;
+
     .select-tab {
         display: flex;
         justify-content: center;
         padding: 2rem 0 2rem 0;
+
         button {
             padding: 10px 12px 10px 12px;
             font-weight: 500;
@@ -13,6 +16,7 @@
             outline: none;
             border: 1px solid #79747E;
             background-color: #ffffff;
+
             span {
                 background-color: #014FA1;
                 color: #ffffff;
@@ -21,24 +25,60 @@
                 padding: 2px 8px 2px 8px;
                 margin-left: 10px;
             }
+
             &.active {
                 background-color: #D4E5F7;
                 transition: 0.5s;
             }
         }
+
         #projbtn {
             border-radius: 100px 0px 0px 100px;
         }
+
         #tgbtn {
             border-radius: 0px 100px 100px 0px;
         }
     }
+
     hr {
         width: 80%;
         margin: auto;
     }
+
     .select-options {
         .select-options-proj {
+
+            .heading {
+                font-size: 1.5rem;
+                display: flex;
+                justify-content: center;
+            }
+
+            .proj {
+                margin: 1rem 0;
+            }
+
+            ::ng-deep mat-form-field {
+                background: none;
+                border-radius: 5px;
+
+                .mat-mdc-text-field-wrapper {
+                    background: none;
+                    border: 1px solid #79747E;
+                }
+            }
+
+            .project-selection {
+                // width: 100%;
+                display: flex;
+                justify-content: center;
+
+                .proj-field {
+                    width: 30%;
+                }
+            }
+
             .project-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
@@ -50,10 +90,9 @@
                     flex-direction: column;
                     justify-content: space-between;
                     border-radius: 5px;
-                    
-                  }
-                  
-                  .removeBtn {
+                }
+
+                .removeBtn {
                     position: absolute;
                     top: 0;
                     right: 0;
@@ -67,12 +106,14 @@
                     z-index: 1000;
                     color: #014FA1;
                     box-shadow: none;
-    
-                  }
-              }
-              .btns {
+
+                }
+            }
+
+            .btns {
                 display: flex;
                 justify-content: center;
+
                 button {
                     border: none;
                     outline: none;
@@ -83,8 +124,8 @@
                     gap: 20;
                     margin: 0 5px;
                 }
-              }
-              
+            }
+
         }
     }
 }
