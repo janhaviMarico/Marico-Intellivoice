@@ -191,10 +191,12 @@ export class ChatService {
     }
   }
 
-  async compareProjects(project1: string, project2: string): Promise<any> {
+  async compareProjects(project1: string, project2: string,compare:string): Promise<any> {
     try {
-      const vectorIdsProject1 = await this.fetchData(project1);
-      const vectorIdsProject2 = await this.fetchData(project2);
+
+      if (compare=='PROJ'){
+      const vectorIdsProject1 = await this.getVectorIdsByProject(project1);
+      const vectorIdsProject2 = await this.getVectorIdsByProject(project2);
       
       const project1Documents = await this.getTextsByVectorIds(vectorIdsProject1);
       const project2Documents = await this.getTextsByVectorIds(vectorIdsProject2);
@@ -204,14 +206,40 @@ export class ChatService {
   
       const summary = await this.getPrompResponse(PROJECT_COMPARE_STATIC_INSTRUCTION, `${targetCompareProject1}${targetCompareProject2}`);
       
-      return { targetCompareProject1, targetCompareProject2, summary };
+      return {
+        project: [
+          { targetCompareProject1: targetCompareProject1 }, 
+          { targetCompareProject2: targetCompareProject2 }
+        ],
+        summary: summary
+      };
+      }
+      else (compare =='TARGET')
+      {
+       const vectorIdsTarget1= await this.getVectorIdsByTarget(project1);
+       const vectorIdsTarget2= await this.getVectorIdsByTarget(project2);
+       const Target1Documents = await this.getTextsByVectorIds(vectorIdsTarget1);
+       const Target2Documents = await this.getTextsByVectorIds(vectorIdsTarget2);
+      const targetCompareProject1 = await this.generateAnswerFromDocumentsWithChunks(STATIC_INSTRUCTION, Target1Documents);
+      const targetCompareProject2 = await this.generateAnswerFromDocumentsWithChunks(STATIC_INSTRUCTION, Target2Documents);
+  
+      const summary = await this.getPrompResponse(PROJECT_COMPARE_STATIC_INSTRUCTION, `${targetCompareProject1}${targetCompareProject2}`);
+      //return false;
+      return {
+        project: [
+          { targetCompareProject1: targetCompareProject1 }, 
+          { targetCompareProject2: targetCompareProject2 }
+        ],
+        summary: summary
+      };
+    }
     } catch (error) {
       console.error("Error comparing projects:", error);
       throw new Error("An error occurred while comparing projects.");
     }
   }
 
-  async fetchData(projectName: string): Promise<string[]> {
+  async getVectorIdsByProject(projectName: string): Promise<string[]> {
     try {
       const querySpec = {
         query: 'SELECT * FROM c WHERE c.ProjName = @projectName',
@@ -236,6 +264,26 @@ export class ChatService {
       }
   
       return transcriptionData.map(item => item.vectorId[0]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw new Error("An error occurred while fetching data.");
+    }
+  }
+
+  async getVectorIdsByTarget(targetName: string): Promise<string[]> {
+    try {
+      const querySpec = {
+        query: 'SELECT * FROM c WHERE c.TGName=@targetName',
+        parameters: [{ name: '@targetName', value: targetName }],
+      };
+      const { resources: existingDocuments } = await this.transcriptionContainer.items.query(querySpec).fetchAll();
+
+      if (!existingDocuments.length) {
+        throw new Error(`No documents found for project: ${targetName}`);
+      }
+      const transcriptionDocument = existingDocuments[0];
+      return transcriptionDocument.vectorId;
+      //const transcriptionIds = projectDocument.TGIds.map(id => `'${id}'`).join(", ");      
     } catch (error) {
       console.error("Error fetching data:", error);
       throw new Error("An error occurred while fetching data.");
