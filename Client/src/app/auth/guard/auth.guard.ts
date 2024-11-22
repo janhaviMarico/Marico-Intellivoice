@@ -4,7 +4,11 @@ import { MsalService } from '@azure/msal-angular';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const msalService = inject(MsalService);
-  const router = inject(Router);
+  const router = inject(Router);  
+  if(msalService.instance.getActiveAccount() == null) {
+    router.navigate(["/login"]);
+    return false;
+  }
 
   // Check session expiry
   const loginTime = localStorage.getItem('LoginTime');
@@ -21,11 +25,6 @@ export const authGuard: CanActivateFn = (route, state) => {
     }
   } else {
     // If no login time is found, redirect to login
-    router.navigate(["/login"]);
-    return false;
-  }
-
-  if(msalService.instance.getActiveAccount() == null) {
     router.navigate(["/login"]);
     return false;
   }

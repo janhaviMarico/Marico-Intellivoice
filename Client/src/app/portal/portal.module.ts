@@ -40,6 +40,7 @@ import {ToastrModule } from 'ngx-toastr';
 import { UserListComponent } from './user-list/user-list.component';
 import { CompareComponent } from './compare/compare.component';
 import { CompareDetailComponent } from './compare/compare-detail/compare-detail.component';
+import { AudioProcessComponent } from './audio-process/audio-process.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { CompareDetailComponent } from './compare/compare-detail/compare-detail.
     UserListComponent,
     CompareComponent,
     CompareDetailComponent,
+    AudioProcessComponent,
   ],
   imports: [
     CommonModule,
