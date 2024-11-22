@@ -8,8 +8,9 @@ import { ConfigService } from "@nestjs/config";
 import { Container } from "@azure/cosmos";
 import axios from "axios";
 import { ChatCompletionMessageParam } from "openai/resources";
-import { SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY } from "src/constants";
+import { MODERATOR_RECOGNITION, SENTIMENT_ANALYSIS, SENTIMENT_ANALYSIS_PROMPT, SUMMARIZATION_PROMPT_TEMPLATE, SUMMARY } from "src/constants";
 import { response } from "express";
+import { ChatService } from "src/chat/chat.service";
 
 
 export interface Document {
@@ -26,6 +27,7 @@ export class AudioUtils{
   
     constructor(
       @InjectModel(TranscriptionEntity) private readonly transcriptionContainer: Container,
+      private readonly chatService: ChatService,
       private readonly configService: ConfigService
     ) {
       this.translateClient = new Translate({ key: this.configService.get<string>('TRANSALATION_APIKEY') }); 
@@ -158,8 +160,22 @@ export class AudioUtils{
             };
           })
         ); 
-        const combinedTranslation = translatedTextArray.map(data => data.translation).join(' ');
-        return { translatedTextArray, combinedTranslation };
+        const audioTranscript = translatedTextArray
+        .map((entry: any) => ` Speaker ${entry.speaker}: ${entry.translation}`)
+        .join('\n\n');
+        console.log(audioTranscript);
+   const response= this.chatService.getPrompResponse(MODERATOR_RECOGNITION,audioTranscript);
+   console.log(response);
+   const match = (await response).match(/Speaker\s*\d+/i).toString();
+   const updatedTextArray = translatedTextArray.map(item => {
+    // If this item's speaker matches the identified moderator, mark them as 'Moderator'
+    if (`Speaker ${item.speaker}` === match) {
+      return { ...item, speaker: 'Moderator' };
+    }
+    return item;
+  });
+        const combinedTranslation = updatedTextArray.map(data => `${data.speaker} : ${data.translation}`).join('\n\n');
+        return { updatedTextArray, combinedTranslation };
       }
       
       generateSummarizationPrompt(text:string) {

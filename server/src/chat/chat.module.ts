@@ -24,6 +24,7 @@ import { TargetGroupEntity } from "src/audio/entity/target.entity";
         
         ,ConfigModule.forRoot(),AudioModule], // Add ConfigModule here
     controllers: [ChatController],
-    providers:[ChatService]
+    providers:[ChatService],
+    exports:[ChatService]
 })
 export class ChatModule {}

@@ -33,7 +33,7 @@ const routes: Routes = [
       // {path:'comparison',component:CompareComponent},
       // {path:'comparison/comparison-detail',component:CompareDetailComponent},
       // {path:'dashboard/audio-process',component:AudioProcessComponent},
-      // {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' },
+      // {path:'',redirectTo:'/portal/dashboard',pathMatch:'full' }
     ]
   }
 ];
