@@ -68,7 +68,7 @@ async askQuestionWithVectorIds(
 
     // Step 3: Generate answer based on the documents and question
     this.logger.log(`Generating answer for question: "${question}" with vector IDs: ${vectorIds}`);
-    const answer = await this.chatservice.generateAnswerFromDocuments(question, documents);
+    const answer = await this.chatservice.generateAnswerFromDocumentsWithChunks(question, documents);
 
     // Step 4: Return the question and answer
     return { question, answer };
@@ -83,14 +83,15 @@ async askQuestionWithVectorIds(
 @UsePipes(new ValidationPipe({ transform: true }))
 async compareProjects(
   @Query('project_1') project1: string,
-  @Query('project_2') project2: string
+  @Query('project_2') project2: string,
+  @Query('compare') compare :string
 ): Promise<any> {
   try {
     if (!project1 || !project2) {
       throw new HttpException('Both project_1 and project_2 query parameters are required.', HttpStatus.BAD_REQUEST);
     }
     console.log(`Comparing projects: ${project1} and ${project2}`);
-    const result = await this.chatservice.compareProjects(project1, project2);
+    const result = await this.chatservice.compareProjects(project1, project2,compare);
     return result;
   } catch (error) {
     console.error('Error comparing projects:', error);

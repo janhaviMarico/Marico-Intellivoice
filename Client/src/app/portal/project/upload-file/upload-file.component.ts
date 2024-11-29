@@ -381,11 +381,14 @@ export class UploadFileComponent {
       this.closeProjectDialog();
       this.closeUploadDailog();
 
+      const info = {
+        name: 'submit', title: ''
+      }
       this.dialog.open(InfoComponent, {
         height: '50vh',
         width: '40vw',
         disableClose: true,
-        data: { info: 'Process' }
+        data: info
       });
     }, (err: any) => {
       this.isLoading = false;

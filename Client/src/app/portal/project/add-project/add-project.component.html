@@ -7,13 +7,31 @@
         <div #formEnd>
             <div class="project-detail">
                 <h3>Project Details</h3>
-                <mat-form-field>
+               <div class="project-card">
+                <mat-form-field *ngIf="!isExitingProj">
                     <mat-label>Project Name</mat-label>
                     <input matInput placeholder="Enter Project Name" formControlName="projectName">
                     <mat-error *ngIf="targetForm.get('projectName')?.invalid && targetForm.get('projectName')?.touched">
                         Project Name is required
                     </mat-error>
                 </mat-form-field>
+                <mat-form-field class="example-full-width" *ngIf="isExitingProj">
+                    <mat-label>Project Name</mat-label>
+                    <input type="text"
+                           placeholder="Project Name"
+                           aria-label="Project Name"
+                           matInput
+                           formControlName="projectName"
+                           [matAutocomplete]="auto">
+                    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                        <mat-option *ngFor="let option of filteredProject | async" [value]="option.ProjName">{{option.ProjName}}</mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="targetForm.get('projectName')?.invalid && targetForm.get('projectName')?.touched">
+                        Project Name is required
+                    </mat-error>
+                  </mat-form-field>
+                  <!-- <button type="button">Select Existing Project</button> -->
+               </div>
             </div>
             <div class="tg-detail">
                 <h3>Target Group Details</h3>

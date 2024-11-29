@@ -103,3 +103,11 @@ export const PROJECT_COMPARE_STATIC_INSTRUCTION=`Based on the analyses of the tw
                 Here are the analysis:
 
 `
+
+export const MODERATOR_RECOGNITION=`You are an expert at analyzing textual conversations. Your task is to
+                        identify the moderator in the following discussion text. The moderator is 
+                        the person who guides the conversation, asks questions to different participants,
+                        ensures the discussion stays on track, and often addresses participants by name.
+                        Please carefully read the provided text and determine who the moderator is based
+                        on their role and actions within the discussion.            
+                        Provide a brief explanation for your choice.`

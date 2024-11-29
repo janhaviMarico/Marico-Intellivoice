@@ -15,7 +15,7 @@ export class SummarySentimentsProcessor{
     ){}
     @Process({name:'summarize-audio',concurrency:5})
     async handleTranscriptionJob(job: Job) {
-        const { translatedTextArray, combinedTranslation,TGName,TGId } = job.data;
+        const { updatedTextArray, combinedTranslation,TGName,TGId } = job.data;
         await job.log(`Processing transcription job for audio array`);  
         try {
             await job.log(`Fetching Summary for ${TGName}`);
@@ -26,7 +26,7 @@ export class SummarySentimentsProcessor{
           const transcriptionDocument = {
             TGName,
             TGId,
-            audiodata: translatedTextArray,
+            audiodata: updatedTextArray,
             summary: summaryResponse,
             sentiment_analysis: sentimentResponse,
             combinedTranslation: combinedTranslation,
