@@ -167,10 +167,10 @@ export class ChangeFeedService implements OnModuleInit {
   private async listenToChangeFeed() {
     setInterval(async () => {
       try {
-        console.log('Polling Cosmos DB for changes...');
+        //console.log('Polling Cosmos DB for changes...');
         
         // Log the last checked time for debugging
-        console.log('Last Checked Time:', this.lastCheckedTime);
+        //console.log('Last Checked Time:', this.lastCheckedTime);
 
         // Create the query with parameters
         const query = {
@@ -209,29 +209,29 @@ export class ChangeFeedService implements OnModuleInit {
   private async getUserEmailByTgid(TGId: string): Promise<string | null> {
     try {
       // Step 1: Retrieve project ID from targetgroups based on tgid
-      console.log("1")
+     // console.log("1")
       const targetGroupQuery = {
         query: 'SELECT * FROM c WHERE c.TGId = @TGId',
         parameters: [{ name: '@TGId', value: TGId }],
       };
       const { resources: targetGroups } = await this.TargetGroupsContainer.items.query(targetGroupQuery).fetchNext();
-      console.log("target group query is: ",targetGroupQuery)
+     // console.log("target group query is: ",targetGroupQuery)
       if (targetGroups.length === 0) return null;
 
       const ProjId = targetGroups[0].ProjId;
-      console.log("2",targetGroups)
+      //console.log("2",targetGroups)
 
       // Step 2: Retrieve user ID from project based on projectId
       const projectQuery = {
         query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
         parameters: [{ name: '@ProjId', value: ProjId }],
       };
-      console.log('project query is',projectQuery)
+      //console.log('project query is',projectQuery)
       const { resources: projects } = await this.projectContainer.items.query(projectQuery).fetchNext();
-      console.log("project group query is: ",projects)
+      //console.log("project group query is: ",projects)
       if (projects.length === 0) return null;
       const userId = projects[0].UserId;
-      console.log("4")
+      //console.log("4")
 
       // Step 3: Retrieve email from user container based on userId
       const userQuery = {
@@ -239,7 +239,7 @@ export class ChangeFeedService implements OnModuleInit {
         parameters: [{ name: '@userId', value: userId }],
       };
       const { resources: users } = await this.userContainer.items.query(userQuery).fetchNext();
-      console.log("user group query is: ",userQuery)
+      //console.log("user group query is: ",userQuery)
       if (users.length === 0) return null;
 
       return users[0].email; // Assuming the user document has an `email` field

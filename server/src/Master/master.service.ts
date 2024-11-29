@@ -36,8 +36,8 @@ export class MasterService {
     // Map over the data to transform `country` and `state` into objects with `name` key
     const transformedMasters = masters.map((master) => ({
       ...master,
-      country: master.country.map((countryName) => ({ name: countryName })),
-      state: master.state.map((stateName) => ({ name: stateName })),
+      //country: master.country.map((countryName) => ({ name: countryName })),
+      // state: master.state.map((stateName) => ({ name: stateName })),
       marico_product: master.marico_product.map((marico_productName) => ({ name: marico_productName })),
     }));
 
