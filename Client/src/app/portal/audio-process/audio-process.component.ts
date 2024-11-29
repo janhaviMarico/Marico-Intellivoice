@@ -1,7 +1,7 @@
 import { Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { map, Observable, startWith } from 'rxjs';
+import { map, Observable, of, startWith } from 'rxjs';
 import { AudioService } from '../service/audio.service';
 import { CommonService } from '../service/common.service';
 import { InfoComponent } from '../project/info/info.component';
@@ -144,10 +144,15 @@ export class AudioProcessComponent {
   getExistingProject() {
     this.commonServ.getAPI('master/project/all').subscribe((res:any)=> {
       this.existingProject = res.data;
-      this.filteredProject = this.myControl.valueChanges.pipe(
-        startWith(''),
-        map(value => this._filter(value || '')),
-      );
+      const projectControl = this.targetForm.get('projectName');
+      if (projectControl) {
+        this.filteredProject = projectControl.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filter(value || '')),
+        );
+      } else {
+        this.filteredProject = of([]);
+      }
     },(err:any)=>{
       this.toastr.error('Something Went Wrong!')
     })

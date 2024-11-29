@@ -106,7 +106,7 @@
                     z-index: 1000;
                     color: #014FA1;
                     box-shadow: none;
-
+                    rotate: 45deg;
                 }
             }
 
@@ -128,4 +128,7 @@
 
         }
     }
+}
+button[disabled] {
+    cursor: not-allowed;
 }

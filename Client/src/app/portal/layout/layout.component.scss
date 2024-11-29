@@ -30,9 +30,11 @@ header {
         .profile {
             display: flex;
             align-items: center;
-
-            img {
-                margin-left: 10px;
+            button {
+                border: none;
+                outline: none;
+                background: transparent;
+                margin: 0 5px;
             }
         }
 
@@ -85,15 +87,21 @@ header {
                 align-items: center;
                 padding: 10px 20px 10px 30px;
                 cursor: pointer;
-                img {
-                    width: 30px;
-                    margin-right: 15px;
+                mat-icon {
+                    margin-right: 10px;
+                    color: #757575;
+                    font-size: 1.6rem;
+                    width: 1.6rem;
+                    height: 1.6rem;
                 }
                 &.active {
                     background-color: #D4E5F7;
                     color: #014FA1;
                     font-weight: 700;
                     transition: 0.5s;
+                    mat-icon {
+                        color: #014FA1;
+                    }
                 }
             }
         }

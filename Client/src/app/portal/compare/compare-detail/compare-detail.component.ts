@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AudioService } from '../../service/audio.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-compare-detail',
@@ -14,6 +16,14 @@ export class CompareDetailComponent {
     { title: 'Project 5 Analysis', content: 'Curabitur nec nunc...' },
     { title: 'Project 6 Analysis', content: 'Vestibulum ante ipsum...' },
   ];
+  compareArray:string[] = []
+  constructor(private audioServ:AudioService, private router: Router) {}
+
+  ngOnInit() {
+    this.audioServ.getCompare().subscribe((res:any) => {
+      this.compareArray = res;
+    })
+  }
 
   isVisible(index: number): boolean {
     return index >= this.currentIndex && index < this.currentIndex + 2;
@@ -34,6 +44,10 @@ export class CompareDetailComponent {
       this.previousIndex = this.currentIndex;
       this.currentIndex -= 2;
     }
+  }
+
+  backBtn() {
+    this.router.navigate(['/portal/comparison'])
   }
   
 }
