@@ -221,8 +221,8 @@ export class AudioProcessComponent {
     const selectedCountry = this.countries.find(country => country.name === countryName)?.code || 'NA';
     const selectedState = this.states.find(state => state.name === stateName)?.code || 'NA';
     const selectedCompetitors = competitorNames.map((name: any) => this.competitors.find((c: any) => c.name === name)?.code || name).join('-');
-    const selectedProduct = this.products.find(product => product.name === maricoProductName)?.code || 'ProductCode';
-    const selectedPrimaryLang = this.primaryLang.find(lang => lang.name === primaryLangName)?.code || 'PrimaryLangCode';
+    const selectedProduct = this.products.find(product => product.name === maricoProductName)?.code || '111';
+    const selectedPrimaryLang = this.primaryLang.find(lang => lang.name === primaryLangName)?.code || '222';
     const selectedOtherLangs = otherLangNames.map((name: any) => this.otherLang.find((lang: any) => lang.name === name)?.code || name).join('-');
     const uniqueId = new Date().getTime();
     return `${selectedCountry}_${selectedState}_${selectedCompetitors}_${selectedProduct}_${minAge}_${maxAge}_${selectedPrimaryLang}_${selectedOtherLangs}_${numSpeakers}_${projectName}_${uniqueId}`;

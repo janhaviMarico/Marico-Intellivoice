@@ -156,6 +156,14 @@
                             outline: none;
                             background: none;
                             margin: 8px;
+                            mat-icon {
+                                color: #014FA1;
+                            }
+                        }
+                        .cross-btn {
+                            mat-icon {
+                                rotate: 45deg;
+                            }
                         }
 
                         span {

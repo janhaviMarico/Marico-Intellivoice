@@ -168,7 +168,7 @@
                             <div class="tg-name" appTooltip>
                                 <div class="targetTooltip">
                                     <div class="targetGroupPopop">
-                                        <h6>{{target?.name | truncate:30 }}</h6>
+                                        <h6>{{target?.name | truncate:50 }}</h6>
                                         <div class="target-data-wrapper">
                                             <div class="data-group">
                                                 <div class="target">
@@ -216,10 +216,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button><img src="../../../../assets/Img/dashboard/info.png" alt=""></button>
+                                <button><mat-icon>help</mat-icon></button>
                                 <span>{{ tg.name | truncate:25 }}</span>
-                                <button (click)="removeTargetGroup(i)"><img
-                                        src="../../../../assets/Img/dashboard/close-project.png" alt=""></button>
+                                <button class="cross-btn" (click)="removeTargetGroup(i)"><mat-icon>add</mat-icon></button>
                             </div>
                         </mat-grid-tile>
                     </mat-grid-list>
@@ -271,27 +270,10 @@
                                     <img src="../../../../assets/Img/dashboard/play-btn.png" alt="" />
                                   </button> -->
                                                 <button (click)="removeFileFromExpansionList(expIndex, i , true)">
-                                                    <img src="../../../../assets/Img/dashboard/delete-btn.png" alt="" />
+                                                    <mat-icon>delete</mat-icon>
                                                 </button>
                                             </div>
                                         </div>
-                                        <!-- <div class="slider">
-                                <span id="current-time">{{ file.currentTime || '0:00' }}</span>
-                                <input 
-                                  type="range" 
-                                  class="seek-bar" 
-                                  [value]="file.seekValue || 0" 
-                                  max="100" 
-                                  (input)="seekAudio($event, i, exp.audioList)" 
-                                />
-                                <span id="duration-time">{{ file.durationTime || '0:00' }}</span>
-                                <audio 
-                                  #audioPlayer 
-                                  controls 
-                                  (timeupdate)="updateProgress($event, i, exp.audioList)" 
-                                  [src]="file.url"
-                                ></audio>
-                              </div> -->
                                     </div>
                                 </li>
                             </ul>
