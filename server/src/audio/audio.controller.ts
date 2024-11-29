@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query, BadRequestException } from '@nestjs/common';
 import { AudioService } from './audio.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO } from './dto/upload-audio.dto';
@@ -104,10 +104,14 @@ export class AudioController {
     }
   }
 
-  //trabslation edit
-  @Post('edit')
-    async editTranscription(@Body() editTranscriptionDto: EditTranscriptionDto) {
-        return this.audioService.editTranscription(editTranscriptionDto);
+@Post('edit')
+async editTranscription(
+    @Body('editData') editTranscriptionDto: EditTranscriptionDto,
+    @Body('vectorIds') vectorIds: string[],
+) {
+    if (!Array.isArray(vectorIds) || vectorIds.length === 0) {
+        throw new BadRequestException('Vector document IDs are required and should be an array.');
     }
-  
+    return this.audioService.editTranscription(editTranscriptionDto, vectorIds);
+} 
 }

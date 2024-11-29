@@ -9,20 +9,15 @@ export class MasterEntity {
   state: NameValuePair[]; 
   marico_product:string[] 
   Role: roleData[];   
-  Access:accessData[];
+  Access:NameValuePair[];
 }
 class NameValuePair {
-  name: string;
+  name:string;
+  code:string;
 }
-
 
 class roleData {
     code: string;
     name: string;
     access: string[];
-}
-
-class accessData{
-    name:string;
-    code:string;
 }
