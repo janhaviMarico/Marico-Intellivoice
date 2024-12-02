@@ -16,8 +16,8 @@ export class CompareComponent implements OnInit {
   isProjectCompare: boolean = true;
   projectForm: FormGroup;
   targetForm: FormGroup;
-  target:any;
-  selectedProject:string = '';
+  target: any;
+  selectedProject: string = '';
 
   existingProject: any[] = [];
   filteredProject!: Observable<any[]>;
@@ -25,8 +25,8 @@ export class CompareComponent implements OnInit {
   existingTGs: any[] = [];
   filteredTGsArray: Observable<any[]>[] = [];
 
-  constructor(private fb: FormBuilder,private toastr: ToastrService, private commonServ: CommonService,
-    private audioServ:AudioService,private router:Router) {
+  constructor(private fb: FormBuilder, private toastr: ToastrService, private commonServ: CommonService,
+    private audioServ: AudioService, private router: Router) {
 
     this.projectForm = this.fb.group({
       projects: this.fb.array([]),
@@ -69,7 +69,7 @@ export class CompareComponent implements OnInit {
       }
     );
   }
-  
+
   private _filter(value: string): string[] {
     const filterValue = value.toLowerCase();
     return this.existingProject.filter((option: any) =>
@@ -77,8 +77,8 @@ export class CompareComponent implements OnInit {
     );
   }
 
-  changeOption(isCompProj:boolean) {
-    this.isProjectCompare =isCompProj;
+  changeOption(isCompProj: boolean) {
+    this.isProjectCompare = isCompProj;
   }
 
   get projects(): FormArray {
@@ -91,7 +91,7 @@ export class CompareComponent implements OnInit {
         projectName: ['', Validators.required]
       });
       this.projects.push(projectGroup);
-  
+
       this.setupAutocomplete(this.projects.length - 1);
     } else {
       this.toastr.warning('Maximum 5 project limit for comparison!');
@@ -118,7 +118,11 @@ export class CompareComponent implements OnInit {
   }
 
   onSubmitProject(): void {
-    this.audioServ.setCompare(this.targetForm.value);
+    const param = {
+      arr: this.projectForm.value.projects,
+      isProject: true
+    }
+    this.commonServ.setCompareObj(param);
     this.router.navigate(['/portal/comparison/comparison-detail']);
   }
 
@@ -127,7 +131,7 @@ export class CompareComponent implements OnInit {
   }
 
   addTargetGrp(): void {
-    if(this.targets.length < 5) {
+    if (this.targets.length < 5) {
       const targetGroup = this.fb.group({
         targetName: ['', Validators.required]
       });
@@ -138,15 +142,19 @@ export class CompareComponent implements OnInit {
   }
 
   removeTargetGrp(index: number): void {
-    if(this.targets.length === 2) {
+    if (this.targets.length === 2) {
       this.toastr.warning('Minimum 2 Target required for Comparison!')
     } else {
       this.targets.removeAt(index);
     }
   }
 
-  onSubmitTarget(): void {
-    this.audioServ.setCompare(this.targetForm.value);
+  onSubmitTarget() {
+    const param = {
+      arr: this.targetForm.value.targets,
+      isProject: false
+    }
+    this.commonServ.setCompareObj(param);
     this.router.navigate(['/portal/comparison/comparison-detail']);
   }
 
@@ -179,7 +187,7 @@ export class CompareComponent implements OnInit {
     );
   }
 
-  mouseEnterOnTargetGrp(tg:any) {
-    this.target  = tg;
+  mouseEnterOnTargetGrp(tg: any) {
+    this.target = tg;
   }
 }

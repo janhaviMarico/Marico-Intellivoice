@@ -12,7 +12,6 @@ export class AudioService {
   constructor(private http:HttpClient, private toastr:ToastrService) { }
   baseUrl = environment.BASE_URL;
   public messageHistory: Subject<any> = new Subject();
-  private compareArr = new Subject<String[]>();
 
   postAPI(url: string, payload: any , download?:boolean): Observable<any> {
     if(download) {
@@ -60,13 +59,5 @@ export class AudioService {
         link.download = 'file.pdf';
         link.click();
       });
-  }
-
-  public getCompare(): Observable<String[]> {
-    return this.compareArr.asObservable();
-  }
-
-  public setCompare(message: String[]) {
-    return this.compareArr.next(message);
   }
 }

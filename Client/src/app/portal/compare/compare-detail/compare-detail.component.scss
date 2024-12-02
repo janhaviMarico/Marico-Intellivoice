@@ -26,6 +26,19 @@
         padding: 15px;
         overflow-y: auto;
 
+        h3 {
+            background-color: #F7ECD5;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            padding: 0.5rem;
+        }
+
+        pre {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-wrap: wrap;
+        }
+
         .carousel-container {
             height: 80%;
 
@@ -46,20 +59,7 @@
                     background-color: #fff;
                     border-radius: 5px;
                     padding: 15px;
-                    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;  
-                    
-                    .card {
-                        h3 {
-                            background-color: #F7ECD5;
-                            font-size: 1rem;
-                            margin-bottom: 10px;
-                            padding: 0.5rem;
-                        }
-                        p {
-                            font-size: 0.9rem;
-                            letter-spacing: 1px;
-                        }
-                    }
+                    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
                 }
 
                 .carousel-item.visible {
@@ -75,39 +75,32 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
+
                 button {
                     border: none;
                     outline: none;
                     background: none;
                     margin: 0 5px;
                 }
+
                 button:hover {
                     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
                     scale: 1.2;
                 }
+
                 button:disabled {
-                        opacity: 0.5;
-                        cursor: not-allowed;
-                      }
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
             }
         }
 
         .summary-container {
             background-color: #fff;
-            
+
             .summary {
                 border: 1px solid #F0F2F5;
                 padding: 15px;
-                h3 {
-                    background-color: #F7ECD5;
-                    font-size: 1rem;
-                    margin-bottom: 10px;
-                    padding: 0.5rem;
-                }
-                p {
-                    font-size: 0.9rem;
-                    letter-spacing: 1px;
-                }
             }
         }
     }

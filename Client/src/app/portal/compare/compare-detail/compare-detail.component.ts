@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { AudioService } from '../../service/audio.service';
 import { Router } from '@angular/router';
+import { CommonService } from '../../service/common.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-compare-detail',
@@ -8,21 +10,19 @@ import { Router } from '@angular/router';
   styleUrls: ['./compare-detail.component.scss']
 })
 export class CompareDetailComponent {
-  items = [
-    { title: 'Project 1 Analysis', content: 'Lorem ipsum dolor sit amet...' },
-    { title: 'Project 2 Analysis', content: 'Phasellus euismod magna...' },
-    { title: 'Project 3 Analysis', content: 'Suspendisse potenti...' },
-    { title: 'Project 4 Analysis', content: 'Aenean eu turpis euismod...' },
-    { title: 'Project 5 Analysis', content: 'Curabitur nec nunc...' },
-    { title: 'Project 6 Analysis', content: 'Vestibulum ante ipsum...' },
-  ];
-  compareArray:string[] = []
-  constructor(private audioServ:AudioService, private router: Router) {}
+  compareArr:any = [{projectName: '', targetCompareProject:''}, {projectName: '',targetCompareProject:''}];
+  compareObj:any;
+  isLoading:boolean = false;
+  summary:string = '';
+  constructor(private audioServ:AudioService, private router: Router,
+    private commonServ:CommonService, private toastr: ToastrService
+  ) {}
 
   ngOnInit() {
-    this.audioServ.getCompare().subscribe((res:any) => {
-      this.compareArray = res;
-    })
+    this.compareObj = this.commonServ.getCompareObj();
+    if(this.compareObj) {
+      this.compareProjectAndTG();
+    }
   }
 
   isVisible(index: number): boolean {
@@ -33,7 +33,7 @@ export class CompareDetailComponent {
   previousIndex = 0;
   
   next() {
-    if (this.currentIndex < this.items.length - 2) {
+    if (this.currentIndex < this.compareArr.length - 2) {
       this.previousIndex = this.currentIndex;
       this.currentIndex += 2;
     }
@@ -50,4 +50,16 @@ export class CompareDetailComponent {
     this.router.navigate(['/portal/comparison'])
   }
   
+  compareProjectAndTG() {
+    this.isLoading = true;
+    this.commonServ.getParamAPI('chat/compare', this.compareObj.isProject, this.compareObj.arr).subscribe((res:any)=> {
+      this.isLoading = false;
+      this.compareArr = [];
+      this.compareArr = res?.project;
+      this.summary = res?.summary;
+    },(err:any)=> {
+      this.isLoading = false;
+      this.toastr.error('Something Went Wrong!')
+    })
+  }
 }

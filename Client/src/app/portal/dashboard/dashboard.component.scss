@@ -1,9 +1,11 @@
 .dashboard-container {
+    height: calc(100vh - 64px);
     .dashboard-header {
         border: 6px solid #D4E5F7;
         border-radius: 7px;
         width: 96%;
-        margin: 20px auto;
+        margin: 10px auto;
+        height: 50%;
 
         .add-project {
             display: flex;
@@ -35,8 +37,12 @@
     .dashboard-body {
         border-top: 1px solid #E4E7EC;
         border-radius: 20px;
+        height: 50%;
         .dashboard-body-title {
-            padding: 20px 24px 20px 24px;
+            height: 15%;
+            padding: 0 0 0 15px;
+            display: flex;
+            align-items: center;
             label {
                 color: #101828;
                 font-size: 18px;
@@ -50,6 +56,10 @@
                 color: #014FA1;
                 font-weight: 500;
             }
+        }
+        .dashboard-body-table {
+            height: 85%;
+            overflow-y: auto;
         }
     }
 }
@@ -83,8 +93,3 @@
                 outline: none;
     }
 }
-
-.dashboard-body-table {
-    height: 250px;
-    overflow-y: auto;
-  }

@@ -1,11 +1,11 @@
 <div class="select-container">
     <div class="select-tab">
       <button [ngClass]="isProjectCompare ? 'active' : ''" id="projbtn" (click)="changeOption(true)">
-        <img *ngIf="isProjectCompare" src="../../../assets/Img/AudioDetails/save-trans.png" alt="">
+        <mat-icon *ngIf="isProjectCompare">check</mat-icon>
         Compare Projects
       </button>
       <button [ngClass]="!isProjectCompare ? 'active' : ''" id="tgbtn" (click)="changeOption(false)">
-        <img *ngIf="!isProjectCompare" src="../../../assets/Img/AudioDetails/save-trans.png" alt="">
+        <mat-icon *ngIf="!isProjectCompare">check</mat-icon>
         Compare Target Groups
       </button>
     </div>
