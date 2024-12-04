@@ -297,8 +297,8 @@ export class AudioService {
       if (userid) {
         // If `userid` is passed, filter by `userid`
         querySpecProject = {
-          query: 'SELECT * FROM c WHERE c.userid = @userid',
-          parameters: [{ name: '@userid', value: userid }],
+          query: 'SELECT * FROM c WHERE c.UserId = @UserId',
+          parameters: [{ name: '@UserId', value: userid }],
         };
       } else {
         // If no `userid`, fetch all projects
@@ -351,6 +351,81 @@ export class AudioService {
       throw new InternalServerErrorException('Failed to fetch audio data');
     }
   }
+
+  async getAudioDataByProject(projectName: string) {
+    try {
+      const querySpecProject = {
+        query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
+        parameters: [{ name: '@ProjName', value: projectName }],
+      };
+  
+      const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
+  
+      if (projects.length === 0) {
+        return [];
+      }
+  
+      return await this.combineProjectAndTargetData(projects);
+    } catch (error) {
+      console.error('Error fetching audio data by project:', error.message);
+      throw new InternalServerErrorException('Failed to fetch audio data by project');
+    }
+  }
+
+  async getAudioDataByUserAndProject(user: string, projectName: string) {
+    try {
+      const querySpecProject = {
+        query: 'SELECT * FROM c WHERE c.UserId = @UserId AND c.ProjName = @ProjName',
+        parameters: [
+          { name: '@UserId', value: user },
+          { name: '@ProjName', value: projectName },
+        ],
+      };
+  
+      const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
+  
+      if (projects.length === 0) {
+        return [];
+      }
+  
+      return await this.combineProjectAndTargetData(projects);
+    } catch (error) {
+      console.error('Error fetching audio data by user and project:', error.message);
+      throw new InternalServerErrorException('Failed to fetch audio data by user and project');
+    }
+  }
+ 
+  private async combineProjectAndTargetData(projects: any[]) {
+    const combinedResults = [];
+  
+    for (const project of projects) {
+      const projId = project.ProjId;
+  
+      const querySpecTarget = {
+        query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
+        parameters: [{ name: '@ProjId', value: projId }],
+      };
+      const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
+  
+      for (const target of targets) {
+        combinedResults.push({
+          ProjectName: project.ProjName,
+          Country: target.Country,
+          State: target.State,
+          TargetGroup: target.TGName,
+          TargetId: target.TGId,
+          AgeGroup: target.AgeGrp,
+          CompetitorGroup: target.CompetetionProduct,
+          MaricoProduct: target.MaricoProduct,
+          Status: target.status === 0 ? 'Processing' : target.status === 1 ? 'Completed' : target.status === 2 ? 'Failed' : 'Unknown',
+        });
+      }
+    }
+  
+    return combinedResults;
+  }
+  
+  
 
   async viewData(TGName:string,TGId:string){
   }

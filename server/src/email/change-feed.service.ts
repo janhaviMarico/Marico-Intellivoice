@@ -198,7 +198,7 @@ export class ChangeFeedService implements OnModuleInit {
           const latestChangeTs = Math.max(...changes.map(change => change._ts));
           this.lastCheckedTime = latestChangeTs;
         } else {
-          console.log('No new insertions/updates detected.');
+          //console.log('No new insertions/updates detected.');
         }
       } catch (error) {
         console.error('Error fetching changes:', error);

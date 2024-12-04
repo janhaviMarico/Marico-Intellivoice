@@ -76,17 +76,53 @@ export class AudioController {
     }
   }
 
-  @Get('list')
-  async getAudioList(@Body('userid') userid?: string) {
-    try {
-      // Fetch data from service with or without userid
-      const audioData = await this.audioService.getAudioData(userid);
-      return { data: audioData, message: 'Audio data fetched successfully' };
-    } catch (error) {
-      console.error('Error fetching audio data:', error.message);
-      throw new InternalServerErrorException('Failed to fetch audio data');
+  // @Get('list')
+  // async getAudioList(@Body('userid') userid?: string) {
+  //   try {
+  //     // Fetch data from service with or without userid
+  //     const audioData = await this.audioService.getAudioData(userid);
+  //     return { data: audioData, message: 'Audio data fetched successfully' };
+  //   } catch (error) {
+  //     console.error('Error fetching audio data:', error.message);
+  //     throw new InternalServerErrorException('Failed to fetch audio data');
+  //   }
+  // }
+
+  /// new  code 
+
+  @Post('list')
+async getAudioListak(@Body() body: { user?: string; projectName?: string }) {
+  const { user, projectName } = body;
+
+  try {
+    let data = [];
+
+    if (!user && !projectName) {
+      // Fetch all data if both `user` and `projectName` are empty
+      data = await this.audioService.getAudioData();
+    } else if (user && !projectName) {
+      // Fetch all data for the specified `user`
+      data = await this.audioService.getAudioData(user);
+    } else if (!user && projectName) {
+      // Fetch all data for the specified `projectName`
+      data = await this.audioService.getAudioDataByProject(projectName);
+    } else {
+      // Fetch data for the specified `user` and `projectName`
+      data = await this.audioService.getAudioDataByUserAndProject(user, projectName);
     }
+
+    // Include the count of the data list in the response
+    return {
+      count: data.length,
+      data: data,
+      message: 'Audio data fetched successfully',
+    };
+  } catch (error) {
+    console.error('Error fetching audio data:', error.message);
+    throw new InternalServerErrorException('Failed to fetch audio data');
   }
+}
+
 
   @Get('details')
   async getAudioDetails(
