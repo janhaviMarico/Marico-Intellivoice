@@ -1,0 +1,412 @@
+<div class="audio-process-container">
+    <div class="process-bar">
+        <button *ngFor="let step of steps; let i = index" class="step" [ngClass]="{
+          active: currentStep === i,
+          'completed-left': i < currentStep,
+          'upcoming-right': i > currentStep
+        }">
+            <span>{{ step }}</span>
+        </button>
+    </div>
+    <!-- Add Project Code -->
+    <div class="process-container" *ngIf="currentStep === 0">
+        <form [formGroup]="targetForm" (ngSubmit)="onSubmit()">
+            <div #formEnd>
+                <div class="project-detail">
+                    <h3>Project Details</h3>
+                    <div class="project-card">
+                        <mat-form-field class="example-full-width">
+                            <mat-label>Project Name</mat-label>
+                            <input type="text" placeholder="Project Name" aria-label="Project Name" matInput
+                                formControlName="projectName" [matAutocomplete]="auto">
+                            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredProject | async"
+                                    [value]="option.ProjName">{{option.ProjName}}</mat-option>
+                            </mat-autocomplete>
+                            <mat-error
+                                *ngIf="targetForm.get('projectName')?.invalid && targetForm.get('projectName')?.touched">
+                                Project Name is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="tg-detail">
+                    <h3>Target Group Details</h3>
+                    <button type="button" (click)="clearForm()">Clear All</button>
+                </div>
+                <div class="dp-detail">
+                    <h3>Demographic & Products Involved</h3>
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Select Country</mat-label>
+                            <mat-select formControlName="country">
+                                <mat-option [value]="con.name" *ngFor="let con of countries">{{con.name}}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="targetForm.get('country')?.invalid && targetForm.get('country')?.touched">
+                                Country is required
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>Select State</mat-label>
+                            <mat-select formControlName="state">
+                                <mat-option [value]="state.name"
+                                    *ngFor="let state of states">{{state.name}}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="targetForm.get('state')?.invalid && targetForm.get('state')?.touched">
+                                State is required
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>Competitors Product</mat-label>
+                            <mat-select multiple formControlName="competitors">
+                                <mat-option [value]="com.name" *ngFor="let com of competitors">{{com.name}}</mat-option>
+                            </mat-select>
+                            <mat-error
+                                *ngIf="targetForm.get('competitors')?.invalid && targetForm.get('competitors')?.touched">
+                                Please select at least one competitor
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Marico Product</mat-label>
+                            <mat-select formControlName="maricoProduct">
+                                <mat-option [value]="pro.name" *ngFor="let pro of products">{{pro.name}}</mat-option>
+                            </mat-select>
+                            <mat-error
+                                *ngIf="targetForm.get('maricoProduct')?.invalid && targetForm.get('maricoProduct')?.touched">
+                                Marico Product is required
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>Minimum Age of the Group {{targetForm.errors?.['ageRangeInvalid']}}
+                                {{!targetForm.get('minAge')?.hasError('min')}}
+                                {{!targetForm.get('minAge')?.hasError('max')}}</mat-label>
+                            <input matInput type="number" formControlName="minAge" min="5" max="60"
+                                placeholder="Enter Minimum Age">
+                            <mat-error *ngIf="targetForm.get('minAge')?.invalid && targetForm.get('minAge')?.touched">
+                                <span *ngIf="targetForm.get('minAge')?.hasError('required')">
+                                    Minimum Age is required
+                                </span>
+                                <span *ngIf="targetForm.get('minAge')?.hasError('min')">
+                                    Minimum Age cannot be less than 5
+                                </span>
+                                <span *ngIf="targetForm.get('minAge')?.hasError('max')">
+                                    Minimum Age cannot exceed 60
+                                </span>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>Maximum Age of the Group</mat-label>
+                            <input matInput type="number" formControlName="maxAge" min="5" max="60"
+                                placeholder="Enter Maximum Age">
+                            <mat-error *ngIf="targetForm.get('maxAge')?.invalid && targetForm.get('maxAge')?.touched">
+                                <span *ngIf="targetForm.get('maxAge')?.hasError('required')">
+                                    Maximum Age is required
+                                </span>
+                                <span *ngIf="targetForm.get('maxAge')?.hasError('min')">
+                                    Maximum Age cannot be less than 5
+                                </span>
+                                <span *ngIf="targetForm.get('maxAge')?.hasError('max')">
+                                    Maximum Age cannot exceed 60
+                                </span>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="dp-detail">
+                    <h3>Languages & Speakers</h3>
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Primary Language</mat-label>
+                            <mat-select formControlName="primaryLang">
+                                <mat-option [value]="pl.name" *ngFor="let pl of primaryLang">{{pl.name}}</mat-option>
+                            </mat-select>
+                            <mat-error
+                                *ngIf="targetForm.get('primaryLang')?.invalid && targetForm.get('primaryLang')?.touched">
+                                Primary Language is required
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>Secondary Language</mat-label>
+                            <mat-select multiple formControlName="otherLangs">
+                                <mat-option [value]="ol.name"
+                                    *ngFor="let ol of filteredOtherLang">{{ol.name}}</mat-option>
+                            </mat-select>
+                            <mat-error
+                                *ngIf="targetForm.get('otherLangs')?.invalid && targetForm.get('otherLangs')?.touched">
+                                At least one Secondary Language is required
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                            <mat-label>No. of Speakers</mat-label>
+                            <input matInput type="number" formControlName="numSpeakers" placeholder="Enter Maximum Age"
+                                min="2" max="10">
+                            <mat-error
+                                *ngIf="targetForm.get('numSpeakers')?.invalid && targetForm.get('numSpeakers')?.touched">
+                                <span *ngIf="targetForm.get('numSpeakers')?.hasError('required')">
+                                    Number of Speakers is required
+                                </span>
+                                <span *ngIf="targetForm.get('numSpeakers')?.hasError('min')">
+                                    Number of Speakers cannot be less than 2
+                                </span>
+                                <span *ngIf="targetForm.get('numSpeakers')?.hasError('max')">
+                                    Number of Speakers cannot exceed 10
+                                </span>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="new-tg-grp">
+                    <button type="submit" [disabled]="targetForm.invalid">Create New Target Group</button>
+                </div>
+
+                <div class="tg-list">
+                    <mat-grid-list cols="4" rowHeight="5:1" *ngIf="true">
+                        <!-- <mat-grid-list cols="2"rowHeight="5:1" *ngIf="targetGrpArr.length > 0"> -->
+                        <mat-grid-tile *ngFor="let tg of targetGrpArr; let i = index" (mouseenter)="mouseEnter(tg)">
+                            <div class="tg-name" appTooltip>
+                                <div class="targetTooltip">
+                                    <div class="targetGroupPopop">
+                                        <h6>{{target?.name | truncate:50 }}</h6>
+                                        <div class="target-data-wrapper">
+                                            <div class="data-group">
+                                                <div class="target">
+                                                    <span class="label">Project Name</span>
+                                                    <span class="value">{{target?.projectName}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Country</span>
+                                                    <span class="value">{{target?.country}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">State</span>
+                                                    <span class="value">{{target?.state}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="data-group">
+                                                <div class="target">
+                                                    <span class="label">Competitor Products</span>
+                                                    <span class="value">{{target?.competitors}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Marico Product</span>
+                                                    <span class="value">{{target?.maricoProduct}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Min Age - Max Age</span>
+                                                    <span class="value">{{target?.minAge}} - {{target?.maxAge}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="data-group">
+                                                <div class="target">
+                                                    <span class="label">Primary Lang</span>
+                                                    <span class="value">{{target?.primaryLang}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Other Lang</span>
+                                                    <span class="value">{{target?.otherLangs}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">No. Of Speakers</span>
+                                                    <span class="value">{{target?.numSpeakers}}</span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <button><mat-icon>help</mat-icon></button>
+                                <span>{{ tg.name | truncate:25 }}</span>
+                                <button class="cross-btn" (click)="removeTargetGroup(i)"><mat-icon>add</mat-icon></button>
+                            </div>
+                        </mat-grid-tile>
+                    </mat-grid-list>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Media Code -->
+    <div class="media-container" *ngIf="currentStep === 1 || currentStep === 2">
+        <div class="media-inner-cont">
+            <div class="media-header">
+                <h3>Media Upload</h3>
+                <p>Format supported are MP3</p>
+                <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)"
+                    (dragleave)="onDragLeave($event)">
+                    <input type="file" #fileDropRef id="fileDropRef" (change)="onFileSelected($event)" multiple
+                        accept="audio/*">
+                    <img src="../../../../assets/Img/dashboard/upload-file.png" alt="upload-file">
+                    <div class="upload-label">
+                        <label for="fileDropRef">Drag your file(s) or <span>browser</span></label>
+                        <label class="validation-msg" for="">Maximum Upload File Size is 4GB</label>
+                    </div>
+                </div>
+            </div>
+            <div class="media-body">
+                <div class="upload-list">
+                    <h3>Selected Audios And Assign Target Groups</h3>
+                    <mat-accordion *ngIf="expansionArr.length > 0" class="expansion-section">
+                        <mat-expansion-panel *ngFor="let exp of expansionArr; let expIndex = index"
+                            (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
+
+                            <mat-expansion-panel-header>
+                                <mat-panel-title> {{exp.name | truncate:29 }} </mat-panel-title>
+                            </mat-expansion-panel-header>
+
+                            <ul>
+                                <li class="expanse-li" *ngFor="let file of exp.audioList; let i = index">
+                                    <button><img src="../../../../assets/Img/dashboard/drag.png" alt=""
+                                            (click)="removeFileFromExpansionList(expIndex, i)"></button>
+                                    <div class="upload-player">
+                                        <div class="controls">
+                                            <div class="file-name">
+                                                <img src="../../../../assets/Img/dashboard/file.png" alt="">
+                                                <span>{{ file.name | truncate:25 }}</span>
+                                            </div>
+                                            <div class="control">
+                                                <!-- <button (click)="togglePlayPause(i, exp.audioList, 'expansion')">
+                                    <img src="../../../../assets/Img/dashboard/play-btn.png" alt="" />
+                                  </button> -->
+                                                <button (click)="removeFileFromExpansionList(expIndex, i , true)">
+                                                    <mat-icon>delete</mat-icon>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                    <ul class="audio-files-section">
+                        <li *ngFor="let file of audioFiles; let i = index">
+                            <input type="checkbox" (change)="toggleSelectFile(file, $event)" />
+                            <div class="upload-player">
+                                <div class="controls">
+                                    <div class="file-name">
+                                        <img src="../../../../assets/Img/dashboard/file.png" alt="">
+                                        <span>{{ file.name | truncate:25}}</span>
+                                    </div>
+                                    <div class="control">
+                                        <button (click)="togglePlayPause(i, audioFiles,'audioFiles')">
+                                            <mat-icon *ngIf="!isPlaying(i, 'audioFiles')">play_arrow</mat-icon>
+                                            <mat-icon *ngIf="isPlaying(i, 'audioFiles')">pause</mat-icon>
+                                        </button>
+                                        <button (click)="deleteFile(i)">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="slider">
+                                    <span id="current-time">{{ file.currentTime || '0:00' }}</span>
+                                    <input type="range" class="seek-bar" [value]="file.seekValue || 0" max="100"
+                                        (input)="seekAudio($event, i, audioFiles)" />
+                                    <span id="duration-time">{{ file.durationTime || '0:00' }}</span>
+                                    <audio #audioPlayer controls (timeupdate)="updateProgress($event, i, audioFiles)"
+                                        [src]="file.url"></audio>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Success -->
+    <div class="upload-success-cont" *ngIf="currentStep === 4">
+        <div class="info-container">
+            <img src="../../../../assets/Img/dashboard/file-process.png" alt="">
+            <h5>Files submitted for Intelli-Voice processing!</h5>
+            <p>An email with link will be send to when the processing is complete.</p>
+            <div class="info-btn">
+                <button class="add-btn" (click)="AddAnotherProject()">Add Another Video</button>
+                <button class="cl-btn" (click)="closeAudioProcess()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="project-footer">
+        <div class="add-project-footer" *ngIf="currentStep === 0">
+            <button type="submit" [disabled]="targetGrpArr.length === 0" (click)="nextStep()">Next <mat-icon
+                    aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_forward"></mat-icon></button>
+        </div>
+        <div class="add-media-footer" *ngIf="currentStep === 1 || currentStep === 2">
+            <button type="submit" (click)="previousStep()"><mat-icon aria-hidden="false" aria-label="Example home icon"
+                    fontIcon="arrow_back"></mat-icon>Prev</button>
+            <div class="add-meadia-btn">
+                <mat-form-field>
+                    <mat-label>Select Target Group</mat-label>
+                    <mat-select #selectElement [(ngModel)]="selectedTargetGrp"
+                        (selectionChange)="assignTargetGrp($event)">
+                        <mat-option *ngFor="let tg of targetGrps?.targetGrpArr; let i = index" [value]="tg.name"
+                            (mouseenter)="mouseEnter(tg)">
+                            <div appTooltip>
+                                <div class="targetTooltip">
+                                    <div class="targetGroupPopop">
+                                        <h6>{{target?.name | truncate:30 }}</h6>
+                                        <div class="target-data-wrapper">
+                                            <div class="data-group">
+                                                <div class="target">
+                                                    <span class="label">Project Name</span>
+                                                    <span class="value">{{target?.projectName}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Country</span>
+                                                    <span class="value">{{target?.country}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">State</span>
+                                                    <span class="value">{{target?.state}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="data-group">
+                                                <div class="target">
+                                                    <span class="label">Competitor Products</span>
+                                                    <span class="value">{{target?.competitors}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Marico Product</span>
+                                                    <span class="value">{{target?.maricoProduct}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Min Age - Max Age</span>
+                                                    <span class="value">{{target?.minAge}} - {{target?.maxAge}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="data-group">
+                                                <div class="target">
+                                                    <span class="label">Primary Lang</span>
+                                                    <span class="value">{{target?.primaryLang}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">Other Lang</span>
+                                                    <span class="value">{{target?.otherLangs}}</span>
+                                                </div>
+                                                <div class="target">
+                                                    <span class="label">No. Of Speakers</span>
+                                                    <span class="value">{{target?.numSpeakers}}</span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                Target {{i+1}}
+                            </div>
+
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button (click)="audioProcessing()" [disabled]="isProcessingDisable">Submit For Processing</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div *ngIf="isLoading" class="spinner">
+    <mat-spinner></mat-spinner>
+</div>

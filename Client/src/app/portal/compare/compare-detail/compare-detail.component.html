@@ -1,0 +1,36 @@
+
+<div class="compare-container">
+    <div class="compare-header">
+      <button (click)="backBtn()" matTooltip="Back"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
+      <h3>Comparison of Project 1 , Project 2, Project 3  </h3>
+    </div>
+    <div class="compare-body">
+        <div class="carousel-container">
+            <div class="carousel">
+                <div class="carousel-item" *ngFor="let item of compareArr; let i = index" [class.visible]="isVisible(i)">
+                    <div class="card">
+                        <h3>{{ item?.projectName  | truncate:50 }}</h3>
+                        <div class="analysis">
+                            <pre>{{ item?.targetCompareProject }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-control">
+                <button (click)="prev()" [disabled]="currentIndex === 0"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
+                <button (click)="next()" [disabled]="currentIndex >= compareArr.length - 2"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_forward"></mat-icon></button>
+            </div>
+        </div>
+        <div class="summary-container">
+            <div class="summary">
+                <h3>Summary</h3>
+                <pre>{{summary}}</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div *ngIf="isLoading" class="spinner">
+    <mat-spinner></mat-spinner>
+</div>

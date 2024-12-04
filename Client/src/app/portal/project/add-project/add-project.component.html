@@ -30,7 +30,7 @@
                         Project Name is required
                     </mat-error>
                   </mat-form-field>
-                  <!-- <button type="button">Select Existing Project</button> -->
+                  <button type="button" (click)="changeProject()">{{ isExitingProj ? 'Add New Project' : 'Select Existing Project' }}</button>
                </div>
             </div>
             <div class="tg-detail">

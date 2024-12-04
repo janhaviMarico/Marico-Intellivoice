@@ -15,7 +15,6 @@ export class InfoComponent {
     @Inject(MAT_DIALOG_DATA) public info: {name?:string,title?:string},
     private commonServ:CommonService
   ) {
-    console.log('info',info)
     this.infoObj = info;
   }
 

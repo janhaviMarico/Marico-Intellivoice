@@ -20,6 +20,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {TableModule} from 'primeng/table';
 import { DropdownModule } from 'primeng/dropdown';
@@ -38,6 +39,9 @@ import { HttpClientModule } from '@angular/common/http';
 
 import {ToastrModule } from 'ngx-toastr';
 import { UserListComponent } from './user-list/user-list.component';
+import { CompareComponent } from './compare/compare.component';
+import { CompareDetailComponent } from './compare/compare-detail/compare-detail.component';
+import { AudioProcessComponent } from './audio-process/audio-process.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +55,9 @@ import { UserListComponent } from './user-list/user-list.component';
     TooltipDirective,
     InfoComponent,
     UserListComponent,
+    CompareComponent,
+    CompareDetailComponent,
+    AudioProcessComponent,
   ],
   imports: [
     CommonModule,
@@ -65,6 +72,7 @@ import { UserListComponent } from './user-list/user-list.component';
     MatCheckboxModule,
     MatButtonModule,
     MatExpansionModule,
+    MatTooltipModule,
     DropdownModule,
     FormsModule,
     MultiSelectModule,

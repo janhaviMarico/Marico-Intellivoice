@@ -128,6 +128,10 @@ export class AddProjectComponent {
     })
   }
 
+  changeProject() {
+    this.isExitingProj = !this.isExitingProj;
+  }
+
   onSubmit() {
     if (this.targetForm.invalid) {
       this.targetForm.markAllAsTouched();

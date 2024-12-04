@@ -1,0 +1,167 @@
+<div class="select-container">
+    <div class="select-tab">
+      <button [ngClass]="isProjectCompare ? 'active' : ''" id="projbtn" (click)="changeOption(true)">
+        <mat-icon *ngIf="isProjectCompare">check</mat-icon>
+        Compare Projects
+      </button>
+      <button [ngClass]="!isProjectCompare ? 'active' : ''" id="tgbtn" (click)="changeOption(false)">
+        <mat-icon *ngIf="!isProjectCompare">check</mat-icon>
+        Compare Target Groups
+      </button>
+    </div>
+    <hr>
+    <div class="select-options">
+      <div class="select-options-proj" *ngIf="isProjectCompare">
+          <form [formGroup]="projectForm" (ngSubmit)="onSubmitProject()">
+            <div class="project-grid" formArrayName="projects">
+              <div *ngFor="let project of projects.controls; let i = index" [formGroupName]="i" class="project-field">
+                <mat-form-field class="example-full-width">
+                  <mat-label>Project Name</mat-label>
+                  <input
+                    type="text"
+                    placeholder="Project Name"
+                    aria-label="Project Name"
+                    matInput
+                    formControlName="projectName"
+                    [matAutocomplete]="auto"
+                  />
+                  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredProjectsArray[i] | async" [value]="option.ProjName">
+                      {{ option.ProjName }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <mat-error *ngIf="projects.at(i).get('projectName')?.invalid && projects.at(i).get('projectName')?.touched">
+                    Project Name is required
+                  </mat-error>
+  
+                  <button class="removeBtn" type="button" (click)="removeProject(i)" *ngIf="projects.controls.length > 2">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </mat-form-field>
+                
+              </div>
+            </div>
+            <div class="btns">
+              <button type="button" (click)="addProject()">
+                Add Project
+              </button>
+              <button type="submit" [disabled]="projectForm.invalid">Compare Selected Project</button>
+            </div>
+          </form>
+      </div>
+
+      <div class="select-options-proj" *ngIf="!isProjectCompare">
+        <form [formGroup]="targetForm" (ngSubmit)="onSubmitTarget()">
+          <h3 class="heading proj">Project Details</h3>
+         <div class="project-selection">
+          <mat-form-field class="example-full-width proj-field">
+            <mat-label>Project Name</mat-label>
+            <input type="text"
+                   placeholder="Project Name"
+                   aria-label="Project Name"
+                   matInput
+                   formControlName="project"
+                   [matAutocomplete]="auto">
+            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+                <mat-option *ngFor="let option of filteredProject | async" [value]="option.ProjName">{{option.ProjName}}</mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="targetForm.get('project')?.invalid && targetForm.get('project')?.touched">
+                Project Name is required
+            </mat-error>
+          </mat-form-field>
+         </div>
+
+          <h3 class="heading">Target Group Details</h3>
+          <div class="project-grid" formArrayName="targets">
+            <div *ngFor="let project of targets.controls; let i = index" [formGroupName]="i" class="project-field">
+              <mat-form-field class="example-full-width">
+                <mat-label>Target Group Name</mat-label>
+                <input
+                  type="text"
+                  placeholder="Target Group Name"
+                  aria-label="Target Group Name"
+                  matInput
+                  formControlName="targetName"
+                  [matAutocomplete]="auto"
+                />
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                  <mat-option *ngFor="let option of filteredTGsArray[i] | async" [value]="option.TGName"
+                  (mouseenter)="mouseEnterOnTargetGrp(option)">
+                  <div appTooltip>
+                    <div class="targetTooltip">
+                        <div class="targetGroupPopop">
+                            <h6>{{target?.TGName | truncate:50 }}</h6>
+                            <div class="target-data-wrapper">
+                                <div class="data-group">
+                                    <div class="target">
+                                        <span class="label">Project Name</span>
+                                        <span class="value">{{selectedProject}}</span>
+                                    </div>
+                                    <div class="target">
+                                        <span class="label">Country</span>
+                                        <span class="value">{{target?.Country}}</span>
+                                    </div>
+                                    <div class="target">
+                                        <span class="label">State</span>
+                                        <span class="value">{{target?.State}}</span>
+                                    </div>
+                                </div>
+                                <div class="data-group">
+                                    <div class="target">
+                                        <span class="label">Competitor Products</span>
+                                        <span class="value">{{target?.CompetetionProduct}}</span>
+                                    </div>
+                                    <div class="target">
+                                        <span class="label">Marico Product</span>
+                                        <span class="value">{{target?.MaricoProduct}}</span>
+                                    </div>
+                                    <div class="target">
+                                        <span class="label">Min Age - Max Age</span>
+                                        <span class="value">{{target?.AgeGrp}}</span>
+                                    </div>
+                                </div>
+                                <div class="data-group">
+                                    <div class="target">
+                                        <span class="label">Primary Lang</span>
+                                        <span class="value">{{target?.MainLang}}</span>
+                                    </div>
+                                    <div class="target">
+                                        <span class="label">Other Lang</span>
+                                        <span class="value">{{target?.SecondaryLang}}</span>
+                                    </div>
+                                    <div class="target">
+                                        <span class="label">No. Of Speakers</span>
+                                        <span class="value">{{target?.noOfSpek}}</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    {{ option.TGName }}
+                </div>
+                    <!-- {{ option.TGName }} -->
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="targets.at(i).get('targetName')?.invalid && targets.at(i).get('targetName')?.touched">
+                  Target Group Name is required
+                </mat-error>
+
+                <button class="removeBtn" type="button" (click)="removeTargetGrp(i)" *ngIf="targets.controls.length > 2">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </mat-form-field>
+              
+            </div>
+          </div>
+          <div class="btns">
+            <button type="button" (click)="addTargetGrp()">
+              Add Target Group
+            </button>
+            <button type="submit" [disabled]="targetForm.invalid">Compare Selected Target Group</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

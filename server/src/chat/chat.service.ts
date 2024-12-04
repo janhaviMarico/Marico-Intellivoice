@@ -208,8 +208,8 @@ export class ChatService {
       
       return {
         project: [
-          { targetCompareProject1: targetCompareProject1 }, 
-          { targetCompareProject2: targetCompareProject2 }
+          { targetCompareProject: targetCompareProject1, projectName: project1 }, 
+          { targetCompareProject: targetCompareProject2, projectName: project2 }
         ],
         summary: summary
       };
@@ -227,8 +227,8 @@ export class ChatService {
       //return false;
       return {
         project: [
-          { targetCompareProject1: targetCompareProject1 }, 
-          { targetCompareProject2: targetCompareProject2 }
+          { targetCompareProject: targetCompareProject1, projectName:  project1}, 
+          { targetCompareProject: targetCompareProject2, projectName:  project2}
         ],
         summary: summary
       };
@@ -245,15 +245,16 @@ export class ChatService {
         query: 'SELECT * FROM c WHERE c.ProjName = @projectName',
         parameters: [{ name: '@projectName', value: projectName }],
       };
-  
+      
       const { resources: existingDocuments } = await this.projectContainer.items.query(querySpec).fetchAll();
-      if (!existingDocuments.length) {
+      
+      if (existingDocuments.length === 0) {
         throw new Error(`No documents found for project: ${projectName}`);
       }
-  
+
       const projectDocument = existingDocuments[0];
       const transcriptionIds = projectDocument.TGIds.map(id => `'${id}'`).join(", ");
-  
+
       const transcriptionQuery = {
         query: `SELECT c.vectorId FROM c WHERE c.TGName IN (${transcriptionIds})`,
       };
