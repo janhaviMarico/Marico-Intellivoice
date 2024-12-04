@@ -542,8 +542,6 @@ async editTranscription(data: EditTranscriptionDto, vectorIds: string[]) {
 async updateMetadataInAzureSearch(vectorIds: string[], metadata:string): Promise<any> {
   const url = `${this.endpoint}/indexes/${this.indexName}/docs/index?api-version=2021-04-30-Preview`;
 
-  console.log("metadat is",metadata)
-  console.log("url is",url)
 
   // Convert the metadata object into a single string if needed
   //const metadataString = JSON.stringify(metadata);

@@ -75,13 +75,13 @@ export class MasterService {
     };
 
     // Log the target query specification for debugging
-    console.log("Target Query Spec:", targetQuerySpec);
+    //console.log("Target Query Spec:", targetQuerySpec);
 
     // Execute the target details query for the current project
     const { resources: targetDetails } = await this.TargetContainer.items.query(targetQuerySpec).fetchAll();
 
     // Log the results fetched from TargetContainer
-    console.log("Target Details for Project", project.id, targetDetails);
+   // console.log("Target Details for Project", project.id, targetDetails);
 
     // Attach target details to the current project if data is found
     project.targetDetails = targetDetails.length ? targetDetails : [];
