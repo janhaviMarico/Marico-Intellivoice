@@ -131,7 +131,7 @@ async getAudioListak(@Body() body: { user?: string; projectName?: string }) {
 ) {
     try {
       // Fetch details from the service
-      console.log(tgId,tgName);
+      
       const audioDetails = await this.audioService.getAudioDetails(tgId, tgName);
       return { data: audioDetails, message: 'Audio details fetched successfully' };
     } catch (error) {
