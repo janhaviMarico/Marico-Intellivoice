@@ -1,6 +1,6 @@
 <div class="tab-container">
   <div class="tab-header">
-    <button (click)="back()"><mat-icon>arrow_back</mat-icon></button>
+    <button (click)="back()" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
     <h3>{{audioDetails?.TGName}}</h3>
   </div>
   <mat-tab-group class="tab-group" [(selectedIndex)]="selectedTabIndex">

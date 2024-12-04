@@ -34,7 +34,7 @@
                     Project Name is required
                   </mat-error>
   
-                  <button class="removeBtn" type="button" (click)="removeProject(i)">
+                  <button class="removeBtn" type="button" (click)="removeProject(i)" *ngIf="projects.controls.length > 2">
                     <mat-icon>add</mat-icon>
                   </button>
                 </mat-form-field>
@@ -147,7 +147,7 @@
                   Target Group Name is required
                 </mat-error>
 
-                <button class="removeBtn" type="button" (click)="removeTargetGrp(i)">
+                <button class="removeBtn" type="button" (click)="removeTargetGrp(i)" *ngIf="targets.controls.length > 2">
                   <mat-icon>add</mat-icon>
                 </button>
               </mat-form-field>

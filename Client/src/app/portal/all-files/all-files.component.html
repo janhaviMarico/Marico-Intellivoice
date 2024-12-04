@@ -1,39 +1,55 @@
 <div class="allfiles-container">
   <div class="allfiles-container-header">
-    <button [ngClass]="isAllFiles ? 'active' : ''" id="allfilebtn" (click)="changeFileOption('all')">All Files <span>100
-        files</span></button>
-    <button [ngClass]="!isAllFiles ? 'active' : ''" id="myfilebtn" (click)="changeFileOption('my')">My Files <span>50
-        files</span></button>
+    <div class="allfiles-container-header-tabs">
+      <button [ngClass]="isAllFiles ? 'active' : ''" id="allfilebtn" (click)="changeFileOption('all')">All Files
+        <span>100
+          files</span></button>
+      <button [ngClass]="!isAllFiles ? 'active' : ''" id="myfilebtn" (click)="changeFileOption('my')">My Files <span>50
+          files</span></button>
+    </div>
+    <div class="allfiles-container-header-search">
+      <form class="example-form">
+        <mat-form-field class="example-full-width">
+          <mat-label>Search by Project Name</mat-label>
+          <input type="text" placeholder="Search Project Name" aria-label="ProjName" matInput [formControl]="myControl"
+            [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+            <mat-option *ngFor="let option of filteredOptions | async; track option"
+              [value]="option?.ProjName">{{option?.ProjName}}</mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </form>
+    </div>
   </div>
   <div class="allfiles-container-body">
     <div class="card">
       <p-table #dt2 [value]="project" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true">
-          <ng-template pTemplate="header">
-              <tr>
-                  <th>Project Name</th>
-                  <th>Country</th>
-                  <th>State</th>
-                  <th>Target Group</th>
-                  <th>Age Group</th>
-                  <th>Competetion</th>
-                  <th>Marico Product</th>
-                  <th>Actions</th>
-              </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-project>
-              <tr>
-                  <td>{{ project.ProjectName }}</td>
-                  <td>{{ project.Country }}</td>
-                  <td>{{ project.State }}</td>
-                  <td>{{ project.TargetGroup | truncate:40}}</td>
-                  <td>{{ project.AgeGroup }}</td>
-                  <td>{{ project.CompetitorGroup }}</td>
-                  <td>{{ project.MaricoProduct }}</td>
-                  <td> 
-                    <button class="view-btn" (click)="viewDetails(project.TargetId, project.TargetGroup)">View</button> 
-                  </td>
-              </tr>
-          </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Project Name</th>
+            <th>Country</th>
+            <th>State</th>
+            <th>Target Group</th>
+            <th>Age Group</th>
+            <th>Competetion</th>
+            <th>Marico Product</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-project>
+          <tr>
+            <td>{{ project.ProjectName }}</td>
+            <td>{{ project.Country }}</td>
+            <td>{{ project.State }}</td>
+            <td>{{ project.TargetGroup | truncate:40}}</td>
+            <td>{{ project.AgeGroup }}</td>
+            <td>{{ project.CompetitorGroup }}</td>
+            <td>{{ project.MaricoProduct }}</td>
+            <td>
+              <button class="view-btn" (click)="viewDetails(project.TargetId, project.TargetGroup)">View</button>
+            </td>
+          </tr>
+        </ng-template>
       </p-table>
     </div>
   </div>

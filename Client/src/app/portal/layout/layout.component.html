@@ -1,6 +1,6 @@
 <header>
     <div class="logo">
-        <img src="../../../assets/Img/header/Logo.png" alt="Marico-Logo">
+        <img src="../../../assets/Img/header/Logo.png" alt="Marico-Logo" matTooltip="Marico">
         <label>Intelli-Voice</label>
     </div>
     <div class="section">
@@ -10,9 +10,9 @@
                 placeholder="Search Files, Projects, Target Groups, Competitors, Products">
         </div>
         <div class="profile">
-            <button><mat-icon>help_outline</mat-icon></button>
-            <button><mat-icon>settings</mat-icon></button>
-            <button><img src="../../../assets/Img/header/profile.png" (click)="logout()" alt="Profile"></button>
+            <button matTooltip="Help"><mat-icon>help_outline</mat-icon></button>
+            <button matTooltip="Settings"><mat-icon>settings</mat-icon></button>
+            <button matTooltip="Profile"><img src="../../../assets/Img/header/profile.png" (click)="logout()" alt="Profile"></button>
         </div>
     </div>
 </header>

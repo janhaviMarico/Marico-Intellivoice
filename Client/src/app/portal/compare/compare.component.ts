@@ -117,13 +117,23 @@ export class CompareComponent implements OnInit {
     }
   }
 
-  onSubmitProject(): void {
-    const param = {
-      arr: this.projectForm.value.projects,
-      isProject: true
+  onSubmitProject() {
+    let areUnique: boolean = this.projectForm.value.projects.every(
+      (item:any, index:number) =>
+        this.projectForm.value.projects.findIndex((obj:any) => obj.projectName === item.projectName) === index
+    );
+
+    if(areUnique) {
+      const param = {
+        arr: this.projectForm.value.projects,
+        isProject: true
+      }
+      this.commonServ.setCompareObj(param);
+      this.router.navigate(['/portal/comparison/comparison-detail']);
+    } else {
+      this.toastr.warning('Select Unique Projects for Comparison');
     }
-    this.commonServ.setCompareObj(param);
-    this.router.navigate(['/portal/comparison/comparison-detail']);
+    
   }
 
   get targets(): FormArray {
@@ -150,12 +160,20 @@ export class CompareComponent implements OnInit {
   }
 
   onSubmitTarget() {
-    const param = {
-      arr: this.targetForm.value.targets,
-      isProject: false
+    let areUnique: boolean = this.targetForm.value.targets.every(
+      (item:any, index:number) =>
+        this.targetForm.value.targets.findIndex((obj:any) => obj.targetName === item.targetName) === index
+    );
+    if(areUnique) {
+      const param = {
+        arr: this.targetForm.value.targets,
+        isProject: false
+      }
+      this.commonServ.setCompareObj(param);
+      this.router.navigate(['/portal/comparison/comparison-detail']);
+    } else {
+      this.toastr.warning('Select Unique Target Groups for Comparison')
     }
-    this.commonServ.setCompareObj(param);
-    this.router.navigate(['/portal/comparison/comparison-detail']);
   }
 
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {

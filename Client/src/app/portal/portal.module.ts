@@ -20,6 +20,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {TableModule} from 'primeng/table';
 import { DropdownModule } from 'primeng/dropdown';
@@ -71,6 +72,7 @@ import { AudioProcessComponent } from './audio-process/audio-process.component';
     MatCheckboxModule,
     MatButtonModule,
     MatExpansionModule,
+    MatTooltipModule,
     DropdownModule,
     FormsModule,
     MultiSelectModule,
