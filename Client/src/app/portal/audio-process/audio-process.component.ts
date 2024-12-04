@@ -532,6 +532,7 @@ export class AudioProcessComponent {
   ClearProject() {
     this.targetGrpArr = [];
     this.targetForm.reset();
+    this.targetForm.controls['projectName'].enable();
     this.currentStep = 4;
   }
 

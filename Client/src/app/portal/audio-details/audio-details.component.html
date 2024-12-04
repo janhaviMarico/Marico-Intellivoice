@@ -15,7 +15,7 @@
       <div class="tab-content">
         <div class="tab-content-text">
           <p class="text" *ngFor="let audioData of audioDetails?.AudioData">
-            <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
+            <span class="moderator" [ngClass]="{ 'main': audioData?.speaker === 'Moderator' }">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
             {{audioData?.transcription}}
           </p>
         </div>
@@ -59,7 +59,7 @@
       <div class="tab-content">
         <div class="tab-content-text">
           <p class="text" *ngFor="let audioData of audioDetails?.AudioData">
-            <span class="moderator">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
+            <span class="moderator" [ngClass]="{ 'main': audioData?.speaker === 'Moderator' }">Speaker {{audioData?.speaker}} ({{audioData?.timestamp}}): </span>
             <span *ngIf="!isEdit">{{audioData?.translation}}</span>
             <textarea *ngIf="isEdit" name="" id="" [(ngModel)]="audioData.translation" class="edit-textarea"></textarea>
           </p>
