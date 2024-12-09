@@ -2,9 +2,9 @@
   <div class="allfiles-container-header">
     <div class="allfiles-container-header-tabs">
       <button [ngClass]="isAllFiles ? 'active' : ''" id="allfilebtn" (click)="changeFileOption('all')">All Files
-        <span>100
+        <span>{{this.count}}
           files</span></button>
-      <button [ngClass]="!isAllFiles ? 'active' : ''" id="myfilebtn" (click)="changeFileOption('my')">My Files <span>50
+      <button [ngClass]="!isAllFiles ? 'active' : ''" id="myfilebtn" (click)="changeFileOption('my')">My Files <span>{{this.count}}
           files</span></button>
     </div>
     <div class="allfiles-container-header-search">
@@ -12,9 +12,9 @@
         <mat-form-field class="example-full-width">
           <mat-label>Search by Project Name</mat-label>
           <input type="text" placeholder="Search Project Name" aria-label="ProjName" matInput [formControl]="myControl"
-            [matAutocomplete]="auto">
+            [matAutocomplete]="auto" (keyup)="emptyProject()">
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-            <mat-option *ngFor="let option of filteredOptions | async; track option"
+            <mat-option *ngFor="let option of filteredOptions | async;"
               [value]="option?.ProjName">{{option?.ProjName}}</mat-option>
           </mat-autocomplete>
         </mat-form-field>

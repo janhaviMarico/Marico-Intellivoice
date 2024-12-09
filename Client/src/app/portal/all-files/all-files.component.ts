@@ -16,18 +16,24 @@ export class AllFilesComponent {
   isAllFiles: boolean = true;
   project:any[] = [];
   userId:string = 'testuser4';
-  isLoading: boolean = true;
+  isLoading: boolean = false;
   myControl = new FormControl('');
   options: string[] = ['One', 'Two', 'Three'];
   filteredOptions!: Observable<any[]>;
   existingProject:any[] = [];
   selectedProject: string = '';
+  count:number = 0;
+  userEmail:string = ''
   constructor(private audioServ:AudioService,private router:Router, private toastr: ToastrService,
     private commonServ:CommonService
   ) { }
 
   ngOnInit() {
-    this.getProjectData();
+    const param = {
+      user:this.userEmail,
+      projectName: this.selectedProject
+    }
+    this.getProjectData(param);
     this.getExistingProject();
   }
 
@@ -54,18 +60,30 @@ export class AllFilesComponent {
     );
   }
 
-  getProjectData() {
-    this.audioServ.getData('audio/list', this.userId).subscribe((res:any)=> {
+  getProjectData(param:any) {
+    this.isLoading = true;
+    this.audioServ.postAPI('audio/list', param, false).subscribe((res:any)=> {
       this.project = res.data;
+      this.count = res.count;
       this.isLoading = false;
     }, (err:any)=> {
       this.isLoading = false;
       this.toastr.error('Something Went Wrong!')
-    })
+    });
   }
 
   changeFileOption(val:string) {
     this.isAllFiles = (val === 'all');
+    if(val === 'all') {
+      this.userEmail = ''
+    } else {
+      this.userEmail = localStorage.getItem('User') || '';
+    }
+    const param = {
+      user:this.userEmail,
+      projectName: this.selectedProject
+    }
+    this.getProjectData(param);
   }
 
   viewDetails(tgId:string, tgName:string) {
@@ -74,6 +92,22 @@ export class AllFilesComponent {
 
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
     this.selectedProject = event.option.value;
+    const param = {
+      user:this.userEmail,
+      projectName: this.selectedProject
+    }
+    this.getProjectData(param);
+  }
+
+  emptyProject() {
+    if(this.myControl.value === "") {
+      this.selectedProject = "";
+      const param = {
+        user:this.userEmail,
+        projectName: this.selectedProject
+      }
+      this.getProjectData(param);
+    }
   }
 
 }

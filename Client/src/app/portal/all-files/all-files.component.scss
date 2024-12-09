@@ -5,6 +5,7 @@
     .allfiles-container-header {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         padding: 20px;
 
         ::ng-deep mat-form-field {
@@ -49,9 +50,6 @@
             #myfilebtn {
                 border-radius: 0px 100px 100px 0px;
             }
-        }
-        &-search {
-
         }
     }
 
