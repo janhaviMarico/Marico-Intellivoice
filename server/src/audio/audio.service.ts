@@ -14,6 +14,15 @@ import { EditTranscriptionDto } from './dto/edit-transcription.dto';
 import { Console } from 'console';
 import { AudioUtils } from './audio.utils';
 import axios from 'axios';
+import * as path from 'path';
+import ffmpeg from 'fluent-ffmpeg';
+import * as fs from 'fs';
+import * as wav from 'wav';
+import { promisify } from 'util';
+import { Readable } from 'stream';
+
+const unlinkAsync = promisify(fs.unlink); 
+ffmpeg.setFfmpegPath('C:/ffmpeg/ffmpeg.exe');
 
 
 
@@ -576,6 +585,185 @@ async updateMetadataInAzureSearch(vectorIds: string[], metadata:string): Promise
       );
   }
 }
+uploadDirectory = './uploads';
 
+clearUploadFolder() {
+  const files = fs.readdirSync(this.uploadDirectory);
+  for (const file of files) {
+    fs.unlinkSync(path.join(this.uploadDirectory, file));
+  }
+}
+
+storeFiles(files: Express.Multer.File[]): string[] {
+  return files.map((file) => {
+    const filePath = path.join(this.uploadDirectory, file.filename);
+    return `http://localhost:3000/uploads/${file.filename}`; // Adjust URL as needed
+  });
+}
+
+async generatePeaksFromFilePath(filePath: string, numPeaks: number = 1000): Promise<number[]> {
+  return new Promise<number[]>((resolve, reject) => {
+    const outputWavPath = `${filePath}-temp.wav`;
+    const peaks: number[] = [];
+
+    // Step 1: Convert audio to WAV format and save to a temporary file
+    ffmpeg(filePath)
+      .audioChannels(1) // Mono channel
+      .audioFrequency(8000) // Downsample to reduce data size
+      .format('wav')
+      .output(outputWavPath)
+      .on('end', async () => {
+        const reader = new wav.Reader();
+        const fileStream = fs.createReadStream(outputWavPath);
+
+        reader.on('format', (format) => {
+          const step = Math.floor(format.sampleRate / numPeaks); // Calculate step size for numPeaks
+          let sampleCount = 0;
+          let peak = 0;
+
+          reader.on('data', (chunk) => {
+            for (let i = 0; i < chunk.length; i += 2) {
+              const sample = chunk.readInt16LE(i);
+              peak = Math.max(peak, Math.abs(sample));
+
+              sampleCount++;
+              if (sampleCount % step === 0) {
+                peaks.push(peak);
+                peak = 0;
+                if (peaks.length >= numPeaks) {
+                  fileStream.unpipe(reader);
+                  reader.end();
+                  break;
+                }
+              }
+            }
+          });
+
+          reader.on('end', async () => {
+            fileStream.close(); // Ensure fileStream is fully closed
+            
+            // Add a small delay before attempting to delete
+            setTimeout(async () => {
+              try {
+                await unlinkAsync(outputWavPath); // Delete the file after it's closed and delay
+              } catch (unlinkError) {
+                console.error('Error deleting temporary file:', unlinkError.message);
+              }
+              resolve(peaks);
+            }, 100); // 100ms delay to ensure OS releases file lock
+          });
+        });
+
+        reader.on('error', async (error) => {
+          fileStream.close(); // Close the file stream on error as well
+          setTimeout(async () => {
+            try {
+              await unlinkAsync(outputWavPath);
+            } catch (unlinkError) {
+              console.error('Error deleting temporary file on error:', unlinkError.message);
+            }
+            reject(error);
+          }, 100); // 100ms delay before deleting
+        });
+
+        // Pipe the WAV file data to the reader
+        fileStream.pipe(reader);
+      })
+      .on('error', (err) => {
+        reject(err);
+      })
+      .run();
+  });
+}
+
+async mergeAudioWithTrims(fileTrimPairs: { file: Express.Multer.File, trims: { start: number, end: number }[] }[]): Promise<Readable> {
+  return new Promise((resolve, reject) => {
+    const tempFiles: string[] = [];
+    const trimmedFiles: string[] = [];
+
+    // Process each file and its corresponding trims
+    const processNextFile = (index: number) => {
+      if (index >= fileTrimPairs.length) {
+        this.mergeFiles(trimmedFiles, resolve, reject); // Merge when all files are processed
+        return;
+      }
+
+      const { file, trims } = fileTrimPairs[index]; // Get the file and its trims
+      const filePath = `tempfile-${index}.mp3`;
+      fs.writeFileSync(filePath, file.buffer); // Write file to disk
+      tempFiles.push(filePath);
+
+      if (!trims || trims.length === 0) {
+        // No trimming needed, use entire file
+        trimmedFiles.push(filePath);
+        processNextFile(index + 1); // Move to the next file
+      } else {
+        // Trim sections using ffmpeg
+        this.trimAudio(filePath, trims)
+          .then((trimmedFilePaths) => {
+            trimmedFiles.push(...trimmedFilePaths); // Add trimmed parts
+            processNextFile(index + 1); // Move to the next file
+          })
+          .catch((error) => reject(error));
+      }
+    };
+
+    // Start processing files
+    processNextFile(0);
+  });
+}
+
+// Helper method to trim a file based on multiple trim instructions
+async trimAudio(filePath: string, trimTimes: { start: number, end: number }[]): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const trimmedFiles: string[] = [];
+
+    const processNextTrim = (index: number) => {
+      if (index >= trimTimes.length) {
+        resolve(trimmedFiles); // All trims processed
+        return;
+      }
+
+      const { start, end } = trimTimes[index];
+      const trimmedFilePath = `trimmed-${index}-${Date.now()}.mp3`;
+
+      ffmpeg(filePath)
+        .setStartTime(start)
+        .setDuration(end - start)
+        .output(trimmedFilePath)
+        .on('end', () => {
+          trimmedFiles.push(trimmedFilePath); // Add trimmed part
+          processNextTrim(index + 1); // Process next trim
+        })
+        .on('error', (err) => reject(err))
+        .run();
+    };
+
+    processNextTrim(0); // Start processing trims
+  });
+}
+
+// Method to merge all files (trimmed or full)
+mergeFiles(trimmedFiles: string[], resolve: Function, reject: Function): void {
+  const mergedFilePath = 'output.mp3';
+  const concatFilePath = 'concat_list.txt';
+  const concatFileContent = trimmedFiles.map((filePath) => `file '${filePath}'`).join('\n');
+  fs.writeFileSync(concatFilePath, concatFileContent);
+
+  ffmpeg()
+    .input(concatFilePath)
+    .inputOptions(['-f concat', '-safe 0'])
+    .outputOptions('-c copy')
+    .on('end', () => {
+      const mergedStream = fs.createReadStream(mergedFilePath);
+      resolve(mergedStream); // Resolve with the merged stream
+
+      // Clean up temporary files
+      trimmedFiles.forEach((file) => fs.unlinkSync(file));
+      fs.unlinkSync(concatFilePath);
+    })
+    .on('error', (err) => reject(err))
+    .save(mergedFilePath);
+}
 }
 
