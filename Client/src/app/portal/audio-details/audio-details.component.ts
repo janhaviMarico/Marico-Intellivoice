@@ -255,6 +255,10 @@ export class AudioDetailsComponent {
   }
 
   downloadChat() {
+    if(this.chatHistory.length === 0) {
+      this.toastr.warning('Chat is Empty');
+      return 0;
+    }
     const month = String(new Date().getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
     const day = String(new Date().getDate()).padStart(2, '0');
 
@@ -275,5 +279,6 @@ export class AudioDetailsComponent {
     }, (err) => {
       this.toastr.error('Something Went Wrong!');
     });
+    return true;
   }
 }
