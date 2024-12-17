@@ -10,11 +10,9 @@ export class TranscriptionController {
     private readonly transcriptionService: TranscriptionService, // Handles data retrieval
   ) {}
 
-
   @Get('generate-pdf')
   async generatePDF(@Res() res: Response, @Query('tgid') tgid: string) {
     const data = await this.transcriptionService.getSummaryByTGID(tgid);
-
     if (!data) {
       return res.status(404).json({ message: 'No data found for TGID' });
     }
