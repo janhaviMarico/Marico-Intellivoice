@@ -545,6 +545,7 @@ export class AudioProcessComponent {
 
   AddAnotherProject() {
     this.currentStep = 0;
+    this.getExistingProject();
   }
 
   closeAudioProcess() {
