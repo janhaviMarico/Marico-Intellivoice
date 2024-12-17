@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import * as PDFDocument from 'pdfkit';
+import PDFDocument from 'pdfkit';
 import { Response } from 'express';
 import { $Command } from '@aws-sdk/client-s3';
+//import { PDFDocument } from 'pdf-lib';
+
 
 @Injectable()
 export class PdfService {
