@@ -13,7 +13,7 @@ export class PdfService {
   }
 
   generatePDF(res: Response, data: any) {
-    const { TGId, summary, projectInfo, targetGroupInfo, chat } = data;
+    const { TGId, summary, projectInfo, targetGroupInfo, chat,sentiment_analysis } = data;
 
     const doc = new PDFDocument();
 
@@ -86,6 +86,19 @@ export class PdfService {
         });
     }
     
+
+    if (sentiment_analysis) {
+      doc.moveDown(1); // Add space before summary
+      doc.fontSize(18).font('Helvetica-Bold').text('sentiment_analysis:', { underline: true });
+      doc.moveDown(0.5);
+
+
+      doc.fontSize(14).font('Helvetica').text(sentiment_analysis, {
+        //width: availableWidth,
+        align: 'left',
+      });
+      doc.moveDown(1); // Add extra space after the summary
+    }
 
     // Finalize the PDF
     doc.end();
