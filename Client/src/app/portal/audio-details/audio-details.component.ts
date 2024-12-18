@@ -76,8 +76,8 @@ export class AudioDetailsComponent {
     const audio = this.audioPlayer.nativeElement;
     const currentTime = audio.currentTime;
     const duration = audio.duration;
-
-    // Calculate percentage for the seek bar
+    if(!isNaN(duration)) {
+        // Calculate percentage for the seek bar
     this.seekValue = (currentTime / duration) * 100;
 
     // Update the displayed time
@@ -86,6 +86,7 @@ export class AudioDetailsComponent {
 
     // Update slider track color
     this.updateSliderTrack();
+    }
   }
 
   seekAudio(event: any): void {
@@ -174,18 +175,23 @@ export class AudioDetailsComponent {
   }
   updateTranslation() {
     this.isLoading = true;
-    this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
+
     const payload = {
-      TGId: this.tgId,
-      audiodata: this.tempAudioData
+      editData: {
+        TGId: this.tgId,
+        audiodata: this.audioDetails.AudioData,
+      },
+      vectorIds: this.vectorId
     }
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
+        this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.isEdit = false;
       }
     }, (err: any) => {
+      this.cancelEdit();
       this.isLoading = false;
       this.toastr.error('Something Went Wrong!');
     });
@@ -216,20 +222,23 @@ export class AudioDetailsComponent {
         item.translation = item.translation.replace(regex, this.replaceText);
       }
     });
-    this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
     const payload = {
-      TGId: this.tgId,
-      audiodata: this.tempAudioData
+      editData: {
+        TGId: this.tgId,
+        audiodata: this.audioDetails.AudioData,
+      },
+      vectorIds: this.vectorId
     }
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
+        this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.currentText = '';
         this.replaceText = '';
       }
     }, (err: any) => {
-      this.audioDetails.AudioData = this.tempAudioData.map((x: any) => Object.assign({}, x));
+      this.cancelEdit();
       this.isLoading = false;
       this.toastr.error('Something Went Wrong!');
     })
@@ -246,16 +255,20 @@ export class AudioDetailsComponent {
   }
 
   downloadChat() {
+    if(this.chatHistory.length === 0) {
+      this.toastr.warning('Chat is Empty');
+      return 0;
+    }
     const month = String(new Date().getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
     const day = String(new Date().getDate()).padStart(2, '0');
-  
+
     const date = `${new Date().getFullYear()}-${month}-${day}`;
     const param = {
       "TGId": this.tgId,
       "date": date,
       "chat": this.chatHistory
     };
-    this.audioServ.postAPI('transcription/chat', param,true).subscribe((res: Blob) => {
+    this.audioServ.postAPI('transcription/chat', param, true).subscribe((res: Blob) => {
       // Handle the PDF response correctly as a Blob
       const blob = new Blob([res], { type: 'application/pdf' });
       const downloadURL = window.URL.createObjectURL(blob);
@@ -264,8 +277,8 @@ export class AudioDetailsComponent {
       link.download = 'file.pdf'; // Set the filename for download
       link.click(); // Trigger the download
     }, (err) => {
-      console.error('Error:', err);
       this.toastr.error('Something Went Wrong!');
     });
+    return true;
   }
 }

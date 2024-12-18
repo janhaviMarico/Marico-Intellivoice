@@ -78,6 +78,11 @@ export class CompareComponent implements OnInit {
   }
 
   changeOption(isCompProj: boolean) {
+    if(isCompProj) {
+      this.projectForm.reset();
+    } else {
+      this.targetForm.reset();
+    }
     this.isProjectCompare = isCompProj;
   }
 
@@ -86,7 +91,7 @@ export class CompareComponent implements OnInit {
   }
 
   addProject(): void {
-    if (this.projects.length < 5) {
+    if (this.projects.length < 2) {
       const projectGroup = this.fb.group({
         projectName: ['', Validators.required]
       });
@@ -94,7 +99,7 @@ export class CompareComponent implements OnInit {
 
       this.setupAutocomplete(this.projects.length - 1);
     } else {
-      this.toastr.warning('Maximum 5 project limit for comparison!');
+      this.toastr.warning('Maximum 2 project limit for comparison!');
     }
   }
 
@@ -141,13 +146,13 @@ export class CompareComponent implements OnInit {
   }
 
   addTargetGrp(): void {
-    if (this.targets.length < 5) {
+    if (this.targets.length < 2) {
       const targetGroup = this.fb.group({
         targetName: ['', Validators.required]
       });
-      this.targets.push(targetGroup); // Use the getter to access the FormArray
+      this.targets.push(targetGroup);
     } else {
-      this.toastr.warning('Maximum 5 Target limit for comparison!')
+      this.toastr.warning('Maximum 2 Target limit for comparison!')
     }
   }
 
@@ -179,6 +184,11 @@ export class CompareComponent implements OnInit {
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
     this.selectedProject = event.option.value;
     this.existingTGs = [];
+    this.targets.clear();
+    this.addTargetGrp();
+    this.addTargetGrp();
+    // this.targets.push(this.fb.control(''));
+    // this.targets.push(this.fb.control(''));
     const foundProject = this.existingProject.find((project) => project.ProjName.trim() === this.selectedProject.trim());
     if (foundProject) {
       this.existingTGs = foundProject.targetDetails;

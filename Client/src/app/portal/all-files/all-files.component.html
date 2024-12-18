@@ -33,6 +33,7 @@
             <th>Age Group</th>
             <th>Competetion</th>
             <th>Marico Product</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </ng-template>
@@ -45,8 +46,9 @@
             <td>{{ project.AgeGroup }}</td>
             <td>{{ project.CompetitorGroup }}</td>
             <td>{{ project.MaricoProduct }}</td>
+            <td>{{ project.Status}}</td>
             <td>
-              <button class="view-btn" (click)="viewDetails(project.TargetId, project.TargetGroup)">View</button>
+              <button [disabled]="project.Status !== 'Completed'" class="view-btn" (click)="viewDetails(project.TargetId, project.TargetGroup)">View</button>
             </td>
           </tr>
         </ng-template>

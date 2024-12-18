@@ -39,7 +39,7 @@
             <div class="audio-player">
               <span id="current-time">{{ currentTime }}</span>
               <input type="range" class="seek-bar" [value]="seekValue" max="100" (input)="seekAudio($event)">
-              <span id="duration-time">{{ isValidNumber(durationTime) ? durationTime : '00:00' }}</span>
+              <span id="duration-time">{{ durationTime }}</span>
               <audio #audioPlayer controls (timeupdate)="updateProgress($event)">
                 <source [src]="filePath" />
                 Your browser does not support the audio element.

@@ -2,7 +2,7 @@
 <div class="compare-container">
     <div class="compare-header">
       <button (click)="backBtn()" matTooltip="Back"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
-      <h3>Comparison of Project 1 , Project 2, Project 3  </h3>
+      <h3>Comparison of {{compareObj?.isProject ? 'Projects':'Target Groups'}}</h3>
     </div>
     <div class="compare-body">
         <div class="carousel-container">
