@@ -94,4 +94,35 @@ export class TranscriptionService {
     
     return items.length > 0 ? items[0] : null;
   }
+
+  async getSentimentalAnalysisByTGID(tgid: string): Promise<any> {
+    const transcription = await this.fetchSentimental(tgid);
+    const projectInfo = await this.fetchProjectInfo(tgid);
+    const targetGroupInfo = await this.fetchTargetGroupInfo(tgid);
+
+    return {
+      TGId: tgid,
+      sentiment_analysis: transcription?.sentiment_analysis,
+      projectInfo,
+      targetGroupInfo,
+    };
+  
+}
+
+private async fetchSentimental(tgid: string): Promise<any> {
+  const querySpec = {
+    query: 'SELECT c.TGId, c.sentiment_analysis FROM c WHERE c.TGId = @tgid',
+    parameters: [
+      {
+        name: '@tgid',
+        value: tgid,
+      },
+    ],
+  };
+
+  const { resources: items } = await this.transcriptionContainer.items.query(querySpec).fetchAll();
+  
+  return items.length > 0 ? items[0] : null;
+}
+
 }

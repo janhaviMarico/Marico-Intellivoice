@@ -84,7 +84,7 @@
           <p class="text"> <span class="moderator">Summary : </span>{{audioDetails?.Summary}}</p>
         </div>
         <div class="tab-content-model translation">
-          <button (click)="downloadSummary()"><mat-icon>cloud_download</mat-icon> Download Summary</button>
+          <button (click)="downloadSummaryAndSenti('summary')"><mat-icon>cloud_download</mat-icon> Download Summary</button>
         </div>
       </div>
     </mat-tab>
@@ -101,7 +101,7 @@
           <pre class="text">{{audioDetails?.SentimentAnalysis}}</pre>
         </div>
         <div class="tab-content-model translation">
-          <button><mat-icon>cloud_download</mat-icon> Download Sentiment
+          <button (click)="downloadSummaryAndSenti('sentimental-analysis')"><mat-icon>cloud_download</mat-icon> Download Sentiment
             Analysis</button>
         </div>
       </div>

@@ -77,8 +77,11 @@
             }
 
             .project-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
+                // display: grid;
+                // grid-template-columns: repeat(3, 1fr);
+                display: flex;
+                justify-content: center; 
+                flex-wrap: wrap;
                 gap: 20px;
                 padding: 20px;
 
@@ -87,6 +90,7 @@
                     flex-direction: column;
                     justify-content: space-between;
                     border-radius: 5px;
+                    width: 300px;
                 }
 
                 .removeBtn {
