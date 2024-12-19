@@ -22,6 +22,8 @@ export class CompareDetailComponent {
     this.compareObj = this.commonServ.getCompareObj();
     if(this.compareObj) {
       this.compareProjectAndTG();
+    } else {
+      this.backBtn();
     }
   }
 
