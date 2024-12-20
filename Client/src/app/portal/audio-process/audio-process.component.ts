@@ -31,18 +31,8 @@ export class AudioProcessComponent {
   targetForm!: FormGroup;
   targetGrpArr: any[] = [];
   target: any;
-  countries: any[] = [
-    { name: 'India', code: 'IN' },
-    { name: 'Bangladesh', code: 'BD' },
-    { name: 'Vietnam', code: 'VT' },
-    { name: 'England', code: 'EG' }
-  ];
-  states: any[] = [
-    { name: 'Maharastra', code: 'MH' },
-    { name: 'Gujrat', code: 'GJ' },
-    { name: 'Kerala', code: 'KR' },
-    { name: 'Punjab', code: 'PJ' }
-  ];
+  countries: any[] = [];
+  states: any[] = [];
   competitors: any[] = [
     { name: 'Dabur Gold', code: 'DG' },
     { name: 'Nihar Naturals', code: 'NN' },
@@ -55,19 +45,9 @@ export class AudioProcessComponent {
     { name: 'Saffola', code: 'SF' },
     { name: 'X-Men', code: 'XM' }
   ]
-  primaryLang: any[] = [
-    { name: 'English', code: 'EN' },
-    { name: 'Marathi', code: 'MR' },
-    { name: 'Hindi', code: 'HN' },
-    { name: 'Gujrati', code: 'GJ' }
-  ]
-  otherLang: any[] = [
-    { name: 'English', code: 'EN' },
-    { name: 'Marathi', code: 'MR' },
-    { name: 'Hindi', code: 'HN' },
-    { name: 'Gujrati', code: 'GJ' }
-  ];
-  filteredOtherLang: any[] = [...this.otherLang];
+  primaryLang: any[] = []
+  otherLang: any[] = [];
+  filteredOtherLang: any[] = [];
 
   existingProject: any[] = [];
   filteredProject!: Observable<any[]>;
@@ -135,6 +115,9 @@ export class AudioProcessComponent {
         this.countries = res.data[0].country;
         this.states = res.data[0].state;
         this.products = res.data[0].marico_product;
+        this.primaryLang = res.data[0].Languages;
+        this.otherLang = res.data[0].Languages;
+        this.filteredOtherLang = [...this.otherLang];
       }
     }, (err: any) => {
       this.toastr.error('Something Went Wrong!')
