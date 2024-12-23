@@ -2,6 +2,7 @@ import { InjectQueue, Process, Processor } from "@nestjs/bull";
 import { Job, Queue } from 'bull';
 import { AudioUtils } from "../audio.utils";
 import { Logger } from "@nestjs/common";
+import { AudioService } from "../audio.service";
 
 
 @Processor('transcription')
@@ -9,7 +10,8 @@ export class TranscriptionProcessor{
     private readonly logger = new Logger(TranscriptionProcessor.name);
 
     constructor(private readonly audioUtils: AudioUtils,
-        @InjectQueue('translation') private readonly translationQueue: Queue
+        @InjectQueue('translation') private readonly translationQueue: Queue,
+        private readonly audioService: AudioService
 
     ){}
     @Process({name:'transcribe-audio',concurrency:5})
@@ -26,9 +28,21 @@ export class TranscriptionProcessor{
               TGName: TGName,
               TGId:TGId
             });
+
+            // Update status to success in the database
+            await this.audioService.updateStatus(TGId, {
+              status: 1,
+              //statusCode: 200,
+            });
             }catch (error) {
             this.logger.error(`Transcription job failed: ${error.message}`);
-            throw error;
+            // Update status to failed in the database
+            await this.audioService.updateStatus(TGId, {
+             
+              status: 2,
+              //statusCode: 500,
+            });
+                  throw error;
             }
             await job.log(`Transcription job for all the audios are completed`);
     }

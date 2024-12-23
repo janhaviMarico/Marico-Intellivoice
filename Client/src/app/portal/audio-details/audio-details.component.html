@@ -27,14 +27,14 @@
           </div>
           <div class="model-audio">
             <div class="controls">
-              <button (click)="seekBackward()"><mat-icon>fast_rewind</mat-icon></button>
+              <button (click)="seekBackward()" matTooltip="Rewind to 10 sec"><mat-icon>fast_rewind</mat-icon></button>
                   <button (click)="togglePlayPause()">
                     <!-- <img [src]="isPlaying ? '../../../assets/Img/AudioDetails/pause.png' : '../../../assets/Img/dashboard/play-btn.png'"
                          alt="Play/Pause"> -->
-                         <mat-icon *ngIf="!isPlaying" class="playbtn">play_circle_filled</mat-icon>
-                         <mat-icon *ngIf="isPlaying" class="playbtn">pause_circle_filled</mat-icon>
+                         <mat-icon *ngIf="!isPlaying" class="playbtn" matTooltip="Play">play_circle_filled</mat-icon>
+                         <mat-icon *ngIf="isPlaying" class="playbtn" matTooltip="Pause">pause_circle_filled</mat-icon>
                   </button>
-              <button (click)="seekForward()"><mat-icon>fast_forward</mat-icon></button>
+              <button (click)="seekForward()" matTooltip="Forward to 10 sec"><mat-icon>fast_forward</mat-icon></button>
             </div>
             <div class="audio-player">
               <span id="current-time">{{ currentTime }}</span>

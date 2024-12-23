@@ -21,7 +21,7 @@ export class CommonService {
   }
 
   getParamAPI(url: string, isProject: boolean, projTgArr: any[]) {
-    var params;
+    let params;
     if (isProject) {
       params = new HttpParams().set('project_1', projTgArr[0].projectName)
         .set('project_2', projTgArr[1].projectName).set('compare', 'PROJ');

@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
-import { AddProjectComponent } from '../project/add-project/add-project.component';
 import { MatDialog } from '@angular/material/dialog';
-import { UploadFileComponent } from '../project/upload-file/upload-file.component';
-import { InfoComponent } from '../project/info/info.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -121,11 +118,4 @@ export class DashboardComponent {
     this.loading = false;
   }
 
-  showAudioPopup() {
-    this.dialog.open(AddProjectComponent, {
-      height: '90vh',
-      width: '40vw',
-      disableClose: true
-    });
-  }
 }

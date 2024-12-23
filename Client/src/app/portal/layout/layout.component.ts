@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { MsalService } from '@azure/msal-angular';
+import { InfoComponent } from '../Dialog/info/info.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-layout',
@@ -8,10 +9,22 @@ import { MsalService } from '@azure/msal-angular';
 })
 export class LayoutComponent {
 
-  constructor(private msalService:MsalService) { }
+  constructor(private dialog: MatDialog) { }
 
-  logout() {
-    this.msalService.logout();
-    localStorage.removeItem('User')
+  logoutModel(event: MouseEvent) {
+    const targetElement = event.target as HTMLElement;
+    const rect = targetElement.getBoundingClientRect();
+    const info = {
+          name: 'profile', title: ''
+        }
+        this.dialog.open(InfoComponent, {
+          position: {
+            top: `${rect.bottom + window.scrollY + 5}px`, // Positioning below the button
+            left: `${rect.left + window.scrollX - 50}px`,
+          },
+          // width: '100px',
+          // height: '80px',
+          data: info
+        });
   }
 }
