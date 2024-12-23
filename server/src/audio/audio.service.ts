@@ -611,5 +611,45 @@ async updateMetadataInAzureSearch(vectorIds: string[], metadata:string): Promise
   }
 }
 
+async updateStatus(TGId: string, updateData: { status: number }) {
+  try {
+    console.log('TGId is', TGId);
+
+    // Query the target group by TGId
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE c.TGId = @TGId',
+      parameters: [{ name: '@TGId', value: TGId }],
+    };
+
+    const { resources: targetGroups } = await this.targetContainer.items.query(querySpec).fetchAll();
+
+    if (targetGroups.length === 0) {
+      throw new Error(`No target group found with TGId: ${TGId}`);
+    }
+
+    const targetGroup = targetGroups[0];
+    console.log('Existing target group:', targetGroup);
+
+    // Update the necessary fields
+    targetGroup.status = updateData.status;
+
+    // Check if partition key exists
+    const partitionKey = targetGroup.master_id || targetGroup.TGId; // Replace with actual partition key field
+    if (!partitionKey) {
+      throw new Error('Partition key not found for this document.');
+    }
+
+    // Replace the updated document
+    await this.targetContainer
+      .item(targetGroup.id, partitionKey)
+      .replace(targetGroup);
+
+    console.log('Successfully updated target group status.');
+  } catch (error) {
+    console.error(`Error updating TGId ${TGId}:`, error.message);
+    throw new Error(`Failed to update status for TGId ${TGId}: ${error.message}`);
+  }
+}
+
 }
 

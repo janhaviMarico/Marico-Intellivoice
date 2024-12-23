@@ -38,24 +38,6 @@ export class AudioController {
 
       // Call the service to process the audio files
       const result = await this.audioService.processAudioFiles(projectGroupDto, targetGrpDto, files);
-      // const audioProcessDtoArray: {
-      //   TGName: string, 
-      //   mainLang: string, 
-      //   SecondaryLang: string[], 
-      //   noOfSpek: number, 
-      //   sasToken: string
-      // }[] = [];
-
-      // audioProcessDtoArray.push({
-      //   TGName: 'IN_MH_18_25_SOIL_NYK_E_MAR',
-      //     mainLang: 'Hindi',
-      //     SecondaryLang: [ 'English', 'Marathi', 'Tamil' ],
-      //     noOfSpek: 4,
-      //     sasToken: 'https://maricoblobopenai.blob.core.windows.net/audio-files-dev/IN_MH_18_25_SOIL_NYK_E_MAR.mp3?sv=2024-08-04&se=2024-09-26T18%3A18%3A08Z&sr=b&sp=r&sig=9mGPNCVMLqO1gSSyZyPcEErqAxHOEKql4XqIJbsXvqI%3D'
-      // })
-      // const result =this.audioService.runBackgroundTranscription(audioProcessDtoArray);
-     // return result;
-      //Return the result to the client
       return {
         statusCode: result.statusCode,
         message: result.message
@@ -75,20 +57,6 @@ export class AudioController {
       );
     }
   }
-
-  // @Get('list')
-  // async getAudioList(@Body('userid') userid?: string) {
-  //   try {
-  //     // Fetch data from service with or without userid
-  //     const audioData = await this.audioService.getAudioData(userid);
-  //     return { data: audioData, message: 'Audio data fetched successfully' };
-  //   } catch (error) {
-  //     console.error('Error fetching audio data:', error.message);
-  //     throw new InternalServerErrorException('Failed to fetch audio data');
-  //   }
-  // }
-
-  /// new  code 
 
   @Post('list')
 async getAudioListak(@Body() body: { user?: string; projectName?: string }) {
