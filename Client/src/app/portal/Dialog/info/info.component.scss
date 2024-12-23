@@ -44,5 +44,15 @@
             outline: none;
         }
     }
-    
+}
+
+.logout-container {
+    .logoutBtn {
+        padding: 8px 16px;
+        background-color: #014FA1;
+        outline: none;
+        border: none;
+        color: #fff;
+        width: 100%;
+    }
 }

@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { map, Observable, of, startWith } from 'rxjs';
 import { AudioService } from '../service/audio.service';
 import { CommonService } from '../service/common.service';
-import { InfoComponent } from '../project/info/info.component';
+import { InfoComponent } from '../Dialog/info/info.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
@@ -443,9 +443,9 @@ export class AudioProcessComponent {
   audioProcessing() {
     this.isLoading = true;
     const formData = new FormData();
-    var Project: any;
-    var TargetGrp: any = [];
-    var tgArr: any[] = [];
+    let Project: any;
+    let TargetGrp: any = [];
+    let tgArr: any[] = [];
     for (let i = 0; i < this.targetGrps.targetGrpArr.length; i++) {
       if (i == 0) {
         Project = {

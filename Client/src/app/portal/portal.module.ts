@@ -7,7 +7,6 @@ import { FeedbackComponent } from './feedback/feedback.component';
 import { AllFilesComponent } from './all-files/all-files.component';
 import { LayoutComponent } from './layout/layout.component';
 import { AudioDetailsComponent } from './audio-details/audio-details.component';
-import { AddProjectComponent } from './project/add-project/add-project.component';
 
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatInputModule} from '@angular/material/input';
@@ -29,11 +28,10 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
-import { UploadFileComponent } from './project/upload-file/upload-file.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import { SharedModule } from '../shared/shared.module';
 import { TooltipDirective } from './tooltip.directive';
-import { InfoComponent } from './project/info/info.component' ;
+import { InfoComponent } from './Dialog/info/info.component' ;
 import { AudioService } from './service/audio.service';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -50,8 +48,6 @@ import { AudioProcessComponent } from './audio-process/audio-process.component';
     AllFilesComponent,
     LayoutComponent,
     AudioDetailsComponent,
-    AddProjectComponent,
-    UploadFileComponent,
     TooltipDirective,
     InfoComponent,
     UserListComponent,
