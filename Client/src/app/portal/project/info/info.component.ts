@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AddProjectComponent } from '../add-project/add-project.component';
 import { CommonService } from '../../service/common.service';
 
 @Component({
@@ -24,11 +23,6 @@ export class InfoComponent {
 
   AddAnotherProject() {
     this.closeInfo();
-    this.dialog.open(AddProjectComponent, {
-      height: '90vh',
-      width: '40vw',
-      disableClose: true
-    });
   }
 
   deleteTarget() {

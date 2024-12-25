@@ -1,0 +1,6 @@
+projectKey=IntelliVoice-Frontend
+serverUrl=http://localhost:9090
+serverVersion=24.12.0.100206
+dashboardUrl=http://localhost:9090/dashboard?id=IntelliVoice-Frontend
+ceTaskId=6212dcdd-bca5-48f5-8e0f-ed729199b7f6
+ceTaskUrl=http://localhost:9090/api/ce/task?id=6212dcdd-bca5-48f5-8e0f-ed729199b7f6

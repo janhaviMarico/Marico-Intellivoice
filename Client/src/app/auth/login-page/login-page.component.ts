@@ -13,13 +13,13 @@ import { CommonService } from 'src/app/portal/service/common.service';
 export class LoginPageComponent {
   userDetails:any;
   user:any;
-  constructor(private  msalService: MsalService,private router:Router,private toastr: ToastrService,
-    private commonServ:CommonService
+  constructor(readonly msalService: MsalService,readonly router:Router,readonly toastr: ToastrService,
+    readonly commonServ:CommonService
   ) { }
 
   ngOnInit() {
     this.msalService.instance.handleRedirectPromise().then((res:any)=> {
-      if(res!=null && res.account != null) {
+      if(res?.account) {
         this.msalService.instance.setActiveAccount(res.account);
       }
     })

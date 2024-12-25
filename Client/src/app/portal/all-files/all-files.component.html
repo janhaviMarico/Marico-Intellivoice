@@ -26,15 +26,15 @@
       <p-table #dt2 [value]="project" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true">
         <ng-template pTemplate="header">
           <tr>
-            <th>Project Name</th>
-            <th>Country</th>
-            <th>State</th>
-            <th>Target Group</th>
-            <th>Age Group</th>
-            <th>Competetion</th>
-            <th>Marico Product</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th headers="project-name">Project Name</th>
+            <th headers="country">Country</th>
+            <th headers="state">State</th>
+            <th headers="target-group">Target Group</th>
+            <th headers="age-group">Age Group</th>
+            <th headers="competetion">Competetion</th>
+            <th headers="marico-product">Marico Product</th>
+            <th headers="status">Status</th>
+            <th headers="action">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-project>
