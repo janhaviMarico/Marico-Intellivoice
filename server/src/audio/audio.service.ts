@@ -20,10 +20,12 @@ import * as fs from 'fs';
 import * as wav from 'wav';
 import { promisify } from 'util';
 import { Readable } from 'stream';
+import { join } from 'path';
+import { exec } from 'child_process';
 
 const unlinkAsync = promisify(fs.unlink); 
 ffmpeg.setFfmpegPath('C:/ffmpeg/ffmpeg.exe');
-
+const execAsync = promisify(exec);
 
 
 @Injectable()
@@ -190,8 +192,23 @@ export class AudioService {
     try {
       const sasUrls: { fileName: string, sasUri: string, sasToken: string }[] = [];
       const uploadPromises = files.map(async (file) => {
+
+        const tempFilePath = join('uploads', `${Date.now()}-${file.originalname}`);
+        const processedFilePath = join('uploads', `processed-${Date.now()}-${file.originalname}`);
+
+        // Write the uploaded file buffer to disk temporarily
+        fs.writeFileSync(tempFilePath, file.buffer);
+        const ffmpegPath = 'C:/ffmpeg/ffmpeg.exe'; // Adjust the path
+
+        // Process the file with FFmpeg (noise cancellation and mono conversion)
+        const ffmpegCommand = `${ffmpegPath} -i ${tempFilePath} -af "highpass=f=300, lowpass=f=3000, afftdn=nf=-25" -ac 1 -ar 16000 ${processedFilePath}`;
+        await execAsync(ffmpegCommand);
+
+        // Read the processed file back into a buffer
+        const processedBuffer = fs.readFileSync(processedFilePath);
+
         const blockBlobClient = this.containerClient.getBlockBlobClient(file.originalname);
-        const uploadBlobResponse = await blockBlobClient.uploadData(file.buffer);
+        const uploadBlobResponse = await blockBlobClient.uploadData(processedBuffer);
         this.logger.log(`Blob ${file.originalname} uploaded successfully: ${uploadBlobResponse.requestId}`);
         const sasUri = blockBlobClient.url;
         const fileName = file.originalname;
