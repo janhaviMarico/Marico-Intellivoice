@@ -534,9 +534,7 @@ export class AudioService {
           const projId = project.ProjId;
           const relatedTargets = targetMap[projId] || [];
   
-          for (const target of relatedTargets) {
-            const transcriptionExists = await this.checkTranscriptionData(target.TGId);
-            const status = transcriptionExists ? 'Completed' : 'Processing';
+          for (const target of relatedTargets) {           
   
             combinedResults.push({
               ProjectName: project.ProjName,
@@ -547,7 +545,7 @@ export class AudioService {
               AgeGroup: target.AgeGrp,
               CompetitorGroup: target.CompetetionProduct,
               MaricoProduct: target.MaricoProduct,
-              Status: status,
+              Status: target.status,
             });
           }
         })
