@@ -332,12 +332,7 @@ export class AudioService {
         // Combine the data from project and target containers
         for (const target of targets) {
 
-          const transcriptionExists = await this.checkTranscriptionData(target.TGId);
-
-          const status = transcriptionExists
-        ? 'Completed'
-        : 'Processing';
-
+         
           combinedResults.push({
             ProjectName: project.ProjName,
             Country: target.Country,
@@ -347,7 +342,7 @@ export class AudioService {
             AgeGroup: target.AgeGrp,
             CompetitorGroup: target.CompetetionProduct,
             MaricoProduct: target.MaricoProduct,
-            Status: status 
+            Status: target.status 
           });
         }
       }
@@ -415,13 +410,7 @@ export class AudioService {
       const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
   
       for (const target of targets) {
-        // Check for transcription data
-      const transcriptionExists = await this.checkTranscriptionData(target.TGId);
-
-      // Determine the status
-      const status = transcriptionExists
-        ? 'Completed'
-        : 'Processing';
+    
 
         combinedResults.push({
           ProjectName: project.ProjName,
@@ -432,7 +421,7 @@ export class AudioService {
           AgeGroup: target.AgeGrp,
           CompetitorGroup: target.CompetetionProduct,
           MaricoProduct: target.MaricoProduct,
-          Status: status,
+          Status: target.status,
         });
       }
     }
