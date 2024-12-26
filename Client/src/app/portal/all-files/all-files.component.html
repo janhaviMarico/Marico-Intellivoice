@@ -2,9 +2,9 @@
   <div class="allfiles-container-header">
     <div class="allfiles-container-header-tabs">
       <button [ngClass]="isAllFiles ? 'active' : ''" id="allfilebtn" (click)="changeFileOption('all')">All Files
-        <span>{{this.count}}
+        <span>{{!isAllFiles ? 0 : this.count}}
           files</span></button>
-      <button [ngClass]="!isAllFiles ? 'active' : ''" id="myfilebtn" (click)="changeFileOption('my')">My Files <span>{{this.count}}
+      <button [ngClass]="!isAllFiles ? 'active' : ''" id="myfilebtn" (click)="changeFileOption('my')">My Files <span>{{isAllFiles ? 0 : this.count}}
           files</span></button>
     </div>
     <div class="allfiles-container-header-search">
@@ -46,9 +46,13 @@
             <td>{{ project.AgeGroup }}</td>
             <td>{{ project.CompetitorGroup }}</td>
             <td>{{ project.MaricoProduct }}</td>
-            <td>{{ project.Status}}</td>
+            <td> <label class="view-btn" [ngClass]="{
+              'status-processing': project.Status === 0,
+              'status-completed': project.Status === 1,
+              'status-failed': project.Status > 1
+            }">{{ project.Status === 0 ? 'Processing' : (project.Status === 1 ? 'Completed' : 'Failed') }}</label></td>
             <td>
-              <button [disabled]="project.Status !== 'Completed'" class="view-btn" (click)="viewDetails(project.TargetId, project.TargetGroup)">View</button>
+              <button [disabled]="project.Status !== 1" class="view-btn" (click)="viewDetails(project.TargetId, project.TargetGroup)">View</button>
             </td>
           </tr>
         </ng-template>

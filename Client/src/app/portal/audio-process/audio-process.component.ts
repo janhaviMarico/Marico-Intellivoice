@@ -45,14 +45,15 @@ export class AudioProcessComponent {
     { name: 'Saffola', code: 'SF' },
     { name: 'X-Men', code: 'XM' }
   ]
-  primaryLang: any[] = []
+  primaryLang: any[] = [];
   otherLang: any[] = [];
   filteredOtherLang: any[] = [];
 
   existingProject: any[] = [];
   filteredProject!: Observable<any[]>;
-  myControl = new FormControl('');
-  isExitingProj:boolean = false;
+  filteredCountry!: Observable<any[]>;
+  filteredState!: Observable<any[]>;
+  filteredMaricoProduct!: Observable<any[]>;
   steps = ['Project Details', 'Add Media', 'Assign TG', 'Upload Audio'];
   currentStep = 0;
 
@@ -70,8 +71,8 @@ export class AudioProcessComponent {
   targetGrps!: { targetGrpArr: any[] };
   readonly panelOpenState = signal(false);
 
-  constructor(private fb: FormBuilder,private audioServ: AudioService, private router: Router, 
-    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) {}
+  constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
+    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) { }
 
   ngOnInit() {
     //Add Project Code
@@ -104,10 +105,6 @@ export class AudioProcessComponent {
   }
 
   //Add Project Code
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.existingProject.filter((option:any) => option.ProjName.toLowerCase().includes(filterValue));
-  }
 
   getAllMaster() {
     this.commonServ.getAPI('master/all').subscribe((res: any) => {
@@ -125,26 +122,40 @@ export class AudioProcessComponent {
   }
 
   getExistingProject() {
-    this.commonServ.getAPI('master/project/all').subscribe((res:any)=> {
+    this.commonServ.getAPI('master/project/all').subscribe((res: any) => {
       this.existingProject = res.data;
-      const projectControl = this.targetForm.get('projectName');
-      if (projectControl) {
-        this.filteredProject = projectControl.valueChanges.pipe(
-          startWith(''),
-          map(value => this._filter(value || '')),
-        );
-      } else {
-        this.filteredProject = of([]);
-      }
-    },(err:any)=>{
+      this.searchFilter();
+    }, (err: any) => {
       this.toastr.error('Something Went Wrong!')
     })
   }
 
-  changeProject() {
-    this.isExitingProj = !this.isExitingProj;
+  searchFilter() {
+    this.filteredProject = this._initializeFilter('projectName', this.existingProject, 'ProjName');
+    this.filteredCountry = this._initializeFilter('country', this.countries, 'name');
+    this.filteredState = this._initializeFilter('state', this.states, 'name');
+    this.filteredMaricoProduct = this._initializeFilter('maricoProduct', this.products, 'name');
   }
-
+  
+  private _initializeFilter(
+    controlName: string,
+    dataSource: any[],
+    property: string
+  ): Observable<string[]> {
+    const control = this.targetForm.get(controlName);
+    if (control) {
+      return control.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filter(value || '', dataSource, property))
+      );
+    }
+    return of([]);
+  }
+  
+  private _filter(value: string, dataSource: any[], property: string): string[] {
+    const filterValue = value.toLowerCase();
+    return dataSource.filter((option: any) => option[property].toLowerCase().includes(filterValue));
+  }
   onSubmit() {
     if (this.targetForm.invalid) {
       this.targetForm.markAllAsTouched();
@@ -264,6 +275,7 @@ export class AudioProcessComponent {
         url: URL.createObjectURL(file)
       });
     }
+    event.target.value = null;
   }
 
   onDrop(event: DragEvent): void {
@@ -284,7 +296,7 @@ export class AudioProcessComponent {
   }
 
   onDragOver(event: DragEvent): void {
-    event.preventDefault(); 
+    event.preventDefault();
     event.stopPropagation();
   }
 
@@ -390,7 +402,7 @@ export class AudioProcessComponent {
   assignTargetGrp(event: MatSelectChange) {
     this.currentStep = 2;
     const selectedValue = event.value; // Name of the selected item
-    const selectedIndex = this.targetGrps.targetGrpArr.findIndex((tg:any) => tg.name === selectedValue);
+    const selectedIndex = this.targetGrps.targetGrpArr.findIndex((tg: any) => tg.name === selectedValue);
     if (this.selectedArr.length !== 0) {
       if (this.targetGrps.targetGrpArr[selectedIndex].audioList) {
         this.targetGrps.targetGrpArr[selectedIndex].audioList.push(...this.selectedArr);
@@ -496,8 +508,8 @@ export class AudioProcessComponent {
 
   //Overall Code
   nextStep() {
-    if(this.currentStep === 0) {
-      this.targetGrps = {targetGrpArr : this.targetGrpArr};
+    if (this.currentStep === 0) {
+      this.targetGrps = { targetGrpArr: this.targetGrpArr };
     }
     if (this.currentStep < this.steps.length - 1) {
       this.currentStep++;
@@ -505,7 +517,7 @@ export class AudioProcessComponent {
   }
 
   previousStep() {
-    if(this.currentStep === 2) {
+    if (this.currentStep === 2) {
       this.currentStep = this.currentStep - 2;
     } else if (this.currentStep > 0) {
       this.currentStep--;
@@ -523,7 +535,7 @@ export class AudioProcessComponent {
     this.audioFiles = [];
     this.selectedArr = [];
     this.expansionArr = [];
-    this.targetGrps = {targetGrpArr : []};
+    this.targetGrps = { targetGrpArr: [] };
   }
 
   AddAnotherProject() {
