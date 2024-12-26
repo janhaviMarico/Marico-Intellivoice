@@ -46,6 +46,11 @@ export class AudioService {
   // Handle audio processing logic
   async processAudioFiles(projectGrp: ProjectGroupDTO, targetGrp: string, files: Express.Multer.File[]) {
     try {
+
+      //before creating project check data in master for drop downs
+
+      
+
       // Step 1: Create Project and Target Groups
       const projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
       if (!projectResponse) {
@@ -290,76 +295,180 @@ export class AudioService {
     return Promise.resolve(blobUrl);
   }
 
-  async getAudioData(userid?: string) {
+  // async getAudioData(userid?: string) {
+  //   try {
+  //     // 1. Build Project Query
+  //     let querySpecProject;
+  //     if (userid) {
+  //       // If `userid` is passed, filter by `userid`
+  //       querySpecProject = {
+  //         query: 'SELECT * FROM c WHERE c.UserId = @UserId',
+  //         parameters: [{ name: '@UserId', value: userid }],
+  //       };
+  //     } else {
+  //       // If no `userid`, fetch all projects
+  //       querySpecProject = {
+  //         query: 'SELECT * FROM c',
+  //       };
+  //     }
+
+  //     // Fetch projects based on query
+  //     const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
+
+  //     // If no projects found
+  //     if (projects.length === 0) {
+  //       return [];
+  //     }
+
+  //     // 2. Fetch and Combine Data from Target Container
+  //     const combinedResults = [];
+
+  //     // Iterate over all fetched projects
+  //     for (const project of projects) {
+  //       const projId = project.ProjId;
+
+  //       // Fetch related target data using ProjId
+  //       const querySpecTarget = {
+  //         query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
+  //         parameters: [{ name: '@ProjId', value: projId }],
+  //       };
+  //       const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
+
+  //       // Combine the data from project and target containers
+  //       for (const target of targets) {
+
+  //         const transcriptionExists = await this.checkTranscriptionData(target.TGId);
+
+  //         const status = transcriptionExists
+  //       ? 'Completed'
+  //       : 'Processing';
+
+  //         combinedResults.push({
+  //           ProjectName: project.ProjName,
+  //           Country: target.Country,
+  //           State: target.State,
+  //           TargetGroup: target.TGName,
+  //           TargetId :target.TGId,
+  //           AgeGroup: target.AgeGrp,
+  //           CompetitorGroup: target.CompetetionProduct,
+  //           MaricoProduct: target.MaricoProduct,
+  //           Status: status 
+  //         });
+  //       }
+  //     }
+
+  //     return combinedResults;
+  //   } catch (error) {
+  //     console.error('Error fetching audio data:', error.message);
+  //     throw new InternalServerErrorException('Failed to fetch audio data');
+  //   }
+  // }
+
+  // async getAudioDataByProject(projectName: string) {
+  //   try {
+  //     const querySpecProject = {
+  //       query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
+  //       parameters: [{ name: '@ProjName', value: projectName }],
+  //     };
+  
+  //     const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
+  
+  //     if (projects.length === 0) {
+  //       return [];
+  //     }
+  
+  //     return await this.combineProjectAndTargetData(projects);
+  //   } catch (error) {
+  //     console.error('Error fetching audio data by project:', error.message);
+  //     throw new InternalServerErrorException('Failed to fetch audio data by project');
+  //   }
+  // }
+
+  // async getAudioDataByUserAndProject(user: string, projectName: string) {
+  //   try {
+  //     const querySpecProject = {
+  //       query: 'SELECT * FROM c WHERE c.UserId = @UserId AND c.ProjName = @ProjName',
+  //       parameters: [
+  //         { name: '@UserId', value: user },
+  //         { name: '@ProjName', value: projectName },
+  //       ],
+  //     };
+  
+  //     const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
+  
+  //     if (projects.length === 0) {
+  //       return [];
+  //     }
+  
+  //     return await this.combineProjectAndTargetData(projects);
+  //   } catch (error) {
+  //     console.error('Error fetching audio data by user and project:', error.message);
+  //     throw new InternalServerErrorException('Failed to fetch audio data by user and project');
+  //   }
+  // }
+ 
+  // private async combineProjectAndTargetData(projects: any[]) {
+  //   const combinedResults = [];
+  
+  //   for (const project of projects) {
+  //     const projId = project.ProjId;
+  
+  //     const querySpecTarget = {
+  //       query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
+  //       parameters: [{ name: '@ProjId', value: projId }],
+  //     };
+  //     const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
+  
+  //     for (const target of targets) {
+  //       // Check for transcription data
+  //     const transcriptionExists = await this.checkTranscriptionData(target.TGId);
+
+  //     // Determine the status
+  //     const status = transcriptionExists
+  //       ? 'Completed'
+  //       : 'Processing';
+
+  //       combinedResults.push({
+  //         ProjectName: project.ProjName,
+  //         Country: target.Country,
+  //         State: target.State,
+  //         TargetGroup: target.TGName,
+  //         TargetId: target.TGId,
+  //         AgeGroup: target.AgeGrp,
+  //         CompetitorGroup: target.CompetetionProduct,
+  //         MaricoProduct: target.MaricoProduct,
+  //         Status: status,
+  //       });
+  //     }
+  //   }
+  
+  //   return combinedResults;
+  // }
+  
+
+  ////new optimazation code  
+
+  async getAudioData(userId?: string): Promise<any[]> {
     try {
-      // 1. Build Project Query
-      let querySpecProject;
-      if (userid) {
-        // If `userid` is passed, filter by `userid`
-        querySpecProject = {
-          query: 'SELECT * FROM c WHERE c.UserId = @UserId',
-          parameters: [{ name: '@UserId', value: userid }],
-        };
-      } else {
-        // If no `userid`, fetch all projects
-        querySpecProject = {
-          query: 'SELECT * FROM c',
-        };
-      }
-
-      // Fetch projects based on query
+      // Build query for projects
+      const querySpecProject = userId
+        ? { query: 'SELECT * FROM c WHERE c.UserId = @UserId', parameters: [{ name: '@UserId', value: userId }] }
+        : { query: 'SELECT * FROM c' };
+  
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-
-      // If no projects found
-      if (projects.length === 0) {
-        return [];
-      }
-
-      // 2. Fetch and Combine Data from Target Container
-      const combinedResults = [];
-
-      // Iterate over all fetched projects
-      for (const project of projects) {
-        const projId = project.ProjId;
-
-        // Fetch related target data using ProjId
-        const querySpecTarget = {
-          query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
-          parameters: [{ name: '@ProjId', value: projId }],
-        };
-        const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
-
-        // Combine the data from project and target containers
-        for (const target of targets) {
-
-          const transcriptionExists = await this.checkTranscriptionData(target.TGId);
-
-          const status = transcriptionExists
-        ? 'Completed'
-        : 'Processing';
-
-          combinedResults.push({
-            ProjectName: project.ProjName,
-            Country: target.Country,
-            State: target.State,
-            TargetGroup: target.TGName,
-            TargetId :target.TGId,
-            AgeGroup: target.AgeGrp,
-            CompetitorGroup: target.CompetetionProduct,
-            MaricoProduct: target.MaricoProduct,
-            Status: status 
-          });
-        }
-      }
-
-      return combinedResults;
+  
+      if (!projects.length) return [];
+  
+      // Fetch related target data in bulk
+      const projIds = projects.map((proj) => proj.ProjId);
+      return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
       console.error('Error fetching audio data:', error.message);
       throw new InternalServerErrorException('Failed to fetch audio data');
     }
   }
 
-  async getAudioDataByProject(projectName: string) {
+  async getAudioDataByProject(projectName: string): Promise<any[]> {
     try {
       const querySpecProject = {
         query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
@@ -368,18 +477,17 @@ export class AudioService {
   
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
   
-      if (projects.length === 0) {
-        return [];
-      }
+      if (!projects.length) return [];
   
-      return await this.combineProjectAndTargetData(projects);
+      const projIds = projects.map((proj) => proj.ProjId);
+      return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
       console.error('Error fetching audio data by project:', error.message);
       throw new InternalServerErrorException('Failed to fetch audio data by project');
     }
   }
 
-  async getAudioDataByUserAndProject(user: string, projectName: string) {
+  async getAudioDataByUserAndProject(user: string, projectName: string): Promise<any[]> {
     try {
       const querySpecProject = {
         query: 'SELECT * FROM c WHERE c.UserId = @UserId AND c.ProjName = @ProjName',
@@ -391,54 +499,68 @@ export class AudioService {
   
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
   
-      if (projects.length === 0) {
-        return [];
-      }
+      if (!projects.length) return [];
   
-      return await this.combineProjectAndTargetData(projects);
+      const projIds = projects.map((proj) => proj.ProjId);
+      return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
       console.error('Error fetching audio data by user and project:', error.message);
       throw new InternalServerErrorException('Failed to fetch audio data by user and project');
     }
   }
- 
-  private async combineProjectAndTargetData(projects: any[]) {
-    const combinedResults = [];
-  
-    for (const project of projects) {
-      const projId = project.ProjId;
-  
+
+  private async combineProjectAndTargetData(projIds: string[], projects: any[]): Promise<any[]> {
+    try {
+      // Fetch all targets for given project IDs
       const querySpecTarget = {
-        query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
-        parameters: [{ name: '@ProjId', value: projId }],
+        query: `SELECT * FROM c WHERE ARRAY_CONTAINS(@ProjIds, c.ProjId)`,
+        parameters: [{ name: '@ProjIds', value: projIds }],
       };
+  
       const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
   
-      for (const target of targets) {
-        // Check for transcription data
-      const transcriptionExists = await this.checkTranscriptionData(target.TGId);
-
-      // Determine the status
-      const status = transcriptionExists
-        ? 'Completed'
-        : 'Processing';
-
-        combinedResults.push({
-          ProjectName: project.ProjName,
-          Country: target.Country,
-          State: target.State,
-          TargetGroup: target.TGName,
-          TargetId: target.TGId,
-          AgeGroup: target.AgeGrp,
-          CompetitorGroup: target.CompetetionProduct,
-          MaricoProduct: target.MaricoProduct,
-          Status: status,
-        });
-      }
-    }
+      // Map targets by ProjId for quick lookup
+      const targetMap = targets.reduce((map, target) => {
+        if (!map[target.ProjId]) map[target.ProjId] = [];
+        map[target.ProjId].push(target);
+        return map;
+      }, {});
   
-    return combinedResults;
+      // Combine project and target data
+      const combinedResults = [];
+  
+      await Promise.all(
+        projects.map(async (project) => {
+          const projId = project.ProjId;
+          const relatedTargets = targetMap[projId] || [];
+  
+          for (const target of relatedTargets) {
+            const transcriptionExists = await this.checkTranscriptionData(target.TGId);
+            const status = transcriptionExists ? 'Completed' : 'Processing';
+  
+            combinedResults.push({
+              ProjectName: project.ProjName,
+              Country: target.Country,
+              State: target.State,
+              TargetGroup: target.TGName,
+              TargetId: target.TGId,
+              AgeGroup: target.AgeGrp,
+              CompetitorGroup: target.CompetetionProduct,
+              MaricoProduct: target.MaricoProduct,
+              Status: status,
+            });
+          }
+        })
+      );
+  
+      return combinedResults;
+    } catch (error) {
+      console.error('Error combining project and target data:', error.message);
+      throw new InternalServerErrorException('Failed to combine project and target data');
+    }
   }
+  
+  
   
   private async checkTranscriptionData(targetId: string): Promise<boolean> {
     try {
