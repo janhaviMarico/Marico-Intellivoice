@@ -1,6 +1,7 @@
 // src/Master/master.controller.ts
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { MasterService, GetAllUsersResponse, GetAllProjectsResponse } from './master.service';
+import { UpdateMasterDto } from './update-master.dto';
 
 @Controller('master')
 export class MasterController {
@@ -15,5 +16,13 @@ export class MasterController {
 
   async getAllProjects():Promise<GetAllProjectsResponse>{
     return this.masterService.getAllProjects();
+  }
+
+  @Patch(':masterId/update')
+  async updateMaster(
+    @Param('masterId') masterId: string,
+    @Body() updateDto: UpdateMasterDto,
+  ) {
+    return this.masterService.updateMasterData(masterId, updateDto);
   }
 }
