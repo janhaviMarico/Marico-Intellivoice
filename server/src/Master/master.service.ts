@@ -72,16 +72,10 @@ export class MasterService {
     const targetQuerySpec = {
       query: `SELECT * FROM c WHERE c.ProjId = @ProjId`,
       parameters: [{ name: '@ProjId', value: project.ProjId }]
-    };
-
-    // Log the target query specification for debugging
-    //console.log("Target Query Spec:", targetQuerySpec);
+    }; 
 
     // Execute the target details query for the current project
-    const { resources: targetDetails } = await this.TargetContainer.items.query(targetQuerySpec).fetchAll();
-
-    // Log the results fetched from TargetContainer
-   // console.log("Target Details for Project", project.id, targetDetails);
+    const { resources: targetDetails } = await this.TargetContainer.items.query(targetQuerySpec).fetchAll();  
 
     // Attach target details to the current project if data is found
     project.targetDetails = targetDetails.length ? targetDetails : [];

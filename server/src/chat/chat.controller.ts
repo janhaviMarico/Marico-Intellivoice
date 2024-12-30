@@ -90,7 +90,7 @@ async compareProjects(
     if (!project1 || !project2) {
       throw new HttpException('Both project_1 and project_2 query parameters are required.', HttpStatus.BAD_REQUEST);
     }
-    console.log(`Comparing projects: ${project1} and ${project2}`);
+   
     const result = await this.chatservice.compareProjects(project1, project2,compare);
     return result;
   } catch (error) {

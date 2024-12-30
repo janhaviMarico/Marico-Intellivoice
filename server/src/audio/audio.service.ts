@@ -808,7 +808,7 @@ mergeFiles(trimmedFiles: string[], resolve: Function, reject: Function): void {
 
 async updateStatus(TGId: string, updateData: { status: number }) {
   try {
-    console.log('TGId is', TGId);
+   
 
     // Query the target group by TGId
     const querySpec = {
@@ -823,7 +823,7 @@ async updateStatus(TGId: string, updateData: { status: number }) {
     }
 
     const targetGroup = targetGroups[0];
-    console.log('Existing target group:', targetGroup);
+    
 
     // Update the necessary fields
     targetGroup.status = updateData.status;
@@ -838,8 +838,6 @@ async updateStatus(TGId: string, updateData: { status: number }) {
     await this.targetContainer
       .item(targetGroup.id, partitionKey)
       .replace(targetGroup);
-
-    console.log('Successfully updated target group status.');
   } catch (error) {
     console.error(`Error updating TGId ${TGId}:`, error.message);
     throw new Error(`Failed to update status for TGId ${TGId}: ${error.message}`);

@@ -179,12 +179,12 @@ async function getTranscriptionResult(transcriptionUrl, headers, project_name: s
 
       if (transcriptionData.status === 'Succeeded') {
         isCompleted = true;
-        console.log('Transcription succeeded.');
+        
       } else if (transcriptionData.status === 'Failed') {
         throw new Error('Transcription failed.');
       }
       else {
-        console.log(`Transcription status: ${transcriptionData.status}. Retrying...`);
+       
         await sleep(30000); // Wait for 30 seconds before c
       }
     } catch (error) {
@@ -248,9 +248,9 @@ async function saveTranscriptionDocument(transcriptionDocument) {
     const response = await transcriptionContainer.items.create(transcriptionDocument);
     // Check if the document was successfully inserted
     if (response.resource) {
-      console.log('Document successfully created in Cosmos DB');
+      this.logger.log('Document successfully created in Cosmos DB');
     } else {
-      console.error('Document was not inserted successfully');
+      this.logger.error('Document was not inserted successfully');
     }
     return transcriptionDocument;
   } catch (error) {

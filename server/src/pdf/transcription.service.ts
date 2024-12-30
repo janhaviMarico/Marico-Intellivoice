@@ -75,7 +75,7 @@ export class TranscriptionService {
     };
   
     const { resources: projectItems } = await this.projectContainer.items.query(projectQuery).fetchAll();
-    //console.log("project data",projectItems)
+
     return projectItems.length > 0 ? projectItems[0] : null;
   }
   

@@ -16,7 +16,7 @@ export class TranscriptionProcessor{
     ){}
     @Process({name:'transcribe-audio',concurrency:5})
     async handleTranscriptionJob(job: Job) {
-        console.log('job.data',job.data);
+        
         const { TGId, TGName, sasToken, mainLang, SecondaryLang, noOfSpek } = job.data;
         await job.log(`Processing transcription job for audio array ${TGName}`);     
         try {
