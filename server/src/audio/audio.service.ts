@@ -32,8 +32,7 @@ export class AudioService {
     @InjectModel(TranscriptionEntity) private readonly transcriptContainer: Container,
     @InjectQueue('transcription') private readonly transcriptionQueue: Queue,
     private readonly audioUtils: AudioUtils,
-    private readonly config: ConfigService ) 
-    {
+    private readonly config: ConfigService) {
     this.blobServiceClient = BlobServiceClient.fromConnectionString(this.config.get<string>('AZURE_STORAGE_CONNECTION_STRING'));
     this.containerClient = this.blobServiceClient.getContainerClient(this.config.get<string>('AUDIO_UPLOAD_BLOB_CONTAINER'));
     this.transcriptionQueue.isReady().then(() => {
@@ -41,7 +40,7 @@ export class AudioService {
     }).catch(err => {
       this.logger.error('Failed to connect to Redis:', err);
     });
-    }
+  }
 
   // Handle audio processing logic
   async processAudioFiles(projectGrp: ProjectGroupDTO, targetGrp: string, files: Express.Multer.File[]) {
@@ -49,7 +48,7 @@ export class AudioService {
 
       //before creating project check data in master for drop downs
 
-      
+
 
       // Step 1: Create Project and Target Groups
       const projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
@@ -61,17 +60,17 @@ export class AudioService {
         statusCode: HttpStatus.CREATED,
         message: 'Project created successfully, audio files processing in background',
       };
-  
+
       // Run the remaining steps asynchronously (in the background)
       this.uploadAndProcessFilesInBackground(files, projectGrp, targetGrp);
-  
+
       return response;
     } catch (error) {
       this.logger.error(`Failed to process audio files: ${error.message}`);
       throw new InternalServerErrorException('Error processing audio files');
     }
   }
-  
+
   private async uploadAndProcessFilesInBackground(
     files: Express.Multer.File[],
     projectGrp: ProjectGroupDTO,
@@ -84,7 +83,7 @@ export class AudioService {
       const audioProcessDtoArray = await this.updateTargetGroupsWithSasUrls(projectGrp, targetGrp, sasUrls);
       // Optionally, start background transcription
       await this.runBackgroundTranscription(audioProcessDtoArray);
-  
+
     } catch (error) {
       this.logger.error(`Error processing files in background: ${error.message}`);
       // Handle or log background processing errors if needed
@@ -99,8 +98,8 @@ export class AudioService {
           parameters: [{ name: '@ProjName', value: project.ProjName }],
         })
         .fetchAll();
-  
-      
+
+
       if (existingProject.resources.length === 0) {
         // Project doesn't exist; create a new one
         const projectName: ProjectEntity = {
@@ -109,70 +108,70 @@ export class AudioService {
           UserId: project.userid,
           TGIds: project.TGIds,
         };
-  
+
         await this.projectContainer.items.create(projectName);
-       
+
         this.logger.log(`Project ${projectName.ProjName} created with ID ${projectName.ProjId}`);
       } else {
         // Project already exists
         this.logger.log(`Project with ID ${existingProject.resources[0].ProjId} already exists. Skipping project creation.`);
       }
-  
+
       // Process target groups
       const targetGrpArray = Object.values(targetGrp);
 
-      
+
       for (const group of targetGrpArray) {
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
-      
-      if (existingProject.resources.length > 0) {
-       // projectIdToUse = existingProject.resources[0].ProjId;
-        const targetGroupEntity: TargetGroupEntity = {
-          TGId: nanoid(),
-          TGName: groupObj.TGName,
-          ProjId: existingProject.resources[0].ProjId,
-          AudioName: groupObj.AudioName,
-          Country: groupObj.Country,
-          State: groupObj.State,
-          AgeGrp: groupObj.AgeGrp,
-          CompetetionProduct: groupObj.CompetetionProduct,
-          MaricoProduct: groupObj.MaricoProduct,
-          MainLang: groupObj.MainLang,
-          SecondaryLang: groupObj.SecondaryLang,
-          noOfSpek: groupObj.noOfSpek,
-          filePath: '', // This will be updated after audio upload
-          status: 0,
-        };
-        await this.targetContainer.items.create(targetGroupEntity);
-        // Add the new TGId to the existing project's TGIds array
-        existingProject.resources[0].TGIds.push(targetGroupEntity.TGId);
 
-        // Use upsert to update the project with the new TGIds array
-        await this.projectContainer.items.upsert(existingProject.resources[0]);
-      }else{
-        
-        const targetGroupEntity: TargetGroupEntity = {
-          TGId: nanoid(),
-          TGName: groupObj.TGName,
-          ProjId: groupObj.ProjId,
-          AudioName: groupObj.AudioName,
-          Country: groupObj.Country,
-          State: groupObj.State,
-          AgeGrp: groupObj.AgeGrp,
-          CompetetionProduct: groupObj.CompetetionProduct,
-          MaricoProduct: groupObj.MaricoProduct,
-          MainLang: groupObj.MainLang,
-          SecondaryLang: groupObj.SecondaryLang,
-          noOfSpek: groupObj.noOfSpek,
-          filePath: '', // This will be updated after audio upload
-          status: 0,
-        };
-        await this.targetContainer.items.create(targetGroupEntity);
+        if (existingProject.resources.length > 0) {
+          // projectIdToUse = existingProject.resources[0].ProjId;
+          const targetGroupEntity: TargetGroupEntity = {
+            TGId: nanoid(),
+            TGName: groupObj.TGName,
+            ProjId: existingProject.resources[0].ProjId,
+            AudioName: groupObj.AudioName,
+            Country: groupObj.Country,
+            State: groupObj.State,
+            AgeGrp: groupObj.AgeGrp,
+            CompetetionProduct: groupObj.CompetetionProduct,
+            MaricoProduct: groupObj.MaricoProduct,
+            MainLang: groupObj.MainLang,
+            SecondaryLang: groupObj.SecondaryLang,
+            noOfSpek: groupObj.noOfSpek,
+            filePath: '', // This will be updated after audio upload
+            status: 0,
+          };
+          await this.targetContainer.items.create(targetGroupEntity);
+          // Add the new TGId to the existing project's TGIds array
+          existingProject.resources[0].TGIds.push(targetGroupEntity.TGId);
+
+          // Use upsert to update the project with the new TGIds array
+          await this.projectContainer.items.upsert(existingProject.resources[0]);
+        } else {
+
+          const targetGroupEntity: TargetGroupEntity = {
+            TGId: nanoid(),
+            TGName: groupObj.TGName,
+            ProjId: groupObj.ProjId,
+            AudioName: groupObj.AudioName,
+            Country: groupObj.Country,
+            State: groupObj.State,
+            AgeGrp: groupObj.AgeGrp,
+            CompetetionProduct: groupObj.CompetetionProduct,
+            MaricoProduct: groupObj.MaricoProduct,
+            MainLang: groupObj.MainLang,
+            SecondaryLang: groupObj.SecondaryLang,
+            noOfSpek: groupObj.noOfSpek,
+            filePath: '', // This will be updated after audio upload
+            status: 0,
+          };
+          await this.targetContainer.items.create(targetGroupEntity);
+        }
+
+
       }
 
-       
-      }
-  
       this.logger.log('Target groups linked to project and created successfully.');
       return true;
     } catch (error) {
@@ -180,8 +179,8 @@ export class AudioService {
       throw new InternalServerErrorException('Error creating project and target groups');
     }
   }
-  
-  
+
+
   async uploadAudioFiles(files: Express.Multer.File[]): Promise<{ fileName: string, sasUri: string, sasToken: string }[]> {
     try {
       const sasUrls: { fileName: string, sasUri: string, sasToken: string }[] = [];
@@ -195,7 +194,7 @@ export class AudioService {
         const sasToken = await this.generateBlobSasUrl(file.originalname);
         sasUrls.push({ fileName, sasUri, sasToken });
       });
-  
+
       await Promise.all(uploadPromises);
       return sasUrls;
     } catch (error) {
@@ -203,7 +202,7 @@ export class AudioService {
       throw new InternalServerErrorException('Error uploading audio files');
     }
   }
-  
+
   async updateTargetGroupsWithSasUrls(projectGrp: ProjectGroupDTO, targetGrp: string,
     sasUrls: { fileName: string, sasUri: string, sasToken: string }[]) {
     const audioProcessDtoArray: any[] = [];
@@ -214,10 +213,11 @@ export class AudioService {
         const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
         const querySpec = {
           query: 'SELECT * FROM c WHERE c.TGName = @TGName',
-        parameters: [{ name: '@TGName', value: groupObj.TGName }]};  
-        const {resources: existingDocuments } = await this.targetContainer.items.query(querySpec).fetchAll();
+          parameters: [{ name: '@TGName', value: groupObj.TGName }]
+        };
+        const { resources: existingDocuments } = await this.targetContainer.items.query(querySpec).fetchAll();
         const latestDocument = existingDocuments[0];
-        latestDocument.filePath=matchingSasUrl.sasUri;
+        latestDocument.filePath = matchingSasUrl.sasUri;
         audioProcessDtoArray.push({
           TGId: latestDocument.TGId,
           TGName: groupObj.TGName,
@@ -235,24 +235,24 @@ export class AudioService {
       throw new InternalServerErrorException('Error updating target groups');
     }
   }
-  
 
-    runBackgroundTranscription(audioProcessDtoArray: {
-    TGId:string,
+
+  runBackgroundTranscription(audioProcessDtoArray: {
+    TGId: string,
     TGName: string,
     mainLang: string,
     SecondaryLang: string[],
     noOfSpek: number,
     sasToken: string,
   }[]) {
-    this.logger.log('Enqueuing audio transcription job...');   
+    this.logger.log('Enqueuing audio transcription job...');
     try {
       // Add the job to Bull queue
       for (const audioData of audioProcessDtoArray) {
         // Enqueue each audio file as a separate job
         this.transcriptionQueue.add('transcribe-audio', audioData);
         this.logger.log(`Transcription job for ${audioData.TGName} enqueued successfully`);
-    }
+      }
     } catch (error) {
       this.logger.error(`Failed to enqueue transcription job: ${error.message}`);
       throw new InternalServerErrorException('Failed to enqueue transcription job');
@@ -290,7 +290,7 @@ export class AudioService {
     ).toString();
 
     // Build the full URL with the SAS token
-    const blobUrl = `${this.containerClient.url}/${fileName}?${sasToken}`;  
+    const blobUrl = `${this.containerClient.url}/${fileName}?${sasToken}`;
     this.logger.log(`Generated SAS URL for blob: ${blobUrl}`);
     return Promise.resolve(blobUrl);
   }
@@ -370,13 +370,13 @@ export class AudioService {
   //       query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
   //       parameters: [{ name: '@ProjName', value: projectName }],
   //     };
-  
+
   //     const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-  
+
   //     if (projects.length === 0) {
   //       return [];
   //     }
-  
+
   //     return await this.combineProjectAndTargetData(projects);
   //   } catch (error) {
   //     console.error('Error fetching audio data by project:', error.message);
@@ -393,32 +393,32 @@ export class AudioService {
   //         { name: '@ProjName', value: projectName },
   //       ],
   //     };
-  
+
   //     const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-  
+
   //     if (projects.length === 0) {
   //       return [];
   //     }
-  
+
   //     return await this.combineProjectAndTargetData(projects);
   //   } catch (error) {
   //     console.error('Error fetching audio data by user and project:', error.message);
   //     throw new InternalServerErrorException('Failed to fetch audio data by user and project');
   //   }
   // }
- 
+
   // private async combineProjectAndTargetData(projects: any[]) {
   //   const combinedResults = [];
-  
+
   //   for (const project of projects) {
   //     const projId = project.ProjId;
-  
+
   //     const querySpecTarget = {
   //       query: 'SELECT * FROM c WHERE c.ProjId = @ProjId',
   //       parameters: [{ name: '@ProjId', value: projId }],
   //     };
   //     const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
-  
+
   //     for (const target of targets) {
   //       // Check for transcription data
   //     const transcriptionExists = await this.checkTranscriptionData(target.TGId);
@@ -441,10 +441,10 @@ export class AudioService {
   //       });
   //     }
   //   }
-  
+
   //   return combinedResults;
   // }
-  
+
 
   ////new optimazation code  
 
@@ -454,13 +454,12 @@ export class AudioService {
       const querySpecProject = userId
         ? { query: 'SELECT * FROM c WHERE c.UserId = @UserId', parameters: [{ name: '@UserId', value: userId }] }
         : { query: 'SELECT * FROM c' };
-  
+
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-  
+
       if (!projects.length) return [];
-  
-      // Fetch related target data in bulk
-      const projIds = projects.map((proj) => proj.ProjId);
+
+      const projIds = projects.map((proj) => proj.ProjId).reverse();
       return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
       console.error('Error fetching audio data:', error.message);
@@ -474,12 +473,12 @@ export class AudioService {
         query: 'SELECT * FROM c WHERE c.ProjName = @ProjName',
         parameters: [{ name: '@ProjName', value: projectName }],
       };
-  
+
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-  
+
       if (!projects.length) return [];
-  
-      const projIds = projects.map((proj) => proj.ProjId);
+
+      const projIds = projects.map((proj) => proj.ProjId).reverse();
       return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
       console.error('Error fetching audio data by project:', error.message);
@@ -496,12 +495,12 @@ export class AudioService {
           { name: '@ProjName', value: projectName },
         ],
       };
-  
+
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-  
+
       if (!projects.length) return [];
-  
-      const projIds = projects.map((proj) => proj.ProjId);
+
+      const projIds = projects.map((proj) => proj.ProjId).reverse();
       return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
       console.error('Error fetching audio data by user and project:', error.message);
@@ -516,26 +515,26 @@ export class AudioService {
         query: `SELECT * FROM c WHERE ARRAY_CONTAINS(@ProjIds, c.ProjId)`,
         parameters: [{ name: '@ProjIds', value: projIds }],
       };
-  
+
       const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
-  
+
       // Map targets by ProjId for quick lookup
       const targetMap = targets.reduce((map, target) => {
         if (!map[target.ProjId]) map[target.ProjId] = [];
         map[target.ProjId].push(target);
         return map;
       }, {});
-  
+
       // Combine project and target data
       const combinedResults = [];
-  
+
       await Promise.all(
         projects.map(async (project) => {
           const projId = project.ProjId;
           const relatedTargets = targetMap[projId] || [];
-  
-          for (const target of relatedTargets) {           
-  
+
+          for (const target of relatedTargets) {
+
             combinedResults.push({
               ProjectName: project.ProjName,
               Country: target.Country,
@@ -550,16 +549,16 @@ export class AudioService {
           }
         })
       );
-  
-      return combinedResults;
+
+      return combinedResults.reverse();
     } catch (error) {
       console.error('Error combining project and target data:', error.message);
       throw new InternalServerErrorException('Failed to combine project and target data');
     }
   }
-  
-  
-  
+
+
+
   private async checkTranscriptionData(targetId: string): Promise<boolean> {
     try {
       const querySpecTranscription = {
@@ -567,10 +566,10 @@ export class AudioService {
         parameters: [{ name: '@TGId', value: targetId }],
       };
 
-      this.logger.log("transcription data",querySpecTranscription)
-  
+      this.logger.log("transcription data", querySpecTranscription)
+
       const { resources: transcriptions } = await this.transcriptContainer.items.query(querySpecTranscription).fetchAll();
-  
+
       // Return true if at least one transcription exists for the target
       return transcriptions.length > 0;
     } catch (error) {
@@ -578,10 +577,10 @@ export class AudioService {
       return false; // Treat as no transcription if an error occurs
     }
   }
-  
-  
 
-  async viewData(TGName:string,TGId:string){
+
+
+  async viewData(TGName: string, TGId: string) {
   }
 
   async getAudioDetails(tgId: string, tgName: string) {
@@ -599,7 +598,7 @@ export class AudioService {
       const { resources: targetData } = await this.targetContainer.items
         .query(querySpecTarget)
         .fetchAll();
-        this.logger.log(`Fetching details for  ${tgId} and ${tgName} `);  
+      this.logger.log(`Fetching details for  ${tgId} and ${tgName} `);
 
 
       if (targetData.length === 0) {
@@ -618,14 +617,14 @@ export class AudioService {
       const { resources: transcriptionData } = await this.transcriptContainer.items
         .query(querySpecTranscription)
         .fetchAll();
-        this.logger.log(`Fetching transcription data for  ${tgId} and ${tgName} `);  
+      this.logger.log(`Fetching transcription data for  ${tgId} and ${tgName} `);
 
       if (transcriptionData.length === 0) {
         return { message: 'Transcription data not found' };
-      }   
-    const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
-     this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);  
-     const filenameurl=await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
+      }
+      const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
+      this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);
+      const filenameurl = await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
       // 3. Combine Target and Transcription Data
       const combinedData = {
         TGId: targetItem.TGId,
@@ -634,7 +633,7 @@ export class AudioService {
         AudioData: transcriptionItem.audiodata, // Transcription and Translation
         Summary: transcriptionItem.summary, // Summary from Transcription Container
         SentimentAnalysis: transcriptionItem.sentiment_analysis, // Sentiment Analysis from Transcription Container
-        vectorId:transcriptionItem.vectorId
+        vectorId: transcriptionItem.vectorId
       };
       return combinedData;
     } catch (error) {
@@ -643,32 +642,32 @@ export class AudioService {
     }
   }
 
-async editTranscription(data: EditTranscriptionDto, vectorIds: string[]) {
-  this.logger.log(`Attempting to edit transcription for TGId: ${data.TGId}`);
+  async editTranscription(data: EditTranscriptionDto, vectorIds: string[]) {
+    this.logger.log(`Attempting to edit transcription for TGId: ${data.TGId}`);
 
-  if (!data.TGId) {
+    if (!data.TGId) {
       this.logger.error('TGId is undefined or empty');
       throw new BadRequestException('TGId is required');
-  }
+    }
 
-  try {
+    try {
       // Parameterized query to fetch items by TGId
       const { resources: items } = await this.transcriptContainer.items
-          .query({
-              query: 'SELECT * FROM c WHERE c.TGId = @TGId',
-              parameters: [{ name: '@TGId', value: data.TGId }],
-          })
-          .fetchAll();
+        .query({
+          query: 'SELECT * FROM c WHERE c.TGId = @TGId',
+          parameters: [{ name: '@TGId', value: data.TGId }],
+        })
+        .fetchAll();
 
       if (items.length === 0) {
-          this.logger.warn(`No item found with TGId: ${data.TGId}`);
-          throw new NotFoundException(`Item with TGId ${data.TGId} not found`);
+        this.logger.warn(`No item found with TGId: ${data.TGId}`);
+        throw new NotFoundException(`Item with TGId ${data.TGId} not found`);
       }
 
       const existingItem = items[0];
       const updatedItem = {
-          ...existingItem,
-          audiodata: data.audiodata,
+        ...existingItem,
+        audiodata: data.audiodata,
       };
 
       // Upsert updated item back to Cosmos DB
@@ -677,99 +676,99 @@ async editTranscription(data: EditTranscriptionDto, vectorIds: string[]) {
 
       this.logger.log(`Vector IDs: ${JSON.stringify(vectorIds)}`);
 
-    // Extract the translation field from all items in audiodata and join them into one string
-    const metadata = data.audiodata.map(item => item.translation).join(' '); // Joins all translations with a space
+      // Extract the translation field from all items in audiodata and join them into one string
+      const metadata = data.audiodata.map(item => item.translation).join(' '); // Joins all translations with a space
 
       // Update metadata in Azure Search
       await this.updateMetadataInAzureSearch(vectorIds, metadata);
 
       return {
-          statusCode: 200,
-          message: 'Translation and metadata updated successfully.',
-          updatedItem,
+        statusCode: 200,
+        message: 'Translation and metadata updated successfully.',
+        updatedItem,
       };
-  } catch (error) {
+    } catch (error) {
       this.logger.error(`Failed to edit transcription: ${error.message}`);
       throw error;
+    }
   }
-}
-async updateMetadataInAzureSearch(vectorIds: string[], metadata:string): Promise<any> {
-  const url = `${this.endpoint}/indexes/${this.indexName}/docs/index?api-version=2021-04-30-Preview`;
+  async updateMetadataInAzureSearch(vectorIds: string[], metadata: string): Promise<any> {
+    const url = `${this.endpoint}/indexes/${this.indexName}/docs/index?api-version=2021-04-30-Preview`;
 
 
-  // Convert the metadata object into a single string if needed
-  //const metadataString = JSON.stringify(metadata);
+    // Convert the metadata object into a single string if needed
+    //const metadataString = JSON.stringify(metadata);
 
-  // Prepare the document payload
-  const payload = {
+    // Prepare the document payload
+    const payload = {
       value: vectorIds.map((id) => ({
-          '@search.action': 'mergeOrUpload',
-          id, // Use individual vector IDs
-         // ...metadata, // Add metadata fields (e.g., translation)
-          metadata: metadata,
+        '@search.action': 'mergeOrUpload',
+        id, // Use individual vector IDs
+        // ...metadata, // Add metadata fields (e.g., translation)
+        metadata: metadata,
       })),
-  };
+    };
 
-  try {
+    try {
       const response = await axios.post(url, payload, {
-          headers: {
-              'Content-Type': 'application/json',
-              'api-key': this.apiKey,
-          },
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': this.apiKey,
+        },
       });
       this.logger.log(`Metadata updated successfully in Azure Search for vector IDs: ${JSON.stringify(vectorIds)}`);
       return response.data;
-  } catch (error) {
+    } catch (error) {
       this.logger.error(`Failed to update metadata in Azure Search: ${error.message}`);
       if (error.response && error.response.status === 404) {
-          throw new HttpException('Document not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Document not found', HttpStatus.NOT_FOUND);
       }
       throw new HttpException(
-          'Failed to update document metadata',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+        'Failed to update document metadata',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
-  }
-}
-
-async updateStatus(TGId: string, updateData: { status: number }) {
-  try {
-    console.log('TGId is', TGId);
-
-    // Query the target group by TGId
-    const querySpec = {
-      query: 'SELECT * FROM c WHERE c.TGId = @TGId',
-      parameters: [{ name: '@TGId', value: TGId }],
-    };
-
-    const { resources: targetGroups } = await this.targetContainer.items.query(querySpec).fetchAll();
-
-    if (targetGroups.length === 0) {
-      throw new Error(`No target group found with TGId: ${TGId}`);
     }
-
-    const targetGroup = targetGroups[0];
-    console.log('Existing target group:', targetGroup);
-
-    // Update the necessary fields
-    targetGroup.status = updateData.status;
-
-    // Check if partition key exists
-    const partitionKey = targetGroup.master_id || targetGroup.TGId; // Replace with actual partition key field
-    if (!partitionKey) {
-      throw new Error('Partition key not found for this document.');
-    }
-
-    // Replace the updated document
-    await this.targetContainer
-      .item(targetGroup.id, partitionKey)
-      .replace(targetGroup);
-
-    console.log('Successfully updated target group status.');
-  } catch (error) {
-    console.error(`Error updating TGId ${TGId}:`, error.message);
-    throw new Error(`Failed to update status for TGId ${TGId}: ${error.message}`);
   }
-}
+
+  async updateStatus(TGId: string, updateData: { status: number }) {
+    try {
+      console.log('TGId is', TGId);
+
+      // Query the target group by TGId
+      const querySpec = {
+        query: 'SELECT * FROM c WHERE c.TGId = @TGId',
+        parameters: [{ name: '@TGId', value: TGId }],
+      };
+
+      const { resources: targetGroups } = await this.targetContainer.items.query(querySpec).fetchAll();
+
+      if (targetGroups.length === 0) {
+        throw new Error(`No target group found with TGId: ${TGId}`);
+      }
+
+      const targetGroup = targetGroups[0];
+      console.log('Existing target group:', targetGroup);
+
+      // Update the necessary fields
+      targetGroup.status = updateData.status;
+
+      // Check if partition key exists
+      const partitionKey = targetGroup.master_id || targetGroup.TGId; // Replace with actual partition key field
+      if (!partitionKey) {
+        throw new Error('Partition key not found for this document.');
+      }
+
+      // Replace the updated document
+      await this.targetContainer
+        .item(targetGroup.id, partitionKey)
+        .replace(targetGroup);
+
+      console.log('Successfully updated target group status.');
+    } catch (error) {
+      console.error(`Error updating TGId ${TGId}:`, error.message);
+      throw new Error(`Failed to update status for TGId ${TGId}: ${error.message}`);
+    }
+  }
 
 }
 
