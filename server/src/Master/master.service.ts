@@ -1,5 +1,5 @@
 // src/user/user.service.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/azure-database';
 import { Container } from '@azure/cosmos';
 import { MasterEntity } from './master.entity';
@@ -94,6 +94,50 @@ export class MasterService {
   };
 }
 
+//update the master data
 
+async updateMasterData(masterId: string, updateDto: { columnName: string; value: string }) {
+  const { columnName, value } = updateDto;
+
+  // Fetch the master data by ID
+  const querySpec = {
+    query: `SELECT * FROM c WHERE c.master_id = @masterId`,
+    parameters: [{ name: '@masterId', value: masterId }],
+  };
+
+  const { resources } = await this.masterContainer.items.query(querySpec).fetchAll();
+  if (resources.length === 0) {
+    throw new NotFoundException(`Master data with ID ${masterId} not found.`);
+  }
+  
+  const masterData = resources[0];
+
+  // Check if the column exists
+  if (!(columnName in masterData)) {
+    throw new BadRequestException(`Column ${columnName} does not exist in master data.`);
+  }
+
+  // Update the column
+  if (Array.isArray(masterData[columnName])) {
+    // Check if value already exists in the array
+    if (masterData[columnName].some((item: any) => item.name === value)) {
+      throw new BadRequestException(`Value ${value} already exists in ${columnName}.`);
+    }
+    if(columnName=="marico_product"){
+      masterData[columnName].push(value.toUpperCase());
+    }
+    else{
+      masterData[columnName].push({ name: value, code: value.slice(0, 2).toUpperCase() });
+    }
+ 
+  } else {
+    masterData[columnName] = value;
+  }
+
+  // Save the updated master data
+  const { resource: updatedMasterData } = await this.masterContainer.item(masterData.id, masterData.master_id).replace(masterData);
+
+  return updatedMasterData;
+}
   
 }

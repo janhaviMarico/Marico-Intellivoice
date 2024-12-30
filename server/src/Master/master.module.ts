@@ -6,12 +6,13 @@ import { MasterService } from './master.service';
 import { MasterController } from './master.controller';
 import { ProjectEntity } from 'src/audio/entity/project.entity';
 import { TargetGroupEntity } from 'src/audio/entity/target.entity';
+import { UpdateMasterDto } from './update-master.dto';
 
 @Module({
     imports:[AzureCosmosDbModule.forFeature([
         {
         collection:'master',
-        dto: MasterEntity
+        dto: MasterEntity,
         },
         {
             collection:'Projects',
