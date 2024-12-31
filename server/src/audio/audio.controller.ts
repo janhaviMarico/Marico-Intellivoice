@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query, BadRequestException, Res } from '@nestjs/common';
 import { AudioService } from './audio.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO, TargetGroupDto } from './dto/upload-audio.dto';
@@ -6,12 +6,17 @@ import { ParseJsonInterceptor } from 'src/utility';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { get } from 'http';
 import { EditTranscriptionDto } from './dto/edit-transcription.dto';
+import { diskStorage } from 'multer';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { Response } from 'express';
 
 
 @ApiTags('Audio Management')
 @Controller('audio')
 export class AudioController {
   private readonly logger = new Logger(AudioController.name);
+  fileUploadService: any;
 
   constructor(private readonly audioService: AudioService) {}
 
@@ -109,4 +114,97 @@ async editTranscription(
     }
     return this.audioService.editTranscription(editTranscriptionDto, vectorIds);
 } 
+
+/// audio trim code
+
+@Post('multiple')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const filename = `${uuidv4()}${path.extname(file.originalname)}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
+    // Clear the uploads folder before processing new files
+    //this.fileUploadService.clearUploadFolder();
+
+    // Proceed to store and return the new file URLs
+    const fileUrls = this.audioService.storeFiles(files);
+    return { files: fileUrls };
+  }
+
+  @Post('upload-and-peaks')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const filename = `${uuidv4()}${path.extname(file.originalname)}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  async uploadFilesAndGeneratePeaks(@UploadedFiles() files: Express.Multer.File[]) {
+    // Clear the uploads folder before processing new files, if needed
+    // this.fileUploadService.clearUploadFolder();
+
+    // Process each file: store it and generate peaks
+    const results = await Promise.all(
+      files.map(async (file) => {
+        // Generate file URL
+        const fileUrl = `http://localhost:3000/uploads/${file.filename}`;
+
+        // Generate peaks from file path
+        const peaks = await this.audioService.generatePeaksFromFilePath(
+          path.join(this.audioService.uploadDirectory, file.filename),
+        );
+
+        return {
+          fileUrl,
+          fileName: file.originalname,
+          peaks,
+        };
+      }),
+    );
+
+    return { files: results };
+  }
+
+  //merge audio file
+
+  @Post('merge-with-trims')
+  @UseInterceptors(FilesInterceptor('files', 10)) // Allow up to 10 files
+  async mergeAudioWithTrims(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('fileTrimPairs') fileTrimPairs: string, // The file and trim data as JSON
+    @Res() res: Response
+  ) {
+    const parsedFileTrimPairs = JSON.parse(fileTrimPairs); // Parse the file-trim pairing from JSON
+
+    // Combine files and trim data into an array of objects
+    const fileTrimData = parsedFileTrimPairs.map((pair: any, index: number) => ({
+      file: files[index],
+      trims: pair.trims || [] // Default to no trimming if not provided
+    }));
+
+    try {
+      const mergedStream = await this.audioService.mergeAudioWithTrims(fileTrimData);
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Disposition': 'attachment; filename=merged-audio.mp3',
+      });
+      mergedStream.pipe(res); // Pipe the merged audio file to the response
+    } catch (error) {
+      console.error('Error during audio merging with trims:', error);
+      res.status(500).json({ message: 'Error during audio merging.' });
+    }
+  }
+
 }
+
