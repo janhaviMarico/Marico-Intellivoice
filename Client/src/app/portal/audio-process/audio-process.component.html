@@ -45,6 +45,7 @@
                                 <mat-option *ngFor="let option of filteredCountry | async"
                                     [value]="option.name">{{option.name}}</mat-option>
                             </mat-autocomplete>
+                            <mat-icon matSuffix (click)="addEntity('country')">add_circle_outline</mat-icon>
                             <mat-error *ngIf="targetForm.get('country')?.invalid && targetForm.get('country')?.touched">
                                 Country is required
                             </mat-error>
@@ -57,6 +58,7 @@
                                 <mat-option *ngFor="let option of filteredState | async"
                                     [value]="option.name">{{option.name}}</mat-option>
                             </mat-autocomplete>
+                            <mat-icon matSuffix (click)="addEntity('state')">add_circle_outline</mat-icon>
                             <mat-error *ngIf="targetForm.get('state')?.invalid && targetForm.get('state')?.touched">
                                 State is required
                             </mat-error>
@@ -91,6 +93,7 @@
                                 <mat-option *ngFor="let option of filteredMaricoProduct | async"
                                     [value]="option.name">{{option.name}}</mat-option>
                             </mat-autocomplete>
+                            <mat-icon matSuffix (click)="addEntity('marico_product')">add_circle_outline</mat-icon>
                             <mat-error *ngIf="targetForm.get('maricoProduct')?.invalid && targetForm.get('maricoProduct')?.touched">
                                 Marico Product is required
                             </mat-error>

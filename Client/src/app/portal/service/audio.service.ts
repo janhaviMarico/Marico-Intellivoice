@@ -60,4 +60,8 @@ export class AudioService {
         link.click();
       });
   }
+
+  patchData(url: string, payload: any) {
+    return this.http.patch(this.baseUrl + url, payload);
+  }
 }

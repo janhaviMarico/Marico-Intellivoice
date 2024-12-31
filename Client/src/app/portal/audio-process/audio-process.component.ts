@@ -263,6 +263,41 @@ export class AudioProcessComponent {
     this.formEnd.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
+  addEntity(entity:any) {
+    let payload = {
+      columnName: entity,
+      value: ''
+    }
+    if(entity === 'country') {
+      if(this.targetForm.value.country === '') {
+        this.toastr.warning('Field is Empty');
+        return false;
+      } else {
+        payload.value = this.targetForm.value.country;
+      }
+    } else if(entity === 'state'){
+      if(this.targetForm.value.country === '') {
+        this.toastr.warning('Field is Empty');
+        return false;
+      } else {
+        payload.value = this.targetForm.value.state;
+      }
+    } else if(entity === 'marico_product') {
+      if(this.targetForm.value.country === '') {
+        this.toastr.warning('Field is Empty');
+        return false;
+      } else {
+        payload.value = this.targetForm.value.maricoProduct;
+      }
+    }
+    this.audioServ.patchData('master/001/update',payload).subscribe((res:any)=> {
+      this.toastr.success('Add Master Sucessfully!')
+    },(err)=> {
+      this.toastr.error('Something Went Wrong!');
+    });
+    return;
+  }
+
   //Media Code
   onFileSelected(event: any): void {
     const files: FileList = event.target.files;
