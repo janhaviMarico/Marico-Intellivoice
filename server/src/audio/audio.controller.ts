@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query, BadRequestException, Res } from '@nestjs/common';
 import { AudioService } from './audio.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ProjectGroupDTO } from './dto/upload-audio.dto';
+import { ProjectGroupDTO, TargetGroupDto } from './dto/upload-audio.dto';
 import { ParseJsonInterceptor } from 'src/utility';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { get } from 'http';
@@ -10,6 +10,7 @@ import { diskStorage } from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { Response } from 'express';
+
 
 @ApiTags('Audio Management')
 @Controller('audio')
@@ -31,13 +32,11 @@ export class AudioController {
     try {
       // Parse the incoming project and target group data
       const projectGroupDto: ProjectGroupDTO = JSON.parse(projectDto);
-      // Validate the parsed DTO (you could add further validation logic here if necessary)
-      // You can also add a validation pipe here to handle DTO validation globally
-
+     
       if (!files || files.length === 0) {
         throw new HttpException('No files uploaded', HttpStatus.BAD_REQUEST);
       }
-
+      
       // Log the incoming request details
       this.logger.log(`Received request to upload ${files.length} files for project ${projectGroupDto.ProjName}`);
 
@@ -63,28 +62,20 @@ export class AudioController {
     }
   }
 
-  @Post('list')
-async getAudioListak(@Body() body: { user?: string; projectName?: string }) {
+@Post('list')
+async getAudioList(@Body() body: { user?: string; projectName?: string }) {
   const { user, projectName } = body;
 
   try {
-    let data = [];
+    const data =
+      !user && !projectName
+        ? await this.audioService.getAudioData()
+        : user && !projectName
+        ? await this.audioService.getAudioData(user)
+        : !user && projectName
+        ? await this.audioService.getAudioDataByProject(projectName)
+        : await this.audioService.getAudioDataByUserAndProject(user, projectName);
 
-    if (!user && !projectName) {
-      // Fetch all data if both `user` and `projectName` are empty
-      data = await this.audioService.getAudioData();
-    } else if (user && !projectName) {
-      // Fetch all data for the specified `user`
-      data = await this.audioService.getAudioData(user);
-    } else if (!user && projectName) {
-      // Fetch all data for the specified `projectName`
-      data = await this.audioService.getAudioDataByProject(projectName);
-    } else {
-      // Fetch data for the specified `user` and `projectName`
-      data = await this.audioService.getAudioDataByUserAndProject(user, projectName);
-    }
-
-    // Include the count of the data list in the response
     return {
       count: data.length,
       data: data,
