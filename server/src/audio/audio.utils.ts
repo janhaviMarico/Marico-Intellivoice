@@ -163,9 +163,9 @@ export class AudioUtils{
         const audioTranscript = translatedTextArray
         .map((entry: any) => ` Speaker ${entry.speaker}: ${entry.translation}`)
         .join('\n\n');
-        console.log(audioTranscript);
+        //console.log(audioTranscript);
    const response= this.chatService.getPrompResponse(MODERATOR_RECOGNITION,audioTranscript);
-   console.log(response);
+   //console.log(response);
    const match = (await response).match(/Speaker\s*\d+/i).toString();
    const updatedTextArray = translatedTextArray.map(item => {
     // If this item's speaker matches the identified moderator, mark them as 'Moderator'
@@ -225,9 +225,9 @@ export class AudioUtils{
           const response = await this.transcriptionContainer.items.create(transcriptionDocument);
           // Check if the document was successfully inserted
           if (response.resource) {
-            console.log('Document successfully created in Cosmos DB');
+           // console.log('Document successfully created in Cosmos DB');
           } else {
-            console.error('Document was not inserted successfully');
+            //console.error('Document was not inserted successfully');
           }
           return transcriptionDocument;
         } catch (error) {
@@ -252,9 +252,9 @@ export class AudioUtils{
             existingDocument.vectorId = updateData; // Assuming `updatedVectorIdArray` is the new value         
             // Upsert (insert or update) the modified document back into Cosmos DB
             const response = await this.transcriptionContainer.items.upsert(existingDocument);         
-            console.log('Document updated successfully:');
+           // console.log('Document updated successfully:');
           } else {
-            console.log('Document not found');
+           // console.log('Document not found');
             return response;
         }
         } catch (error) {
@@ -329,7 +329,7 @@ export class AudioUtils{
                 const vectorId = uploadResult.results[0]?.key;
                 vectorIds.push(vectorId);                
                 // Optionally, log progress
-                console.log(`Uploaded chunk with vector ID: ${vectorId}`);
+                //console.log(`Uploaded chunk with vector ID: ${vectorId}`);
               }
             // Return all generated vector IDs for the document chunks
             return vectorIds;

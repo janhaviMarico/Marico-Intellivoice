@@ -47,7 +47,7 @@ export class ChangeFeedService implements OnModuleInit {
 
         // Process the changes
         if (Array.isArray(changes) && changes.length > 0) {
-          console.log(`Found ${changes.length} new insertions/updates.`);
+          //console.log(`Found ${changes.length} new insertions/updates.`);
           for (const change of changes) {
             //console.log("TGID is",change.TGId);       
             const userEmail = await this.getUserEmailByTgid(change.TGId);
@@ -132,9 +132,9 @@ export class ChangeFeedService implements OnModuleInit {
 
     try {
       await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully to', recipientEmail);
+      //console.log('Email sent successfully to', recipientEmail);
     } catch (error) {
-      console.error('Error sending email:', error);
+      //console.error('Error sending email:', error);
     }
   }
 }
