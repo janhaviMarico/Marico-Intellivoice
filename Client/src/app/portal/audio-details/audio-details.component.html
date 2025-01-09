@@ -9,7 +9,7 @@
         <label>
           <img
             [src]="selectedTabIndex === 0 ? '../../../assets/Img/AudioDetails/trascriptor-a.png' : '../../../assets/Img/AudioDetails/transcriptor-i.png'"
-            alt=""><span [ngClass]="{'active': selectedTabIndex === 0}">Trascript</span>
+            alt=""><span [ngClass]="{'active': selectedTabIndex === 0}">Transcript</span>
         </label>
       </ng-template>
       <div class="tab-content">
@@ -131,7 +131,7 @@
               <div *ngIf="message.from === 'AI'" class="answer-format">
                 <div class="answer">
                   <img src="../../../assets/Img/header/Logo.png" alt="logo">
-                  <pre>Moderator : {{ message.message }}</pre>
+                  <pre>{{ message.message }}</pre>
                 </div>
               </div>
             </div>

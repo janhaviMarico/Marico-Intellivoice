@@ -33,18 +33,8 @@ export class AudioProcessComponent {
   target: any;
   countries: any[] = [];
   states: any[] = [];
-  competitors: any[] = [
-    { name: 'Dabur Gold', code: 'DG' },
-    { name: 'Nihar Naturals', code: 'NN' },
-    { name: 'Fortune Oil', code: 'FO' },
-    { name: 'Sundrop', code: 'SU' }
-  ]
-  products: any[] = [
-    { name: 'Parachute', code: 'PR' },
-    { name: 'Livon', code: 'LV' },
-    { name: 'Saffola', code: 'SF' },
-    { name: 'X-Men', code: 'XM' }
-  ]
+  competitors: any[] = []
+  products: any[] = []
   primaryLang: any[] = [];
   otherLang: any[] = [];
   filteredOtherLang: any[] = [];
@@ -54,8 +44,12 @@ export class AudioProcessComponent {
   filteredCountry!: Observable<any[]>;
   filteredState!: Observable<any[]>;
   filteredMaricoProduct!: Observable<any[]>;
+  filteredCompetetiveProduct!: Observable<any[]>;
   steps = ['Project Details', 'Add Media', 'Assign TG', 'Upload Audio'];
   currentStep = 0;
+
+  selectedUsers: any[] = new Array<any>();
+  lastFilter: string = '';
 
   //Media Code
   audioFiles: AudioFile[] = [];
@@ -105,7 +99,6 @@ export class AudioProcessComponent {
   }
 
   //Add Project Code
-
   getAllMaster() {
     this.commonServ.getAPI('master/all').subscribe((res: any) => {
       if (res.statusCode == 200) {
@@ -115,7 +108,13 @@ export class AudioProcessComponent {
         this.primaryLang = res.data[0].Languages;
         this.otherLang = res.data[0].Languages;
         this.filteredOtherLang = [...this.otherLang];
+        this.competitors = res.data[0].competetive_product;
       }
+      this.filteredCompetetiveProduct = this.targetForm.get('competitors')!.valueChanges.pipe(
+        startWith<string | any[]>(''),
+        map(value => typeof value === 'string' ? value : this.lastFilter),
+        map(filter => this.filter(filter))
+      );
     }, (err: any) => {
       this.toastr.error('Something Went Wrong!')
     })
@@ -136,7 +135,7 @@ export class AudioProcessComponent {
     this.filteredState = this._initializeFilter('state', this.states, 'name');
     this.filteredMaricoProduct = this._initializeFilter('maricoProduct', this.products, 'name');
   }
-  
+
   private _initializeFilter(
     controlName: string,
     dataSource: any[],
@@ -151,11 +150,44 @@ export class AudioProcessComponent {
     }
     return of([]);
   }
-  
+
   private _filter(value: string, dataSource: any[], property: string): string[] {
     const filterValue = value.toLowerCase();
     return dataSource.filter((option: any) => option[property].toLowerCase().includes(filterValue));
   }
+
+  filter(filter: string): any[] {
+    this.lastFilter = filter;
+    if (filter) {
+      return this.competitors.filter(option => {
+        return option.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+      })
+    } else {
+      return this.competitors.slice();
+    }
+  }
+
+  displayFn(value: any[] | string): string {
+    return '';
+  }
+
+  optionClicked(event: Event, user: any) {
+    event.stopPropagation();
+    this.toggleSelection(user);
+  }
+
+  toggleSelection(user: any) {
+    user.selected = !user.selected;
+    if (user.selected) {
+      this.selectedUsers.push(user);
+    } else {
+      const i = this.selectedUsers.findIndex((value: any) => value.name === user.name);
+      this.selectedUsers.splice(i, 1);
+    }
+
+    this.targetForm.get('competitors')!.setValue(this.selectedUsers);
+  }
+
   onSubmit() {
     if (this.targetForm.invalid) {
       this.targetForm.markAllAsTouched();
@@ -263,36 +295,47 @@ export class AudioProcessComponent {
     this.formEnd.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
-  addEntity(entity:any) {
+  addEntity(entity: any) {
     let payload = {
       columnName: entity,
       value: ''
     }
-    if(entity === 'country') {
-      if(this.targetForm.value.country === '') {
-        this.toastr.warning('Field is Empty');
+    if (entity === 'country') {
+      if (this.targetForm.value.country === '') {
+        this.toastr.warning('Country field is empty');
         return false;
       } else {
         payload.value = this.targetForm.value.country;
       }
-    } else if(entity === 'state'){
-      if(this.targetForm.value.country === '') {
-        this.toastr.warning('Field is Empty');
+    } else if (entity === 'state') {
+      if (this.targetForm.value.state === '') {
+        this.toastr.warning('State field is empty');
         return false;
       } else {
         payload.value = this.targetForm.value.state;
       }
-    } else if(entity === 'marico_product') {
-      if(this.targetForm.value.country === '') {
-        this.toastr.warning('Field is Empty');
+    } else if (entity === 'marico_product') {
+      if (this.targetForm.value.maricoProduct === '') {
+        this.toastr.warning('Marico Product field is empty');
         return false;
       } else {
         payload.value = this.targetForm.value.maricoProduct;
       }
+    } else if (entity === 'competitor') {
+      if (this.lastFilter === '') {
+        this.toastr.warning('Competitor Product field is empty');
+        return false;
+      } else {
+        payload.value = this.lastFilter;
+      }
     }
-    this.audioServ.patchData('master/001/update',payload).subscribe((res:any)=> {
-      this.toastr.success('Add Master Sucessfully!')
-    },(err)=> {
+    this.audioServ.patchData('master/001/update', payload).subscribe((res: any) => {
+      this.toastr.success('Add Master Sucessfully!');
+      if(entity === 'competitor') {
+        this.competitors.push({name:this.lastFilter});
+        this.lastFilter = '';
+      }
+    }, (err) => {
       this.toastr.error('Something Went Wrong!');
     });
     return;
