@@ -123,7 +123,7 @@ async updateMasterData(masterId: string, updateDto: { columnName: string; value:
     if (masterData[columnName].some((item: any) => item.name === value)) {
       throw new BadRequestException(`Value ${value} already exists in ${columnName}.`);
     }
-    if(columnName=="marico_product"){
+    if(columnName=="marico_product" || columnName=="competetive_product"){
       masterData[columnName].push(value.toUpperCase());
     }
     else{
