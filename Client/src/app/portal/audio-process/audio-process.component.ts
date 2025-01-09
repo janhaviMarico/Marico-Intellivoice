@@ -109,15 +109,20 @@ export class AudioProcessComponent {
         this.otherLang = res.data[0].Languages;
         this.filteredOtherLang = [...this.otherLang];
         this.competitors = res.data[0].competetive_product;
+        this.filteredCompetetiveProduct = of(this.competitors);
       }
-      this.filteredCompetetiveProduct = this.targetForm.get('competitors')!.valueChanges.pipe(
-        startWith<string | any[]>(''),
-        map(value => typeof value === 'string' ? value : this.lastFilter),
-        map(filter => this.filter(filter))
-      );
+     
     }, (err: any) => {
       this.toastr.error('Something Went Wrong!')
     })
+  }
+
+  filterForCompetitor() {
+    this.filteredCompetetiveProduct = of(this.lastFilter).pipe(
+      startWith<string>(''),
+      map(value => (typeof value === 'string' ? value : this.lastFilter)),
+      map(filter => this.filter(filter))
+    );
   }
 
   getExistingProject() {
@@ -186,6 +191,7 @@ export class AudioProcessComponent {
     }
 
     this.targetForm.get('competitors')!.setValue(this.selectedUsers);
+    this.filteredCompetetiveProduct = of(this.competitors);
   }
 
   onSubmit() {
@@ -246,7 +252,12 @@ export class AudioProcessComponent {
     // Mapping selected values to their corresponding codes
     const selectedCountry = this.countries.find(country => country.name === countryName)?.code || 'NA';
     const selectedState = this.states.find(state => state.name === stateName)?.code || 'NA';
-    const selectedCompetitors = competitorNames.map((name: any) => this.competitors.find((c: any) => c.name === name)?.code || name).join('-');
+    // const selectedCompetitors = competitorNames.map((name: any) => this.competitors.find((c: any) => c.name === name)?.code || name).join('-');
+    const selectedCompetitors = competitorNames.map((competitor: any) => {
+    const matchedCompetitor = this.competitors.find((c: any) => c.name === competitor.name);
+    return matchedCompetitor ? matchedCompetitor.code : competitor.name || competitor;
+  })
+  .join('-');
     const selectedProduct = this.products.find(product => product.name === maricoProductName)?.code || '111';
     const selectedPrimaryLang = this.primaryLang.find(lang => lang.name === primaryLangName)?.code || '222';
     const selectedOtherLangs = otherLangNames.map((name: any) => this.otherLang.find((lang: any) => lang.name === name)?.code || name).join('-');
@@ -334,6 +345,7 @@ export class AudioProcessComponent {
       if(entity === 'competetive_product') {
         this.competitors.push({name:this.lastFilter});
         this.lastFilter = '';
+        this.filteredCompetetiveProduct = of(this.competitors);
       }
     }, (err) => {
       this.toastr.error('Something Went Wrong!');

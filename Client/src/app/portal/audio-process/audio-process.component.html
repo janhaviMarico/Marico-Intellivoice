@@ -65,8 +65,12 @@
                         </mat-form-field>
                         <mat-form-field class="example-full-width">
                             <input type="text" placeholder="Competitor Products" aria-label="Competitor Producst"
-                                matInput [matAutocomplete]="auto" formControlName="competitors" [(ngModel)]="lastFilter">
+                                matInput [matAutocomplete]="auto" formControlName="competitors" [(ngModel)]="lastFilter" (keyup)="filterForCompetitor()">
                             <mat-icon matSuffix (click)="addEntity('competetive_product')">add_circle_outline</mat-icon>
+                            <mat-error
+                            *ngIf="targetForm.get('competitors')?.invalid && targetForm.get('competitors')?.touched">
+                            Competitor Product is required
+                            </mat-error>
                         </mat-form-field>
 
                         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -204,7 +208,9 @@
                                             <div class="data-group">
                                                 <div class="target">
                                                     <span class="label">Competitor Products</span>
-                                                    <span class="value">{{target?.competitors}}</span>
+                                                    <span class="value"><ng-container *ngFor="let competitor of target?.competitors; let i = index">
+                                                        {{ competitor.name }}<span *ngIf="i < target.competitors.length - 1">, </span>
+                                                      </ng-container></span>
                                                 </div>
                                                 <div class="target">
                                                     <span class="label">Marico Product</span>
