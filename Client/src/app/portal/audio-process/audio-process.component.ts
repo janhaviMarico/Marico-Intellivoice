@@ -321,7 +321,7 @@ export class AudioProcessComponent {
       } else {
         payload.value = this.targetForm.value.maricoProduct;
       }
-    } else if (entity === 'competitor') {
+    } else if (entity === 'competetive_product') {
       if (this.lastFilter === '') {
         this.toastr.warning('Competitor Product field is empty');
         return false;
@@ -331,7 +331,7 @@ export class AudioProcessComponent {
     }
     this.audioServ.patchData('master/001/update', payload).subscribe((res: any) => {
       this.toastr.success('Add Master Sucessfully!');
-      if(entity === 'competitor') {
+      if(entity === 'competetive_product') {
         this.competitors.push({name:this.lastFilter});
         this.lastFilter = '';
       }

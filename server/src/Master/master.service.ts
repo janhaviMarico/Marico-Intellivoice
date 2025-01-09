@@ -39,7 +39,7 @@ export class MasterService {
       //country: master.country.map((countryName) => ({ name: countryName })),
       // state: master.state.map((stateName) => ({ name: stateName })),
       marico_product: master.marico_product.map((marico_productName) => ({ name: marico_productName })),
-      competetive_product: master.marico_product.map((competetive_product) => ({ name: competetive_product })),
+      competetive_product: master.competetive_product.map((competetive_product) => ({ name: competetive_product })),
     }));
 
     return {
