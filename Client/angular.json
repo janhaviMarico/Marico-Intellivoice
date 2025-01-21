@@ -17,6 +17,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "baseHref": "/portal/",
+            "deployUrl": "/portal/",
             "outputPath": "dist/client",
             "index": "src/index.html",
             "main": "src/main.ts",
