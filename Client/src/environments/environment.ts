@@ -10,6 +10,8 @@
 
 export const environment = {
   production: false,
-  BASE_URL: 'http://localhost:3001/'
-  //BASE_URL: 'https://intellivoice.atriina.com/'
+  BASE_URL: 'http://localhost:3001/',
+  //BASE_URL: 'https://intellivoice.atriina.com/',
+  baseHref: '/',
+  redirectUrl: 'http://localhost:4200'
 };

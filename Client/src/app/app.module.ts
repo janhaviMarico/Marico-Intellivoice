@@ -9,12 +9,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { CommonService } from './portal/service/common.service';
 import { HttpClientModule } from '@angular/common/http';
+import { environment } from '../environments/environment';
+import { APP_BASE_HREF } from '@angular/common';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
     auth:{
       clientId: '76227ae6-b2f6-4325-a751-a5b6f94fb870',
-      redirectUri: 'http://localhost:4200'
+      redirectUri: environment.redirectUrl
     },
     cache: {
       cacheLocation: 'localStorage',
@@ -51,7 +53,8 @@ export function initializeMsal(msalService: MsalService): () => Promise<void> {
       multi: true
     },
     provideToastr(),
-    CommonService
+    CommonService,
+    { provide: APP_BASE_HREF, useValue: environment.baseHref }
   ],
   bootstrap: [AppComponent]
 })
