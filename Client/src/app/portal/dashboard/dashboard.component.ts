@@ -108,14 +108,21 @@ export class DashboardComponent {
       maricoProduct: "Product I",
     }
   ];
-
+  baseHref:string = '../../../';
   loading: boolean = true;
   constructor(private dialog: MatDialog) {
-    
+    if(window.location.origin.includes('ai.maricoapps.biz')) {
+      this.baseHref = 'intelliVoice/'
+    }
   }
 
   ngOnInit() {
     this.loading = false;
   }
 
+
+  hostfunction(){
+    const  url = `${window.location.protocol}//${window.location.host}`
+    console.log(url,"vikas")
+  }
 }

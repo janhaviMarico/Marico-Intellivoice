@@ -37,11 +37,13 @@ export class AudioDetailsComponent {
   currentText: string = '';
   replaceText: string = '';
   tempAudioData: any = [];
-
+  baseHref:string = '../../../';
   constructor(private audioServ: AudioService, private cdr: ChangeDetectorRef, private activeRoute: ActivatedRoute,
     private router: Router, private toastr: ToastrService, private dialog: MatDialog,
   ) {
-
+    if(window.location.origin.includes('ai.maricoapps.biz')) {
+      this.baseHref = 'intelliVoice/'
+    }
   }
 
   ngOnInit() {

@@ -10,12 +10,16 @@ import { MsalService } from '@azure/msal-angular';
 })
 export class InfoComponent {
   infoObj:any;
+  baseHref:string = '../../../../';
   constructor(private dialog: MatDialog, 
     public infoDialogRef: MatDialogRef<InfoComponent>,
     @Inject(MAT_DIALOG_DATA) public info: {name?:string,title?:string},
     private commonServ:CommonService, private msalService:MsalService
   ) {
     this.infoObj = info;
+    if(window.location.origin.includes('ai.maricoapps.biz')) {
+      this.baseHref = 'intelliVoice/'
+    }
   }
 
   closeInfo() {

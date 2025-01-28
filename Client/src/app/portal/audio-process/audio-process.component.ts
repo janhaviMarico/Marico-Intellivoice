@@ -63,10 +63,15 @@ export class AudioProcessComponent {
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
   targetGrps!: { targetGrpArr: any[] };
+  baseHref:string = '../../../../';
   readonly panelOpenState = signal(false);
 
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
-    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) { }
+    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) {
+      if(window.location.origin.includes('ai.maricoapps.biz')) {
+        this.baseHref = 'intelliVoice/'
+      }
+     }
 
   ngOnInit() {
     //Add Project Code

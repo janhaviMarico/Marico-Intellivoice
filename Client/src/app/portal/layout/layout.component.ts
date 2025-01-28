@@ -8,23 +8,27 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./layout.component.scss']
 })
 export class LayoutComponent {
-
-  constructor(private dialog: MatDialog) { }
+  baseHref: string = '../../../';
+  constructor(private dialog: MatDialog) {
+    if (window.location.origin.includes('ai.maricoapps.biz')) {
+      this.baseHref = 'intelliVoice/'
+    }
+  }
 
   logoutModel(event: MouseEvent) {
     const targetElement = event.target as HTMLElement;
     const rect = targetElement.getBoundingClientRect();
     const info = {
-          name: 'profile', title: ''
-        }
-        this.dialog.open(InfoComponent, {
-          position: {
-            top: `${rect.bottom + window.scrollY + 5}px`, // Positioning below the button
-            left: `${rect.left + window.scrollX - 50}px`,
-          },
-          // width: '100px',
-          // height: '80px',
-          data: info
-        });
+      name: 'profile', title: ''
+    }
+    this.dialog.open(InfoComponent, {
+      position: {
+        top: `${rect.bottom + window.scrollY + 5}px`, // Positioning below the button
+        left: `${rect.left + window.scrollX - 50}px`,
+      },
+      // width: '100px',
+      // height: '80px',
+      data: info
+    });
   }
 }
