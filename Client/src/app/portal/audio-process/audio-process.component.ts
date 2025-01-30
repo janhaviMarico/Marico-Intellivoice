@@ -69,7 +69,7 @@ export class AudioProcessComponent {
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
     private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) {
       if(window.location.origin.includes('ai.maricoapps.biz')) {
-        this.baseHref = 'intelliVoice/'
+        this.baseHref = 'Insightopedia/'
       }
      }
 

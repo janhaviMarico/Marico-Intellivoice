@@ -11,7 +11,7 @@ export class LayoutComponent {
   baseHref: string = '../../../';
   constructor(private dialog: MatDialog) {
     if (window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'intelliVoice/'
+      this.baseHref = 'Insightopedia/'
     }
   }
 

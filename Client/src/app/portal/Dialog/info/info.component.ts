@@ -18,7 +18,7 @@ export class InfoComponent {
   ) {
     this.infoObj = info;
     if(window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'intelliVoice/'
+      this.baseHref = 'Insightopedia/'
     }
   }
 

@@ -42,7 +42,7 @@ export class AudioDetailsComponent {
     private router: Router, private toastr: ToastrService, private dialog: MatDialog,
   ) {
     if(window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'intelliVoice/'
+      this.baseHref = 'Insightopedia/'
     }
   }
 
