@@ -615,7 +615,7 @@ export class AudioService {
   storeFiles(files: Express.Multer.File[]): string[] {
     return files.map((file) => {
       const filePath = path.join(this.uploadDirectory, file.filename);
-      return `http://localhost:3000/uploads/${file.filename}`; // Adjust URL as needed
+      return `http://localhost:3001/uploads/${file.filename}`; // Adjust URL as needed
     });
   }
 

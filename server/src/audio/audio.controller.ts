@@ -158,7 +158,7 @@ async editTranscription(
     const results = await Promise.all(
       files.map(async (file) => {
         // Generate file URL
-        const fileUrl = `http://localhost:3000/uploads/${file.filename}`;
+        const fileUrl = `http://localhost:3001/uploads/${file.filename}`;
 
         // Generate peaks from file path
         const peaks = await this.audioService.generatePeaksFromFilePath(
@@ -205,6 +205,7 @@ async editTranscription(
       res.status(500).json({ message: 'Error during audio merging.' });
     }
   }
+
 
 }
 
