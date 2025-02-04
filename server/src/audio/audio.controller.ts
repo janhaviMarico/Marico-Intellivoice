@@ -3,7 +3,7 @@ import { AudioService } from './audio.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO, TargetGroupDto } from './dto/upload-audio.dto';
 import { ParseJsonInterceptor } from 'src/utility';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { get } from 'http';
 import { EditTranscriptionDto } from './dto/edit-transcription.dto';
 import { diskStorage } from 'multer';
@@ -205,6 +205,51 @@ async editTranscription(
       res.status(500).json({ message: 'Error during audio merging.' });
     }
   }
+
+  @Post('delete')
+  @ApiOperation({ summary: 'Delete audio files and related data' })
+  @ApiBody({
+    description: 'List of Target IDs and Target Names to delete',
+    schema: {
+      type: 'object',
+      properties: {
+        targets: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              TGId: { type: 'string', description: 'Target Group ID' },
+              TGName: { type: 'string', description: 'Target Group Name' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Targets deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async deleteAudioFiles(
+    @Body() body: { targets: { TGId: string; TGName: string }[] },
+  ) {
+    const { targets } = body;
+  
+    if (!targets || targets.length === 0) {
+      throw new BadRequestException('Invalid input: Targets are required');
+    }
+  
+    try {
+      const result = await this.audioService.deleteAudioFiles(targets);
+      return {
+        message: 'Audio files and related data deleted successfully',
+        deletedCount: result.deletedCount,
+      };
+    } catch (error) {
+      this.logger.error('Error deleting audio files:', error.message);
+      throw new InternalServerErrorException('Failed to delete audio files');
+    }
+  }
+  
 
 }
 

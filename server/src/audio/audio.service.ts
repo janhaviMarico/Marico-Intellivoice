@@ -823,4 +823,109 @@ export class AudioService {
     }
   }
 
+  async deleteAudioFiles(targets: { TGId: string; TGName: string }[]) {
+    let deletedCount = 0;
+    try {
+      for (const target of targets) {
+        const { TGId, TGName } = target;
+  
+        // Step 1: Fetch the target item from the TargetContainer
+        const querySpec = {
+          query: 'SELECT * FROM c WHERE c.TGId = @TGId AND c.TGName = @TGName',
+          parameters: [
+            { name: '@TGId', value: TGId },
+            { name: '@TGName', value: TGName },
+          ],
+        };
+        const { resources: targetItems } = await this.targetContainer.items
+          .query(querySpec)
+          .fetchAll();
+  
+        if (targetItems.length === 0) {
+          this.logger.warn(`No target found with TGId: ${TGId} and TGName: ${TGName}`);
+          continue; // Skip if target not found
+        }
+  
+        const targetItem = targetItems[0];
+        const blobPath = targetItem.filePath.substring(
+          targetItem.filePath.lastIndexOf('/') + 1,
+        );
+  
+        // Step 2: Delete the blob from Azure Storage
+        await this.deleteBlob(blobPath);
+  
+        // Step 3: Delete the target from the TargetContainer
+        await this.targetContainer.item(targetItem.id, targetItem.TGId).delete();
+  
+        // Step 4: Delete the transcription from the TranscriptionContainer
+        const transcriptionQuery = {
+          query: 'SELECT * FROM c WHERE c.TGId = @TGId',
+          parameters: [{ name: '@TGId', value: TGId }],
+        };
+        const { resources: transcriptionItems } = await this.transcriptContainer.items
+          .query(transcriptionQuery)
+          .fetchAll();
+  
+        if (transcriptionItems.length > 0) {
+          const transcriptionItem = transcriptionItems[0];
+          await this.transcriptContainer.item(
+            transcriptionItem.id,
+            transcriptionItem.TGId,
+          ).delete();
+        }
+
+        await this.removeTGIdFromProject(TGName);
+  
+        deletedCount++;
+      }
+  
+      return { deletedCount };
+    } catch (error) {
+      this.logger.error(`Failed to delete audio files: ${error.message}`);
+      //throw new InternalServerErrorException('Error deleting audio files');
+    }
+  }
+  
+  // Helper method to remove TGId from ProjectContainer
+private async removeTGIdFromProject(TGName: string) {
+  try {
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE ARRAY_CONTAINS(c.TGIds, @TGId)',
+      parameters: [{ name: '@TGId', value: TGName }],
+    };
+
+    const { resources: projects } = await this.projectContainer.items.query(querySpec).fetchAll();
+
+    if (projects.length === 0) {
+      this.logger.warn(`No project found containing TGId: ${TGName}`);
+      return;
+    }
+
+    for (const project of projects) {
+      // Remove the TGId from the TGIds array
+      project.TGIds = project.TGIds.filter((id: string) => id !== TGName);
+
+      // Upsert the updated project back into the ProjectContainer
+      await this.projectContainer.items.upsert(project);
+
+      this.logger.log(`Removed TGName: ${TGName} from project: ${project.ProjName}`);
+    }
+  } catch (error) {
+    this.logger.error(`Failed to remove TGId from project: ${error.message}`);
+    //throw new InternalServerErrorException('Error removing TGName from project');
+  }
+}
+
+  // Helper method to delete a blob from Azure Storage
+  private async deleteBlob(blobPath: string) {
+    try {
+      const blockBlobClient = this.containerClient.getBlockBlobClient(blobPath);
+      await blockBlobClient.deleteIfExists();
+      this.logger.log(`Blob deleted successfully: ${blobPath}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete blob: ${blobPath}`, error.message +'blobPath');
+      //throw new InternalServerErrorException('Error deleting blob file');
+    }
+  }
+
 }
