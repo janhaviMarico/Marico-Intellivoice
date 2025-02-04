@@ -219,6 +219,7 @@ export class AudioService {
         // Generate SAS token
         const sasToken = await this.generateBlobSasUrl(file.originalname);
         sasUrls.push({ fileName, sasUri, sasToken });
+        console.log('sasUrls',sasUrls);
       });
 
       await Promise.all(uploadPromises);
@@ -250,7 +251,8 @@ export class AudioService {
           mainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
-          sasToken: matchingSasUrl.sasToken, // This wil'l be updated later
+          sasToken: matchingSasUrl.sasToken,
+          fileName:matchingSasUrl.fileName, // This wil'l be updated later
         });
         await this.targetContainer.items.upsert(latestDocument);
       }
@@ -270,6 +272,7 @@ export class AudioService {
     SecondaryLang: string[],
     noOfSpek: number,
     sasToken: string,
+    fileName : string
   }[]) {
     this.logger.log('Enqueuing audio transcription job...');
     try {
