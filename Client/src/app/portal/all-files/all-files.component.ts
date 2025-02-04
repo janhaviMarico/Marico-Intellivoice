@@ -18,12 +18,16 @@ export class AllFilesComponent {
   userId:string = 'testuser4';
   isLoading: boolean = false;
   myControl = new FormControl('');
-  options: string[] = ['One', 'Two', 'Three'];
   filteredOptions!: Observable<any[]>;
   existingProject:any[] = [];
   selectedProject: string = '';
   count:number = 0;
-  userEmail:string = ''
+  userEmail:string = '';
+
+  myUserControl = new FormControl('');
+  filteredOptionsUser!: Observable<any[]>;
+  existingUser:any = [];
+
   constructor(private audioServ:AudioService,private router:Router, private toastr: ToastrService,
     private commonServ:CommonService
   ) { }
@@ -35,6 +39,7 @@ export class AllFilesComponent {
     }
     this.getProjectData(param);
     this.getExistingProject();
+    //this.getExistingUser();
   }
 
   getExistingProject() {
@@ -108,6 +113,49 @@ export class AllFilesComponent {
       }
       this.getProjectData(param);
     }
+  }
+
+  getExistingUser() {
+    this.commonServ.getAPI('master/project/all').subscribe(
+      (res: any) => {
+        this.existingUser = res.data;
+          
+        this.filteredOptionsUser = this.myUserControl.valueChanges.pipe(
+            startWith(''),
+            map(value => this._filterUser(value || '')),
+          );
+      },
+      (err: any) => {
+        this.toastr.error('Something Went Wrong!');
+      }
+    );
+  }
+
+  onOptionSelectedUser(event: MatAutocompleteSelectedEvent): void {
+    this.selectedProject = event.option.value;
+    const param = {
+      user:this.userEmail,
+      projectName: this.selectedProject
+    }
+    this.getProjectData(param);
+  }
+
+  emptyUser() {
+    if(this.myUserControl.value === "") {
+      this.selectedProject = "";
+      const param = {
+        user:this.userEmail,
+        projectName: this.selectedProject
+      }
+      this.getProjectData(param);
+    }
+  }
+
+  private _filterUser(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.existingUser.filter((option: any) =>
+      option.ProjName.toLowerCase().includes(filterValue)
+    );
   }
 
 }

@@ -8,14 +8,6 @@
         align-items: center;
         padding: 20px;
 
-        ::ng-deep mat-form-field {
-            background: none;
-            border-radius: 5px;
-
-            .mat-mdc-text-field-wrapper {
-                background: none;
-            }
-        }
         ::ng-deep mat-form-field .mat-mdc-form-field-subscript-wrapper {
                 display: none;
         }
@@ -49,6 +41,14 @@
 
             #myfilebtn {
                 border-radius: 0px 100px 100px 0px;
+            }
+        }
+
+        .allfiles-container-header-search {
+            display: flex;
+            align-items: center;
+            form {
+                margin-right: 10px;
             }
         }
     }

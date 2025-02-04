@@ -63,15 +63,15 @@ export class AudioProcessComponent {
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
   targetGrps!: { targetGrpArr: any[] };
-  baseHref:string = '../../../../';
+  baseHref: string = '../../../../';
   readonly panelOpenState = signal(false);
 
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
     private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) {
-      if(window.location.origin.includes('ai.maricoapps.biz')) {
-        this.baseHref = 'Insightopedia/'
-      }
-     }
+    if (window.location.origin.includes('ai.maricoapps.biz')) {
+      this.baseHref = 'Insightopedia/'
+    }
+  }
 
   ngOnInit() {
     //Add Project Code
@@ -116,7 +116,7 @@ export class AudioProcessComponent {
         this.competitors = res.data[0].competetive_product;
         this.filteredCompetetiveProduct = of(this.competitors);
       }
-     
+
     }, (err: any) => {
       this.toastr.error('Something Went Wrong!')
     })
@@ -231,6 +231,7 @@ export class AudioProcessComponent {
         this.toastr.success('Target Grope Created Sucessfully!')
         this.targetForm.controls['projectName'].disable();
         this.clearForm();
+
       } else {
         this.toastr.warning('This target group already exists!');
         this.targetForm.controls['projectName'].disable();
@@ -259,10 +260,10 @@ export class AudioProcessComponent {
     const selectedState = this.states.find(state => state.name === stateName)?.code || 'NA';
     // const selectedCompetitors = competitorNames.map((name: any) => this.competitors.find((c: any) => c.name === name)?.code || name).join('-');
     const selectedCompetitors = competitorNames.map((competitor: any) => {
-    const matchedCompetitor = this.competitors.find((c: any) => c.name === competitor.name);
-    return matchedCompetitor ? matchedCompetitor.code : competitor.name || competitor;
-  })
-  .join('-');
+      const matchedCompetitor = this.competitors.find((c: any) => c.name === competitor.name);
+      return matchedCompetitor ? matchedCompetitor.code : competitor.name || competitor;
+    })
+      .join('-');
     const selectedProduct = this.products.find(product => product.name === maricoProductName)?.code || '111';
     const selectedPrimaryLang = this.primaryLang.find(lang => lang.name === primaryLangName)?.code || '222';
     const selectedOtherLangs = otherLangNames.map((name: any) => this.otherLang.find((lang: any) => lang.name === name)?.code || name).join('-');
@@ -303,8 +304,13 @@ export class AudioProcessComponent {
     const projectNameValue = this.targetForm.get('projectName')?.value;
     this.targetForm.reset();
     this.targetForm.patchValue({
-      projectName: projectNameValue
+      projectName: projectNameValue,
+      maricoProduct: ''
     });
+    this.competitors.forEach(user => user.selected = false);
+    this.selectedUsers = [];
+    this.filteredCompetetiveProduct = of(this.competitors);
+    this.filteredMaricoProduct = of(this.products);
   }
 
   scrollToBottom(): void {
@@ -320,12 +326,18 @@ export class AudioProcessComponent {
       if (this.targetForm.value.country === '') {
         this.toastr.warning('Country field is empty');
         return false;
+      } else if (this.countries.some(item => item.name.toLowerCase() === this.targetForm.value.country.toLowerCase())) {
+        this.toastr.warning('This Country is already in the List');
+        return false;
       } else {
         payload.value = this.targetForm.value.country;
       }
     } else if (entity === 'state') {
       if (this.targetForm.value.state === '') {
         this.toastr.warning('State field is empty');
+        return false;
+      } else if (this.states.some(item => item.name.toLowerCase() === this.targetForm.value.state.toLowerCase())) {
+        this.toastr.warning('This State is already in the List');
         return false;
       } else {
         payload.value = this.targetForm.value.state;
@@ -334,6 +346,9 @@ export class AudioProcessComponent {
       if (this.targetForm.value.maricoProduct === '') {
         this.toastr.warning('Marico Product field is empty');
         return false;
+      } else if (this.products.some(item => item.name.toLowerCase() === this.targetForm.value.maricoProduct.toLowerCase())) {
+        this.toastr.warning('This Product is already in the List');
+        return false;
       } else {
         payload.value = this.targetForm.value.maricoProduct;
       }
@@ -341,14 +356,17 @@ export class AudioProcessComponent {
       if (this.lastFilter === '') {
         this.toastr.warning('Competitor Product field is empty');
         return false;
+      } else if (this.competitors.some(item => item.name.toLowerCase() === this.lastFilter.toLowerCase())) {
+        this.toastr.warning('This Competitor is already in the List');
+        return false;
       } else {
         payload.value = this.lastFilter;
       }
     }
     this.audioServ.patchData('master/001/update', payload).subscribe((res: any) => {
       this.toastr.success('Add Master Sucessfully!');
-      if(entity === 'competetive_product') {
-        this.competitors.push({name:this.lastFilter});
+      if (entity === 'competetive_product') {
+        this.competitors.push({ name: this.lastFilter });
         this.lastFilter = '';
         this.filteredCompetetiveProduct = of(this.competitors);
       }
@@ -548,6 +566,7 @@ export class AudioProcessComponent {
   }
 
   audioProcessing() {
+    debugger
     this.isLoading = true;
     const formData = new FormData();
     let Project: any;
@@ -565,7 +584,7 @@ export class AudioProcessComponent {
       const temp = {
         ProjId: Project.ProjId,
         TGName: this.targetGrps.targetGrpArr[i].name,
-        AudioName: this.targetGrps.targetGrpArr[i].name,
+        AudioName: this.targetGrps.targetGrpArr[i].audioList.map((audio: any) => audio.name),
         Country: this.targetGrps.targetGrpArr[i].country,
         State: this.targetGrps.targetGrpArr[i].state,
         AgeGrp: `${this.targetGrps.targetGrpArr[i].minAge} - ${this.targetGrps.targetGrpArr[i].maxAge}`,
@@ -576,9 +595,14 @@ export class AudioProcessComponent {
         noOfSpek: this.targetGrps.targetGrpArr[i].numSpeakers,
         filePath: ""
       }
-      const originalExtension = this.targetGrps.targetGrpArr[i].audioList[0].data.name.substring(this.targetGrps.targetGrpArr[i].audioList[0].data.name.lastIndexOf('.'));
-      const renamedFile = new File([this.targetGrps.targetGrpArr[i].audioList[0].data], `${this.targetGrps.targetGrpArr[i].name}${originalExtension}`, { type: this.targetGrps.targetGrpArr[i].audioList[0].data.type });
-      formData.append('files', renamedFile);
+
+      for (let j = 0; j < this.targetGrps.targetGrpArr[i].audioList.length; j++) {
+        const originalExtension = this.targetGrps.targetGrpArr[i].audioList[j].data.name.substring(this.targetGrps.targetGrpArr[i].audioList[j].data.name.lastIndexOf('.'));
+        const count = j + 1;
+        const renamedFile = new File([this.targetGrps.targetGrpArr[i].audioList[j].data], `${this.targetGrps.targetGrpArr[i].name}_${count}${originalExtension}`, { type: this.targetGrps.targetGrpArr[i].audioList[j].data.type });
+        formData.append('files', renamedFile);
+      }
+
       TargetGrp.push(temp)
       tgArr.push(this.targetGrps.targetGrpArr[i].name);
     }
