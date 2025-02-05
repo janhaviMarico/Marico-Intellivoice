@@ -657,7 +657,6 @@ export class AudioProcessComponent {
 
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
-    return false;
     this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
 

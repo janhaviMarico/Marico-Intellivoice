@@ -34,3 +34,12 @@
         border-radius: 7px;
     }
 }
+
+.dialog-container {
+    .dialog-title {
+        font-weight: 600;
+    }
+    ::ng-deep mat-form-field {
+        width: 100%;
+    }
+}

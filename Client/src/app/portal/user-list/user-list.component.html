@@ -7,13 +7,13 @@
             <th>Actions</th>
         </tr>
     </ng-template>
-    <ng-template pTemplate="body" let-user>
+    <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
         <tr>
             <td>{{ user.userName }}</td>
             <td>{{ user.email }}</td>
             <td></td>
-            <td> 
-              <button class="edit-btn">Edit</button> 
+            <td>
+                <button class="edit-btn" (click)="editDialog(EditTemplate, rowIndex)">Edit</button>
             </td>
         </tr>
     </ng-template>
@@ -21,4 +21,62 @@
 
 <div *ngIf="isLoading" class="spinner">
     <mat-spinner></mat-spinner>
-  </div>
+</div>
+
+<ng-template #EditTemplate>
+    <div class="dialog-container">
+        <h1 mat-dialog-title class="dialog-title">Edit Form</h1>
+        <mat-dialog-content>
+            <form [formGroup]="userForm">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Username</mat-label>
+                    <input matInput formControlName="userName" />
+                    <mat-error *ngIf="userForm.controls['userName'].invalid && userForm.controls['userName'].touched">
+                        Username is required
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="userEmail" type="email" />
+                    <mat-error *ngIf="userForm.controls['userEmail'].invalid && userForm.controls['userEmail'].touched">
+                        Enter a valid email
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Role</mat-label>
+                    <mat-select formControlName="role">
+                        <mat-option *ngFor="let role of roles" [value]="role.code">{{ role.name }}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="userForm.controls['role'].invalid && userForm.controls['role'].touched">
+                        Role is required
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <input type="text" placeholder="Competitor Products" aria-label="Competitor Producst"
+                        matInput [matAutocomplete]="auto" formControlName="mapUnmapUsers" [(ngModel)]="lastFilter"
+                        (keyup)="filterForCompetitor()">
+                </mat-form-field>
+
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                    <mat-option *ngFor="let user of filteredCompetetiveProduct | async" [value]="selectedUsers">
+                        <div (click)="optionClicked($event, user)">
+                            <mat-checkbox [checked]="user.selected" (change)="toggleSelection(user)"
+                                (click)="$event.stopPropagation()">
+                                {{ user.email }}
+                            </mat-checkbox>
+                        </div>
+                    </mat-option>
+                </mat-autocomplete>
+            </form>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end">
+            <button mat-raised-button color="warn" (click)="closeDialog()">Cancel</button>
+            <button mat-raised-button color="primary" (click)="submitForm()" [disabled]="userForm.invalid">
+                Submit
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>

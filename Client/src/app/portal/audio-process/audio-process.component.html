@@ -359,10 +359,10 @@
     <div class="project-footer">
         <div class="add-project-footer" *ngIf="currentStep === 0">
             <button type="submit" [disabled]="targetGrpArr.length === 0" (click)="nextStep()">Next <mat-icon
-                    aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_forward"></mat-icon></button>
+                 aria-label="Example home icon" fontIcon="arrow_forward"></mat-icon></button>
         </div>
         <div class="add-media-footer" *ngIf="currentStep === 1 || currentStep === 2">
-            <button type="submit" (click)="previousStep()"><mat-icon aria-hidden="false" aria-label="Example home icon"
+            <button type="submit" (click)="previousStep()"><mat-icon aria-label="Example home icon"
                     fontIcon="arrow_back"></mat-icon>Prev</button>
             <div class="add-meadia-btn">
                 <mat-form-field>

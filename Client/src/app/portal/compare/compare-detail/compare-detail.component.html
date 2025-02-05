@@ -1,7 +1,7 @@
 
 <div class="compare-container">
     <div class="compare-header">
-      <button (click)="backBtn()" matTooltip="Back"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
+      <button (click)="backBtn()" matTooltip="Back"><mat-icon  aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
       <h3>Comparison of {{compareObj?.isProject ? 'Projects':'Target Groups'}}</h3>
     </div>
     <div class="compare-body">
@@ -17,8 +17,8 @@
                 </div>
             </div>
             <div class="carousel-control">
-                <button (click)="prev()" [disabled]="currentIndex === 0"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
-                <button (click)="next()" [disabled]="currentIndex >= compareArr.length - 2"><mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="arrow_forward"></mat-icon></button>
+                <button (click)="prev()" [disabled]="currentIndex === 0"><mat-icon aria-label="Example home icon" fontIcon="arrow_back"></mat-icon></button>
+                <button (click)="next()" [disabled]="currentIndex >= compareArr.length - 2"><mat-icon aria-label="Example home icon" fontIcon="arrow_forward"></mat-icon></button>
             </div>
         </div>
         <div class="summary-container">
