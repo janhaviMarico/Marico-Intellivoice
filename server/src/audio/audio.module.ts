@@ -13,6 +13,7 @@ import { AudioUtils } from './audio.utils';
 import { SummarySentimentsProcessor } from './processors/summarySentiments.processor';
 import { EmbeddingProcessor } from './processors/embedding.processor';
 import { ChatService } from 'src/chat/chat.service';
+import { User } from 'src/user/user.entity';
 
 @Module({
     imports:[AzureCosmosDbModule.forFeature([
@@ -27,6 +28,10 @@ import { ChatService } from 'src/chat/chat.service';
         {
           collection:'Transcription',
           dto:TranscriptionEntity
+        },
+        {
+          collection:'User',
+          dto: User
         }
 
 ]),ConfigModule.forRoot(),
@@ -53,7 +58,7 @@ BullModule.registerQueue({
 }),
 ],
   controllers: [AudioController],
-  providers: [AudioService,TranscriptionProcessor,AudioUtils,TranslationProcessor,SummarySentimentsProcessor,EmbeddingProcessor,ChatService,TranscriptionEntity,ProjectEntity],
+  providers: [AudioService,TranscriptionProcessor,AudioUtils,TranslationProcessor,SummarySentimentsProcessor,EmbeddingProcessor,ChatService,TranscriptionEntity,ProjectEntity,User],
   exports:[TranscriptionEntity,ProjectEntity]
 
 })

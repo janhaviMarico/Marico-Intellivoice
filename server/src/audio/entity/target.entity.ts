@@ -15,6 +15,6 @@ export class TargetGroupEntity {
   MainLang: string;
   SecondaryLang: string[];
   noOfSpek: number;
-  filePath: string;
+  filePath: string[];
   status:number;
 }
