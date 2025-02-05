@@ -16,8 +16,8 @@ export class TranscriptionProcessor{
     ){}
     @Process({name:'transcribe-audio',concurrency:5})
     async handleTranscriptionJob(job: Job) {
-        
-        const { TGId, TGName, sasToken, mainLang, SecondaryLang, noOfSpek } = job.data;
+        console.log('job.data',job.data);
+        const { TGId, TGName, sasToken, mainLang, SecondaryLang, noOfSpek,fileName } = job.data;
         await job.log(`Processing transcription job for audio array ${TGName}`);     
         try {
             await job.log(`Transcription job for audio array ${TGName} started`);
@@ -26,7 +26,8 @@ export class TranscriptionProcessor{
             await this.translationQueue.add('translate-audio', {
               transcriptionData:transcriptionResults.transcriptionResult,
               TGName: TGName,
-              TGId:TGId
+              TGId:TGId,
+              fileName:fileName
             });
 
             // Update status to success in the database

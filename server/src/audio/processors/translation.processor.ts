@@ -13,12 +13,12 @@ export class TranslationProcessor {
 
   @Process({name:'translate-audio',concurrency:5})  // Handle jobs in the 'translate-audio' queue
   async handleTranslationJob(job: Job) {
-    const { transcriptionData, TGName,TGId } = job.data;
+    const { transcriptionData, TGName,TGId,fileName } = job.data;
     await job.log(`Processing translation job for ${TGName}`);  
     try {
         const { updatedTextArray, combinedTranslation }= await this.audioUtils.translateText(transcriptionData);
       await job.log('Translation job completed');
-      await this.summaryQueue.add('summarize-audio',{updatedTextArray, combinedTranslation,TGName,TGId});
+      await this.summaryQueue.add('summarize-audio',{updatedTextArray, combinedTranslation,TGName,TGId,fileName});
       // You can then move to further processing like Summary or Sentiment Analysis here if needed.
       //return {translatedTextArray, combinedTranslation,TGName,TGId};
     } catch (error) {

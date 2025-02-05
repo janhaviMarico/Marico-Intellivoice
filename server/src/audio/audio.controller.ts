@@ -3,7 +3,7 @@ import { AudioService } from './audio.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO, TargetGroupDto } from './dto/upload-audio.dto';
 import { ParseJsonInterceptor } from 'src/utility';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { get } from 'http';
 import { EditTranscriptionDto } from './dto/edit-transcription.dto';
 import { diskStorage } from 'multer';
@@ -23,6 +23,24 @@ export class AudioController {
   @Post('upload')
   @ApiOperation({ summary: 'Upload audio files and process them' })
   @ApiConsumes('multipart/form-data') // Specifies that this endpoint consumes multipart data
+  @ApiBody({
+    description: 'Audio file upload',
+    type: 'multipart/form-data',
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+        Project: { type: 'string', example: '{"ProjName": "Test Project"}' },
+        TargetGrp: { type: 'string', example: '{"TargetGroup": "Group1"}' },
+      },
+    },
+  })
   @UseInterceptors(FilesInterceptor('files'), ParseJsonInterceptor)
   async uploadAudioFiles(
     @Body('Project') projectDto: string,
@@ -39,6 +57,9 @@ export class AudioController {
       
       // Log the incoming request details
       this.logger.log(`Received request to upload ${files.length} files for project ${projectGroupDto.ProjName}`);
+      // console.log('projectdto',projectGroupDto);
+      // console.log('targetGrpDto',targetGrpDto);
+      // console.log('files',files);
 
       // Call the service to process the audio files
       const result = await this.audioService.processAudioFiles(projectGroupDto, targetGrpDto, files);
@@ -63,15 +84,27 @@ export class AudioController {
   }
 
 @Post('list')
-async getAudioList(@Body() body: { user?: string; projectName?: string }) {
-  const { user, projectName } = body;
+@ApiOperation({ summary: 'Get list of audio files' }) // Describes endpoint
+  @ApiBody({
+    description: 'Filter audio files by user, project name, or fetch all',
+    schema: {
+      type: 'object',
+      properties: {
+        user: { type: 'string', example: 'john.doe' },
+        projectName: { type: 'string', example: 'Project ABC' },
+        isAllFile: { type: 'boolean', example: true }
+      }
+    }
+  })
+async getAudioList(@Body() body: { user?: string; projectName?: string, isAllFile?:boolean }) {
+  const { user, projectName,isAllFile } = body;
 
   try {
     const data =
       !user && !projectName
         ? await this.audioService.getAudioData()
         : user && !projectName
-        ? await this.audioService.getAudioData(user)
+        ? await this.audioService.getAudioData(user,isAllFile)
         : !user && projectName
         ? await this.audioService.getAudioDataByProject(projectName)
         : await this.audioService.getAudioDataByUserAndProject(user, projectName);

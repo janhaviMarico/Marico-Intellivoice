@@ -2,7 +2,9 @@
 import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { MasterService, GetAllUsersResponse, GetAllProjectsResponse } from './master.service';
 import { UpdateMasterDto } from './update-master.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Master Management')
 @Controller('master')
 export class MasterController {
   constructor(private readonly masterService: MasterService) {}

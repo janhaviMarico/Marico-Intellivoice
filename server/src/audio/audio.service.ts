@@ -22,6 +22,7 @@ import { promisify } from 'util';
 import { Readable } from 'stream';
 import { join } from 'path';
 import { exec } from 'child_process';
+import { User } from 'src/user/user.entity';
 
 const unlinkAsync = promisify(fs.unlink);
 ffmpeg.setFfmpegPath('C:/ffmpeg/ffmpeg.exe');
@@ -38,6 +39,7 @@ export class AudioService {
   private readonly apiKey = 'gwCjVtUk7IpgpvjMhgM3Dgdt1noxYUIKGKUuNB4me2AzSeCc1Ccf'; // Admin API Key
   configService: any;
   constructor(
+    @InjectModel(User) private readonly userContainer: Container,
     @InjectModel(ProjectEntity) private readonly projectContainer: Container,
     @InjectModel(TargetGroupEntity) private readonly targetContainer: Container,
     @InjectModel(TranscriptionEntity) private readonly transcriptContainer: Container,
@@ -56,10 +58,6 @@ export class AudioService {
   // Handle audio processing logic
   async processAudioFiles(projectGrp: ProjectGroupDTO, targetGrp: string, files: Express.Multer.File[]) {
     try {
-
-      //before creating project check data in master for drop downs
-
-
 
       // Step 1: Create Project and Target Groups
       const projectResponse = await this.createProjectAndTargetGroups(projectGrp, targetGrp);
@@ -150,7 +148,7 @@ export class AudioService {
             MainLang: groupObj.MainLang,
             SecondaryLang: groupObj.SecondaryLang,
             noOfSpek: groupObj.noOfSpek,
-            filePath: '', // This will be updated after audio upload
+            filePath: [], // This will be updated after audio upload
             status: 0,
           };
           await this.targetContainer.items.create(targetGroupEntity);
@@ -174,12 +172,11 @@ export class AudioService {
             MainLang: groupObj.MainLang,
             SecondaryLang: groupObj.SecondaryLang,
             noOfSpek: groupObj.noOfSpek,
-            filePath: '', // This will be updated after audio upload
+            filePath: [], // This will be updated after audio upload
             status: 0,
           };
           await this.targetContainer.items.create(targetGroupEntity);
         }
-
 
       }
 
@@ -219,6 +216,7 @@ export class AudioService {
         // Generate SAS token
         const sasToken = await this.generateBlobSasUrl(file.originalname);
         sasUrls.push({ fileName, sasUri, sasToken });
+        //console.log('sasUrls',sasUrls);
       });
 
       await Promise.all(uploadPromises);
@@ -234,26 +232,44 @@ export class AudioService {
     const audioProcessDtoArray: any[] = [];
     try {
       const targetGrpArray = Object.values(targetGrp);
+
       for (const group of targetGrpArray) {
+
+        let latestDocument: any =undefined;
+        const matchingSasUrl: string[] = [];
+        let foundSasUrl:any ;
         const groupObj = typeof group === 'string' ? JSON.parse(group) : group;
-        const matchingSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName.split('.')[0] === groupObj.TGName);
+
         const querySpec = {
           query: 'SELECT * FROM c WHERE c.TGName = @TGName',
           parameters: [{ name: '@TGName', value: groupObj.TGName }]
         };
+        
         const { resources: existingDocuments } = await this.targetContainer.items.query(querySpec).fetchAll();
-        const latestDocument = existingDocuments[0];
-        latestDocument.filePath = matchingSasUrl.sasUri;
-        audioProcessDtoArray.push({
+        latestDocument = existingDocuments[0];
+        latestDocument.filePath = []; // Reset filePath for multiple audio files
+
+        for (const audioFileName of groupObj.AudioName) {
+          const foundSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName === audioFileName);
+
+          latestDocument.filePath.push(foundSasUrl.sasUri);
+          //foundSasUrl = sasUrls.find((sasUrl) => sasUrl.fileName === audioFileName);
+          matchingSasUrl.push(foundSasUrl.sasUri);
+
+          audioProcessDtoArray.push({
           TGId: latestDocument.TGId,
           TGName: groupObj.TGName,
           mainLang: groupObj.MainLang,
           SecondaryLang: groupObj.SecondaryLang,
           noOfSpek: groupObj.noOfSpek,
-          sasToken: matchingSasUrl.sasToken, // This wil'l be updated later
+          sasToken: foundSasUrl.sasToken,
+          fileName:audioFileName
         });
-        await this.targetContainer.items.upsert(latestDocument);
-      }
+      }  
+      await this.targetContainer.items.upsert(latestDocument);
+    }
+
+    console.log('audioProcessDtoArray',audioProcessDtoArray);
       this.logger.log('Target groups updated with SAS URLs.');
       return audioProcessDtoArray;
     } catch (error) {
@@ -270,6 +286,7 @@ export class AudioService {
     SecondaryLang: string[],
     noOfSpek: number,
     sasToken: string,
+    fileName : string
   }[]) {
     this.logger.log('Enqueuing audio transcription job...');
     try {
@@ -322,17 +339,50 @@ export class AudioService {
   }
 
   //new optimazation code  
-  async getAudioData(userId?: string): Promise<any[]> {
+  async getAudioData(userId?: string, isAllFile?: boolean): Promise<any[]> {
     try {
+      let userIdsToFetch: string[] = [];
+  
+      // If isAllFile is true, fetch all users and get their mapped users
+      if (isAllFile && userId) {
+        const querySpecUsers = {
+          query: 'SELECT c.userid, c.mapUser FROM c WHERE c.userid = @UserId',
+          parameters: [{ name: '@UserId', value: userId }],
+        };
+  
+        const { resources: users } = await this.userContainer.items.query(querySpecUsers).fetchAll();
+  
+        if (users.length > 0) {
+          // Add main user
+          userIdsToFetch.push(users[0].userid);
+  
+          // Add mapped users if available
+          if (users[0].mapUser && Array.isArray(users[0].mapUser)) {
+            userIdsToFetch.push(...users[0].mapUser);
+          }
+        }
+      } else if (userId) {
+        // If only a specific user is given, fetch their projects
+        userIdsToFetch.push(userId);
+      }
+
+      console.log('userIdsToFetch',userIdsToFetch);
+  
       // Build query for projects
-      const querySpecProject = userId
-        ? { query: 'SELECT * FROM c WHERE c.UserId = @UserId', parameters: [{ name: '@UserId', value: userId }] }
-        : { query: 'SELECT * FROM c' };
-
+      let querySpecProject;
+      if (userIdsToFetch.length > 0) {
+        querySpecProject = {
+          query: 'SELECT * FROM c WHERE ARRAY_CONTAINS(@userIds, c.UserId)',
+          parameters: [{ name: '@userIds', value: userIdsToFetch }],
+        };
+      } else {
+        querySpecProject = { query: 'SELECT * FROM c' };
+      }
+  
       const { resources: projects } = await this.projectContainer.items.query(querySpecProject).fetchAll();
-
+  
       if (!projects.length) return [];
-
+  
       const projIds = projects.map((proj) => proj.ProjId).reverse();
       return this.combineProjectAndTargetData(projIds, projects);
     } catch (error) {
@@ -340,6 +390,7 @@ export class AudioService {
       throw new InternalServerErrorException('Failed to fetch audio data');
     }
   }
+  
 
   async getAudioDataByProject(projectName: string): Promise<any[]> {
     try {
@@ -384,33 +435,44 @@ export class AudioService {
 
   private async combineProjectAndTargetData(projIds: string[], projects: any[]): Promise<any[]> {
     try {
-      // Fetch all targets for given project IDs
+      // Step 1: Fetch all targets for given project IDs
       const querySpecTarget = {
         query: `SELECT * FROM c WHERE ARRAY_CONTAINS(@ProjIds, c.ProjId)`,
         parameters: [{ name: '@ProjIds', value: projIds }],
       };
-
+  
       const { resources: targets } = await this.targetContainer.items.query(querySpecTarget).fetchAll();
-
-      // Map targets by ProjId for quick lookup
+  
+      // Step 2: Fetch all users to map userId → userName
+      const querySpecUsers = { query: `SELECT c.userid, c.userName FROM c` };
+      const { resources: users } = await this.userContainer.items.query(querySpecUsers).fetchAll();
+  
+      // Create a user map for quick lookup
+      const userMap = users.reduce((map, user) => {
+        map[user.userid] = user.userName;
+        return map;
+      }, {});
+  
+      // Step 3: Map targets by ProjId for quick lookup
       const targetMap = targets.reduce((map, target) => {
         if (!map[target.ProjId]) map[target.ProjId] = [];
         map[target.ProjId].push(target);
         return map;
       }, {});
-
-      // Combine project and target data
+  
+      // Step 4: Combine project and target data
       const combinedResults = [];
-
+  
       await Promise.all(
         projects.map(async (project) => {
           const projId = project.ProjId;
           const relatedTargets = targetMap[projId] || [];
-
+          const userName = userMap[project.UserId] || 'Unknown User'; // Fetch userName from userMap
+  
           for (const target of relatedTargets) {
-
             combinedResults.push({
               ProjectName: project.ProjName,
+              UserName: userName, // ✅ Added User Name here
               Country: target.Country,
               State: target.State,
               TargetGroup: target.TGName,
@@ -423,14 +485,14 @@ export class AudioService {
           }
         })
       );
-
+  
       return combinedResults.reverse();
     } catch (error) {
       console.error('Error combining project and target data:', error.message);
       throw new InternalServerErrorException('Failed to combine project and target data');
     }
   }
-
+  
 
 
   private async checkTranscriptionData(targetId: string): Promise<boolean> {
@@ -460,8 +522,10 @@ export class AudioService {
   async getAudioDetails(tgId: string, tgName: string) {
     try {
       // 1. Fetch Target Data by TGId and TGName
+
       //IN_MH_18_25_SOIL_NYK_E_MAR
       //IN_MH_18_25_SOIL_NYK_E_MAR
+      console.log(tgName);
       const querySpecTarget = {
         query: 'SELECT * FROM c WHERE c.TGName = @TGName',
         parameters: [
@@ -469,11 +533,12 @@ export class AudioService {
           //{name:'@id',value:"113536ec-41e6-445b-8324-bf99bd93d5cd"}
         ],
       };
+
+      console.log(querySpecTarget);
       const { resources: targetData } = await this.targetContainer.items
         .query(querySpecTarget)
         .fetchAll();
       this.logger.log(`Fetching details for  ${tgId} and ${tgName} `);
-
 
       if (targetData.length === 0) {
         return { message: 'Target data not found' };
@@ -496,9 +561,12 @@ export class AudioService {
       if (transcriptionData.length === 0) {
         return { message: 'Transcription data not found' };
       }
+      console.log(transcriptionData);
       const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
       this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);
+      console.log('targetItem',targetItem);
       const filenameurl = await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
+      console.log('filenameurl',filenameurl);
       // 3. Combine Target and Transcription Data
       const combinedData = {
         TGId: targetItem.TGId,

@@ -614,6 +614,7 @@ export class AudioProcessComponent {
   }
 
   audioProcessing() {
+    debugger
     this.isLoading = true;
     const formData = new FormData();
     let Project: any;
@@ -643,6 +644,7 @@ export class AudioProcessComponent {
         filePath: ""
       }
       console.log(this.targetGrps.targetGrpArr);
+
       for (let j = 0; j < this.targetGrps.targetGrpArr[i].audioList.length; j++) {
         const originalExtension = this.targetGrps.targetGrpArr[i].audioList[j].data.name.substring(this.targetGrps.targetGrpArr[i].audioList[j].data.name.lastIndexOf('.'));
         const count = j + 1;

@@ -17,6 +17,7 @@ async function bootstrap() {
     .setTitle('Your API')
     .setDescription('API description')
     .setVersion('1.0')
+    //.addServer('/Insightopedia')
     .build();
 
     
@@ -58,6 +59,7 @@ async function bootstrap() {
   expressApp.use('/admin/queues', serverAdapter.getRouter());
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   app.use(bodyParser.json({ limit: '50mb' }));
+  //app.setGlobalPrefix('Insightopedia');
   await app.listen(3001);
 }
 bootstrap();

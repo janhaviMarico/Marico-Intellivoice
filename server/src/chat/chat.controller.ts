@@ -1,6 +1,9 @@
 import { Body, Controller, Post, BadRequestException, InternalServerErrorException, Logger, Query, Get, UsePipes, ValidationPipe, HttpException, HttpStatus } from "@nestjs/common";
 import { ChatService } from "./chat.service";
+import { ApiTags } from "@nestjs/swagger";
 
+
+@ApiTags('Chat Managment')
 @Controller('chat')
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
