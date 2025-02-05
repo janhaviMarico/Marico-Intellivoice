@@ -521,3 +521,32 @@
         }
     }
 }
+
+.dialog-container {
+    .dialog-title {
+        font-weight: 600;
+        color: #014FA1;
+    }
+    .title-head {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        button {
+            border: none;
+            outline: none;
+            background: none;
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+            mat-icon {
+                color: #014FA1;
+            }
+        }
+        .mergeBtn {
+            border: 1px solid #014FA1;
+            color: #014FA1;
+            border-radius: 4px;
+            padding: 5px 10px;
+        }
+    }
+}

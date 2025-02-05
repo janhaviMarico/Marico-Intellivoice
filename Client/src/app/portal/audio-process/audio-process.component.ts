@@ -1,4 +1,4 @@
-import { Component, ElementRef, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, Renderer2, signal, TemplateRef, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable, of, startWith } from 'rxjs';
@@ -9,6 +9,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { Router } from '@angular/router';
+import WaveSurfer from 'wavesurfer.js';
+import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions';
+import Hover from 'wavesurfer.js/dist/plugins/hover';
 
 interface AudioFile {
   name: string;
@@ -29,7 +32,21 @@ export class AudioProcessComponent {
   //Add Project Code
   @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
-  targetGrpArr: any[] = [];
+  targetGrpArr: any[] = [
+    {
+      competitors: ["Dabur Gold"],
+      country: "India",
+      maricoProduct: "REVIVE LIQ 400G+95G ROI",
+      maxAge: 9,
+      minAge: 6,
+      name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
+      numSpeakers: 3,
+      otherLangs: ["Marathi"],
+      primaryLang: "English",
+      projectName: "ak_project_1",
+      state: "Andhra Pradesh"
+    }
+  ];
   target: any;
   countries: any[] = [];
   states: any[] = [];
@@ -46,7 +63,7 @@ export class AudioProcessComponent {
   filteredMaricoProduct!: Observable<any[]>;
   filteredCompetetiveProduct!: Observable<any[]>;
   steps = ['Project Details', 'Add Media', 'Assign TG', 'Upload Audio'];
-  currentStep = 0;
+  currentStep = 1;
 
   selectedUsers: any[] = new Array<any>();
   lastFilter: string = '';
@@ -62,12 +79,36 @@ export class AudioProcessComponent {
   expansionArr: any[] = [];
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
-  targetGrps!: { targetGrpArr: any[] };
+  // targetGrps!: { targetGrpArr: any[] };
+  targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
   baseHref: string = '../../../../';
   readonly panelOpenState = signal(false);
 
+  wavesurfer!: WaveSurfer;
+  currentTime: number = 0;
+  totalTime: number = 0;
+
+  regions = RegionsPlugin.create();
+  regionArr: any[] = [];
+  activeRegion: any = null;
+  loop: boolean = false;
+
+  hoverPlugin = Hover.create({
+    lineColor: '#ff0000',
+    lineWidth: 2,
+    labelBackground: '#555',
+    labelColor: '#fff',
+    labelSize: '11px',
+  });
+
+  url: any[] = [];
+
+  @ViewChild('waveformContainer', { static: false }) waveformContainer!: ElementRef;
+  isAudioPlay:boolean = false;
+  editFileName:string = '';
+
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
-    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) {
+    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog, private renderer: Renderer2) {
     if (window.location.origin.includes('ai.maricoapps.biz')) {
       this.baseHref = 'Insightopedia/'
     }
@@ -566,7 +607,6 @@ export class AudioProcessComponent {
   }
 
   audioProcessing() {
-    debugger
     this.isLoading = true;
     const formData = new FormData();
     let Project: any;
@@ -665,4 +705,116 @@ export class AudioProcessComponent {
   closeAudioProcess() {
     this.router.navigate(['/portal/dashboard'])
   }
+
+  editAudio(template: TemplateRef<any>, file: any) {
+    this.editFileName = file.name;
+    const formData = new FormData();
+    formData.append('files', file.data, file.data.name);
+
+    this.dialog.open(template, {
+      width: '70%',
+      disableClose: true,
+    }).afterOpened().subscribe(() => {
+      this.audioServ.postAPI('audio/upload-and-peaks', formData).subscribe((res: any) => {
+        this.isLoading = false;
+        this.url = res.files;
+
+        setTimeout(() => this.createWave(), 100); // Ensure DOM is rendered
+      }, (err: any) => {
+        this.isLoading = false;
+        this.toastr.error('Something Went Wrong!');
+      });
+    });
+  }
+
+  createWave() {
+    if (this.wavesurfer) {
+      this.wavesurfer.destroy();
+      this.regionArr = [];
+      this.waveformContainer.nativeElement.innerHTML = '';
+    }
+
+    const waveformDiv = this.renderer.createElement('div');
+    this.renderer.setAttribute(waveformDiv, 'id', 'waveform');
+    this.renderer.appendChild(this.waveformContainer.nativeElement, waveformDiv);
+
+    // Initialize WaveSurfer with the new div container
+    this.wavesurfer = WaveSurfer.create({
+      container: waveformDiv,
+      waveColor: '#D4E5F7',
+      progressColor: '#014FA1',
+      backend: 'MediaElement',
+      plugins: [this.regions, this.hoverPlugin],
+      height: 60,
+      url: this.url[0].fileUrl,
+      peaks: this.url[0].peaks
+    });
+    this.wavesurfer.on('decode', () => {
+      this.totalTime = this.wavesurfer.getDuration();
+      this.regions.enableDragSelection({
+        color: 'rgba(0, 255, 26, 0.3)',
+      });
+
+      this.regions.on('region-in', (region) => {
+        this.activeRegion = region
+      });
+
+      this.regions.on('region-created', (region) => {
+        this.regionArr = this.regions.getRegions();
+      });
+
+      this.regions.on('region-out', (region) => {
+        if (this.activeRegion === region) {
+          if (this.loop) {
+            region.play();
+          } else {
+            this.activeRegion = null;
+          }
+        }
+      });
+
+      this.regions.on('region-clicked', (region, e) => {
+        e.stopPropagation() // prevent triggering a click on the waveform
+        this.activeRegion = region;
+        region.play();
+      });
+
+      this.wavesurfer.on('timeupdate', (currentTime) => {
+        this.currentTime = currentTime;
+      });
+    });
+
+  }
+
+  playAudio(): void {
+    if (this.wavesurfer) {
+      if(!this.isAudioPlay) {
+        this.wavesurfer.play();
+        this.isAudioPlay = !this.isAudioPlay;
+      } else {
+        this.wavesurfer.pause();
+        this.isAudioPlay = !this.isAudioPlay;
+      }
+    }
+  }
+
+  async mergeAudio() {
+    if(this.regionArr.length === 0) {
+      this.toastr.warning('Please select part of the Audio');
+      return false;
+    }
+    console.log(this.regionArr)
+    const fileRes = await this.urlToFile(this.url[0].fileUrl);
+    return true;
+  }
+
+  urlToFile(url: string): Promise<File> {
+    return fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const name = url.split('/').pop() || 'file';
+        return new File([blob], name, { type: blob.type });
+      });
+  }
+
 }
