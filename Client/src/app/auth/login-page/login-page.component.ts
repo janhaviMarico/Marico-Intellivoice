@@ -34,6 +34,7 @@ export class LoginPageComponent {
 
     this.msalService.loginPopup().subscribe((res: AuthenticationResult) => {
       localStorage.setItem('User',res.account.username);
+      localStorage.setItem('tenetId',res.account.tenantId);
       this.msalService.instance.setActiveAccount(res.account);
       this.userDetails = res;
       this.addUserDetails()

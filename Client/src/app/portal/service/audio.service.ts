@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, Subject, throwError } from 'rxjs';
 import {environment} from '../../../environments/environment';
@@ -63,5 +63,12 @@ export class AudioService {
 
   patchData(url: string, payload: any) {
     return this.http.patch(this.baseUrl + url, payload);
+  }
+
+  postAPIBinaryData(url: string, body: any, options?: { headers?: HttpHeaders }): Observable<Blob> {
+    return this.http.post<Blob>(this.baseUrl + url, body, {
+      ...options,
+      responseType: 'blob' as 'json', // Explicitly set 'blob' as the responseType
+    });
   }
 }

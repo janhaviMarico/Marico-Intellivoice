@@ -34,17 +34,17 @@ export class AudioProcessComponent {
   targetForm!: FormGroup;
   targetGrpArr: any[] = [
     {
-      competitors: ["Dabur Gold"],
-      country: "India",
-      maricoProduct: "REVIVE LIQ 400G+95G ROI",
-      maxAge: 9,
-      minAge: 6,
-      name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
-      numSpeakers: 3,
-      otherLangs: ["Marathi"],
-      primaryLang: "English",
-      projectName: "ak_project_1",
-      state: "Andhra Pradesh"
+      // competitors: ["Dabur Gold"],
+      // country: "India",
+      // maricoProduct: "REVIVE LIQ 400G+95G ROI",
+      // maxAge: 9,
+      // minAge: 6,
+      // name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
+      // numSpeakers: 3,
+      // otherLangs: ["Marathi"],
+      // primaryLang: "English",
+      // projectName: "ak_project_1",
+      // state: "Andhra Pradesh"
     }
   ];
   target: any;
@@ -63,7 +63,7 @@ export class AudioProcessComponent {
   filteredMaricoProduct!: Observable<any[]>;
   filteredCompetetiveProduct!: Observable<any[]>;
   steps = ['Project Details', 'Add Media', 'Assign TG', 'Upload Audio'];
-  currentStep = 1;
+  currentStep = 0;
 
   selectedUsers: any[] = new Array<any>();
   lastFilter: string = '';
@@ -79,8 +79,8 @@ export class AudioProcessComponent {
   expansionArr: any[] = [];
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
-  // targetGrps!: { targetGrpArr: any[] };
-  targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
+  targetGrps!: { targetGrpArr: any[] };
+  //targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
   baseHref: string = '../../../../';
   readonly panelOpenState = signal(false);
 
@@ -104,8 +104,15 @@ export class AudioProcessComponent {
   url: any[] = [];
 
   @ViewChild('waveformContainer', { static: false }) waveformContainer!: ElementRef;
-  isAudioPlay:boolean = false;
-  editFileName:string = '';
+  isAudioPlay: boolean = false;
+  editFileName: string = '';
+  audioUrlFinal: string = '';
+
+  @ViewChild('audioPlayerFinal') audioPlayerFinal!: ElementRef<HTMLAudioElement>;
+  currentTimeFinal: string = '0:00';
+  durationTimeFinal: string = '0:00';
+  seekValueFinal: number = 0;
+  isPlayingFinal: boolean = false;
 
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
     private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog, private renderer: Renderer2) {
@@ -635,7 +642,7 @@ export class AudioProcessComponent {
         noOfSpek: this.targetGrps.targetGrpArr[i].numSpeakers,
         filePath: ""
       }
-
+      console.log(this.targetGrps.targetGrpArr);
       for (let j = 0; j < this.targetGrps.targetGrpArr[i].audioList.length; j++) {
         const originalExtension = this.targetGrps.targetGrpArr[i].audioList[j].data.name.substring(this.targetGrps.targetGrpArr[i].audioList[j].data.name.lastIndexOf('.'));
         const count = j + 1;
@@ -650,6 +657,7 @@ export class AudioProcessComponent {
 
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
+    return false;
     this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
 
@@ -706,7 +714,7 @@ export class AudioProcessComponent {
     this.router.navigate(['/portal/dashboard'])
   }
 
-  editAudio(template: TemplateRef<any>, file: any) {
+  editAudio(template: TemplateRef<any>, file: any, i:number, j:number) {
     this.editFileName = file.name;
     const formData = new FormData();
     formData.append('files', file.data, file.data.name);
@@ -788,7 +796,7 @@ export class AudioProcessComponent {
 
   playAudio(): void {
     if (this.wavesurfer) {
-      if(!this.isAudioPlay) {
+      if (!this.isAudioPlay) {
         this.wavesurfer.play();
         this.isAudioPlay = !this.isAudioPlay;
       } else {
@@ -799,12 +807,30 @@ export class AudioProcessComponent {
   }
 
   async mergeAudio() {
-    if(this.regionArr.length === 0) {
+    if (this.regionArr.length === 0) {
       this.toastr.warning('Please select part of the Audio');
       return false;
     }
-    console.log(this.regionArr)
+    this.isLoading = true;
     const fileRes = await this.urlToFile(this.url[0].fileUrl);
+    let filteredRegions = this.regionArr.map(({ start, end }) => ({ start, end }));
+
+    const formData = new FormData();
+    formData.append('files', fileRes, fileRes.name);
+    formData.append('fileTrimPairs', JSON.stringify(filteredRegions));
+    this.audioServ.postAPIBinaryData('audio/merge-with-trims', formData).subscribe(
+      (res: Blob) => {
+        this.isLoading = false;
+        this.createFileFormate(res);
+
+        this.audioUrlFinal = URL.createObjectURL(res);
+      },
+      (err: any) => {
+        this.isLoading = false;
+        this.toastr.error('Something went wrong while processing the file.');
+        console.error(err);
+      }
+    );
     return true;
   }
 
@@ -815,6 +841,73 @@ export class AudioProcessComponent {
         const name = url.split('/').pop() || 'file';
         return new File([blob], name, { type: blob.type });
       });
+  }
+
+  createFileFormate(mergedBlob: Blob) {
+    const mergedFile = new File([mergedBlob], 'merged-audio.mp3', { type: 'audio/mpeg' });
+    console.log(mergedFile)
+    console.log(this.targetGrps.targetGrpArr[0].audioList[0].data)
+  }
+
+  togglePlayPauseFinal(): void {
+    if (!this.audioPlayerFinal) {
+      console.error('Audio player is not initialized.');
+      return;
+    }
+
+    const audio = this.audioPlayerFinal.nativeElement;
+    if (audio.paused) {
+      if (this.currentTimeFinal === '0:00') {
+        audio.load();
+      }
+      audio.play();
+      this.isPlayingFinal = true;
+    } else {
+      audio.pause();
+      this.isPlayingFinal = false;
+    }
+  }
+  updateProgressFinal(event: any): void {
+    const audio = this.audioPlayerFinal.nativeElement;
+    const currentTime = audio.currentTime;
+    const duration = audio.duration;
+    if (!isNaN(duration)) {
+      // Calculate percentage for the seek bar
+      this.seekValueFinal = (currentTime / duration) * 100;
+
+      // Update the displayed time
+      this.currentTimeFinal = this.formatTime(currentTime);
+      this.durationTimeFinal = this.formatTime(duration);
+
+      // Update slider track color
+      this.updateSliderTrackFinal();
+    }
+  }
+
+  updateSliderTrackFinal(): void {
+    const slider = document.querySelector('.seek-bar') as HTMLInputElement;
+    if (slider) {
+      const value = (this.seekValueFinal / 100) * slider.offsetWidth;
+      slider.style.background = `linear-gradient(to right, #007bff ${this.seekValueFinal}%, #d3d3d3 ${this.seekValueFinal}%)`;
+    }
+  }
+
+  seekAudioFinal(event: any): void {
+    const audio = this.audioPlayerFinal.nativeElement;
+    const newTime = (event.target.value / 100) * audio.duration;
+    audio.currentTime = newTime;
+  }
+
+  // // Seek forward by 10 seconds
+  seekForward(): void {
+    const audio = this.audioPlayerFinal.nativeElement;
+    audio.currentTime = Math.min(audio.currentTime + 10, audio.duration); // Ensure it doesn't go beyond duration
+  }
+
+  // Seek backward by 10 seconds
+  seekBackward(): void {
+    const audio = this.audioPlayerFinal.nativeElement;
+    audio.currentTime = Math.max(audio.currentTime - 10, 0); // Ensure it doesn't go below 0
   }
 
 }

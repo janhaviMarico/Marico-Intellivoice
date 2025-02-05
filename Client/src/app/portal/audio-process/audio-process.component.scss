@@ -549,4 +549,129 @@
             padding: 5px 10px;
         }
     }
+    .dialog-footer {
+        .final-audio {
+            height: 15%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #E4E7EC;
+            .audio-label {
+                width: 20%;
+                h3 {
+                    color: #014FA1;
+                    font-size: 1.2rem;
+                    font-weight: 600;   
+                }
+            }
+            .audio-sample {
+                width: 70%;
+                .model-audio {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+
+                    .controls {
+                        display: flex;
+                        align-items: center;
+
+                        button {
+                            background: none;
+                            outline: none;
+                            border: none;
+                            padding: 3px 1px 0 0;
+                        }
+                        mat-icon {
+                            color: #014FA1;
+                            margin: 0 5px;
+                        }
+                        button:disabled mat-icon{
+                            color: #6D6D6D;
+                            cursor: not-allowed;
+                        }
+                        .playbtn {
+                            height: 2.5rem;
+                            width: 2.5rem;
+                            font-size: 2.5rem;
+                        }
+                    }
+
+                    .audio-player {
+                        width: 100%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+
+                        audio {
+                            display: none;
+                        }
+
+                        #current-time,
+                        #duration-time {
+                            font-size: 14px;
+                            margin: 0 5px;
+                        }
+
+                        .seek-bar {
+                            -webkit-appearance: none;
+                            appearance: none;
+                            width: 80%;
+                            height: 5px;
+                            background: #DADADA;
+                            border-radius: 5px;
+                            outline: none;
+                            position: relative;
+                            cursor: pointer;
+                        }
+
+                        .seek-bar::-webkit-slider-runnable-track {
+                            height: 8px;
+                            border-radius: 5px;
+                        }
+
+                        .seek-bar::-webkit-slider-thumb {
+                            -webkit-appearance: none;
+                            appearance: none;
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            background: #014FA1;
+                        }
+
+                        .seek-bar::-moz-range-track {
+                            height: 8px;
+                            border-radius: 5px;
+                            background: #DADADA;
+                        }
+
+                        .seek-bar::-moz-range-thumb {
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            background: #014FA1;
+                        }
+                    }
+                }
+            }
+            .submit-btn {
+                widows: 10%;
+                button {
+                    border: 1px solid #014FA1;
+                    color: #014FA1;
+                    background: none;
+                    outline: none;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-weight: 600;
+                }
+                button:hover {
+                    color: white;
+                    background-color: rgba(1, 79, 161, 0.9);
+                }
+                button:disabled {
+                   cursor: not-allowed;
+                }
+            }
+        }
+    }
 }

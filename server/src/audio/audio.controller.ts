@@ -1,6 +1,6 @@
-import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query, BadRequestException, Res } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFiles, UseInterceptors, ValidationPipe, HttpException, HttpStatus, Logger, Get, InternalServerErrorException, Query, BadRequestException, Res, UploadedFile } from '@nestjs/common';
 import { AudioService } from './audio.service';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectGroupDTO, TargetGroupDto } from './dto/upload-audio.dto';
 import { ParseJsonInterceptor } from 'src/utility';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -179,30 +179,25 @@ async editTranscription(
   //merge audio file
 
   @Post('merge-with-trims')
-  @UseInterceptors(FilesInterceptor('files', 10)) // Allow up to 10 files
+  @UseInterceptors(FileInterceptor('files')) // Single file instead of multiple
   async mergeAudioWithTrims(
-    @UploadedFiles() files: Express.Multer.File[],
-    @Body('fileTrimPairs') fileTrimPairs: string, // The file and trim data as JSON
+    @UploadedFile() file: Express.Multer.File, // Change to single file
+    @Body('fileTrimPairs') fileTrimPairs: string, // The trim data as JSON
     @Res() res: Response
   ) {
-    const parsedFileTrimPairs = JSON.parse(fileTrimPairs); // Parse the file-trim pairing from JSON
-
-    // Combine files and trim data into an array of objects
-    const fileTrimData = parsedFileTrimPairs.map((pair: any, index: number) => ({
-      file: files[index],
-      trims: pair.trims || [] // Default to no trimming if not provided
-    }));
+    const trims = JSON.parse(fileTrimPairs); // Parse the trims array
 
     try {
-      const mergedStream = await this.audioService.mergeAudioWithTrims(fileTrimData);
+      const mergedStream = await this.audioService.mergeSignleAudioWithTrims(file, trims);
+
       res.set({
         'Content-Type': 'audio/mpeg',
-        'Content-Disposition': 'attachment; filename=merged-audio.mp3',
+        'Content-Disposition': 'attachment; filename=trimmed-audio.mp3',
       });
-      mergedStream.pipe(res); // Pipe the merged audio file to the response
+      mergedStream.pipe(res); // Pipe the trimmed audio file to the response
     } catch (error) {
       console.error('Error during audio merging with trims:', error);
-      res.status(500).json({ message: 'Error during audio merging.' });
+      res.status(500).json({ message: 'Error during audio trimming.' });
     }
   }
 
