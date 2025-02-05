@@ -15,7 +15,7 @@ async function bootstrap() {
     .setTitle('Your API')
     .setDescription('API description')
     .setVersion('1.0')
-    .addServer('/Insightopedia')
+    .addServer('/Insightopedia/backend')
     .build();
 
     
@@ -56,7 +56,7 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.use('/admin/queues', serverAdapter.getRouter());
   app.use(bodyParser.json({ limit: '50mb' }));
-  app.setGlobalPrefix('Insightopedia');
+  app.setGlobalPrefix('Insightopedia/backend');
   await app.listen(3001);
 }
 bootstrap();
