@@ -14,32 +14,33 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 })
 export class AllFilesComponent {
   isAllFiles: boolean = true;
-  project:any[] = [];
-  userId:string = 'testuser4';
+  project: any[] = [];
+  userId: string = 'testuser4';
   isLoading: boolean = false;
   myControl = new FormControl('');
   filteredOptions!: Observable<any[]>;
-  existingProject:any[] = [];
+  existingProject: any[] = [];
   selectedProject: string = '';
-  count:number = 0;
-  userEmail:string = '';
+  count: number = 0;
+  userEmail: string = '';
 
   myUserControl = new FormControl('');
   filteredOptionsUser!: Observable<any[]>;
-  existingUser:any = [];
+  existingUser: any = [];
   userRole: string = "";
+  tempAudioData: any = [];
 
-  constructor(private audioServ:AudioService,private router:Router, private toastr: ToastrService,
-    private commonServ:CommonService
+  constructor(private audioServ: AudioService, private router: Router, private toastr: ToastrService,
+    private commonServ: CommonService
   ) { }
 
   ngOnInit() {
     this.userRole = localStorage.getItem('role') || '';
-    if(this.userRole === "1") {
+    if (this.userRole === "1") {
       this.userEmail = localStorage.getItem('tenetId') || '';
     }
     const param = {
-      user:this.userEmail,
+      user: this.userEmail,
       projectName: this.selectedProject,
       isAllFile: 1
     }
@@ -59,11 +60,11 @@ export class AllFilesComponent {
     this.commonServ.getAPI('master/project/all').subscribe(
       (res: any) => {
         this.existingProject = res.data;
-          
+
         this.filteredOptions = this.myControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value || '')),
-          );
+          startWith(''),
+          map(value => this._filter(value || '')),
+        );
       },
       (err: any) => {
         this.toastr.error('Something Went Wrong!');
@@ -78,23 +79,24 @@ export class AllFilesComponent {
     );
   }
 
-  getProjectData(param:any) {
+  getProjectData(param: any) {
     this.isLoading = true;
-    this.audioServ.postAPI('audio/list', param, false).subscribe((res:any)=> {
+    this.audioServ.postAPI('audio/list', param, false).subscribe((res: any) => {
       this.project = res.data;
+      this.tempAudioData = res.data.map((x: any) => Object.assign({}, x));
       this.count = res.count;
       this.isLoading = false;
-    }, (err:any)=> {
+    }, (err: any) => {
       this.isLoading = false;
       this.toastr.error('Something Went Wrong!')
     });
   }
 
-  changeFileOption(val:number) {
+  changeFileOption(val: number) {
     this.isAllFiles = (val === 1);
     var email = ''
-    if(this.isAllFiles) {
-      if(this.userRole === "1") {
+    if (this.isAllFiles) {
+      if (this.userRole === "1") {
         email = localStorage.getItem('tenetId') || '';
       } else {
         email = ''
@@ -110,8 +112,8 @@ export class AllFilesComponent {
     this.getProjectData(param);
   }
 
-  viewDetails(tgId:string, tgName:string) {
-    this.router.navigate(["portal/allFiles/audioDetails/"+tgId+"/"+tgName]);
+  viewDetails(tgId: string, tgName: string) {
+    this.router.navigate(["portal/allFiles/audioDetails/" + tgId + "/" + tgName]);
   }
 
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
@@ -126,10 +128,10 @@ export class AllFilesComponent {
   }
 
   emptyProject() {
-    if(this.myControl.value === "") {
+    if (this.myControl.value === "") {
       this.selectedProject = "";
       const param = {
-        user:this.userEmail,
+        user: this.userEmail,
         projectName: this.selectedProject
       }
       this.getProjectData(param);
@@ -141,9 +143,9 @@ export class AllFilesComponent {
       (res: any) => {
         this.existingUser = res;
         this.filteredOptionsUser = this.myUserControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filterUser(value || '')),
-          );
+          startWith(''),
+          map(value => this._filterUser(value || '')),
+        );
       },
       (err: any) => {
         this.toastr.error('Something Went Wrong!');
@@ -152,12 +154,15 @@ export class AllFilesComponent {
   }
 
   onOptionSelectedUser(event: MatAutocompleteSelectedEvent): void {
-    console.log(event.option.value);
+    const searchUser = event.option.value;
+    this.project = searchUser
+      ? this.project.filter(project => project.UserName === searchUser)
+      : this.project;
   }
 
   emptyUser() {
-    if(this.myUserControl.value === "") {
-      
+    if (this.myUserControl.value === "") {
+      this.project = this.tempAudioData;
     }
   }
 

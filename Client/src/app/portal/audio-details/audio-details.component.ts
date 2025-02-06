@@ -195,7 +195,8 @@ export class AudioDetailsComponent {
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
-        //this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
+        debugger
+        this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.isEdit = false;
       }
@@ -236,8 +237,10 @@ export class AudioDetailsComponent {
         TGId: this.tgId,
         audiodata: this.audioDetails.AudioData,
       },
-      vectorIds: this.vectorId
+      vectorIds: this.vectorId,
+      audioName: this.audioName
     }
+    debugger
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
@@ -293,6 +296,7 @@ export class AudioDetailsComponent {
   }
 
   onAudioNameChange(event: any) {
+    debugger
     const index = this.audioNameArr.indexOf(event.value);
     this.audioDetails = this.allAudioDetails.TranscriptionData[index];
     const audio = this.audioPlayer.nativeElement;
