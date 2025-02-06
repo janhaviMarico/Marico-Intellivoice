@@ -216,7 +216,6 @@ export class AudioService {
         // Generate SAS token
         const sasToken = await this.generateBlobSasUrl(file.originalname);
         sasUrls.push({ fileName, sasUri, sasToken });
-        //console.log('sasUrls',sasUrls);
       });
 
       await Promise.all(uploadPromises);
@@ -520,7 +519,6 @@ export class AudioService {
 
       //IN_MH_18_25_SOIL_NYK_E_MAR
       //IN_MH_18_25_SOIL_NYK_E_MAR
-      console.log(tgName);
       const querySpecTarget = {
         query: 'SELECT * FROM c WHERE c.TGName = @TGName',
         parameters: [
@@ -529,7 +527,6 @@ export class AudioService {
         ],
       };
 
-      console.log(querySpecTarget);
       const { resources: targetData } = await this.targetContainer.items
         .query(querySpecTarget)
         .fetchAll();
@@ -556,10 +553,8 @@ export class AudioService {
       if (transcriptionData.length === 0) {
         return { message: 'Transcription data not found' };
       }
-      console.log(transcriptionData);
       // const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
       this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);
-      console.log('targetItem',targetItem);
 
       const fileUrls = await Promise.all(
         targetItem.filePath.map(async (filePath) => {
@@ -567,19 +562,13 @@ export class AudioService {
         })
       );
 
-      console.log('Generated SAS URLs:', fileUrls);
       const audioFileMap = {};
         targetItem.AudioName.forEach((audioName, index) => {
         audioFileMap[audioName] = fileUrls[index];
       });
 
-      console.log('Audio File Map:', audioFileMap);
-
-
-
       const combinedTranscriptionData = transcriptionData.map((transcriptionItem) => {
         const audioName = transcriptionItem.audioName; // Extract base name without extension
-        console.log('audioName',audioName);
         return {
           filepath: audioFileMap[audioName] || 'URL Not Found', // Match SAS URL by AudioName
           AudioData: transcriptionItem.audiodata,
@@ -617,9 +606,9 @@ export class AudioService {
       // Parameterized query to fetch items by TGId
       const { resources: items } = await this.transcriptContainer.items
         .query({
-          query: 'SELECT * FROM c WHERE c.TGId = @TGId AND STARTSWITH(c.audioName, @audioName)',
+          query: 'SELECT * FROM c WHERE c.TGId = @TGId AND c.audioName LIKE @audioPattern',
           parameters: [
-            { name: '@TGId', value: data.TGId },{ name: '@audioName', value: audioName }
+            { name: '@TGId', value: data.TGId },{ name: '@audioPattern', value: `${audioName}.%` }
           ],
         })
         .fetchAll();
