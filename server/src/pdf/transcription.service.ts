@@ -29,15 +29,15 @@ export class TranscriptionService {
 
   private async fetchTranscription(tgid: string, audioName: string): Promise<any> {
     const querySpec = {
-      query: 'SELECT c.TGId, c.summary FROM c WHERE c.TGId = @tgid AND STARTSWITH(c.audioName, @audioName)',
+      query: 'SELECT c.TGId, c.summary  FROM c WHERE c.TGId = @tgid AND c.audioName LIKE @audioPattern',
       parameters: [
         {
           name: '@tgid',
           value: tgid,
         },
         {
-          name: '@audioName',
-          value: audioName,
+          name: '@audioPattern',
+          value: `${audioName}.%`,
         },
       ],
     };
@@ -115,15 +115,15 @@ export class TranscriptionService {
 
 private async fetchSentimental(tgid: string, audioName: string): Promise<any> {
   const querySpec = {
-    query: 'SELECT c.TGId, c.sentiment_analysis FROM c WHERE c.TGId = @tgid AND STARTSWITH(c.audioName, @audioName)',
+    query: 'SELECT c.TGId, c.sentiment_analysis FROM c WHERE c.TGId = @tgid AND c.audioName LIKE @audioPattern',
     parameters: [
       {
         name: '@tgid',
         value: tgid,
       },
       {
-        name: '@audioName',
-        value: audioName,
+        name: '@audioPattern',
+        value: `${audioName}.%`,
       },
     ],
   };

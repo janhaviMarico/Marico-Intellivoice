@@ -83,7 +83,6 @@ export class UserService {
       };
   
       const { resources: existingUsers } = await this.userContainer.items.query(querySpec).fetchAll();
-      console.log(existingUsers);
       // Step 3: Handle case when user is not found
       if (!existingUsers || existingUsers.length === 0) {
         throw new HttpException(

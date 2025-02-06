@@ -163,9 +163,7 @@ export class AudioUtils{
         const audioTranscript = translatedTextArray
         .map((entry: any) => ` Speaker ${entry.speaker}: ${entry.translation}`)
         .join('\n\n');
-        //console.log(audioTranscript);
    const response= this.chatService.getPrompResponse(MODERATOR_RECOGNITION,audioTranscript);
-   //console.log(response);
    const match = (await response).match(/Speaker\s*\d+/i).toString();
    const updatedTextArray = translatedTextArray.map(item => {
     // If this item's speaker matches the identified moderator, mark them as 'Moderator'
@@ -331,7 +329,6 @@ export class AudioUtils{
                 const vectorId = uploadResult.results[0]?.key;
                 vectorIds.push(vectorId);                
                 // Optionally, log progress
-                //console.log(`Uploaded chunk with vector ID: ${vectorId}`);
               }
             // Return all generated vector IDs for the document chunks
             return vectorIds;

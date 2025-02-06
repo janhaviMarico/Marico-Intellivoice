@@ -57,10 +57,7 @@ export class AudioController {
       
       // Log the incoming request details
       this.logger.log(`Received request to upload ${files.length} files for project ${projectGroupDto.ProjName}`);
-      // console.log('projectdto',projectGroupDto);
-      // console.log('targetGrpDto',targetGrpDto);
-      // console.log('files',files);
-
+ 
       // Call the service to process the audio files
       const result = await this.audioService.processAudioFiles(projectGroupDto, targetGrpDto, files);
       return {
