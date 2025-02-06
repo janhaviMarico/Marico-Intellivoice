@@ -4,7 +4,7 @@ import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common
 import { AzureOpenAI } from "openai";
 import { AudioUtils } from "src/audio/audio.utils";
 import { InjectModel } from "@nestjs/azure-database";
-import { Container } from "@azure/cosmos";
+import { Container, Item } from "@azure/cosmos";
 import { ProjectEntity } from "src/audio/entity/project.entity";
 import { TranscriptionEntity } from "src/audio/entity/transcription.entity";
 import { PROJECT_COMPARE_STATIC_INSTRUCTION, STATIC_INSTRUCTION } from "src/constants";
@@ -73,11 +73,12 @@ export class ChatService {
 
   async getTextsByVectorIds(vectorIds: string[]): Promise<Document[]> {
     try {
+      console.log('getTextsByVectorIds',vectorIds);
       this.logger.log(`Fetching documents with vector IDs: ${vectorIds}`);
       const documents: Document[] = [];
   
       // Fetch documents for each vector ID
-      for (const vectorId of vectorIds) {
+      for (const vectorId of vectorIds.filter(Item => Item !== null)) {
         const document = await this.azureSearchClient.getDocument(vectorId);
         if (document) {
           documents.push(document); // Only push if document exists
@@ -199,7 +200,11 @@ export class ChatService {
       const vectorIdsProject2 = await this.getVectorIdsByProject(project2);
       
       const project1Documents = await this.getTextsByVectorIds(vectorIdsProject1);
+      console.log(project1Documents);
+
       const project2Documents = await this.getTextsByVectorIds(vectorIdsProject2);
+      console.log(project2Documents);
+
   
       const targetCompareProject1 = await this.generateAnswerFromDocumentsWithChunks(STATIC_INSTRUCTION, project1Documents);
       const targetCompareProject2 = await this.generateAnswerFromDocumentsWithChunks(STATIC_INSTRUCTION, project2Documents);
@@ -254,6 +259,7 @@ export class ChatService {
 
       const projectDocument = existingDocuments[0];
       const transcriptionIds = projectDocument.TGIds.map(id => `'${id}'`).join(", ");
+      console.log(transcriptionIds);
 
       const transcriptionQuery = {
         query: `SELECT c.vectorId FROM c WHERE c.TGName IN (${transcriptionIds})`,
@@ -262,9 +268,8 @@ export class ChatService {
       const { resources: transcriptionData } = await this.transcriptionContainer.items.query(transcriptionQuery).fetchAll();
       if (!transcriptionData.length) {
         throw new Error(`No transcription data found for project: ${projectName}`);
-      }
-  
-      return transcriptionData.map(item => item.vectorId[0]);
+      }  
+      return transcriptionData.filter(item => item !== null).map(item => item.vectorId).flat();
     } catch (error) {
       console.error("Error fetching data:", error);
       throw new Error("An error occurred while fetching data.");

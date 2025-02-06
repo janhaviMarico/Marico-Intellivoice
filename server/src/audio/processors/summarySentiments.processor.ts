@@ -36,7 +36,7 @@ export class SummarySentimentsProcessor{
           // Save to Cosmos DB
           await this.audioUtils.saveTranscriptionDocument(transcriptionDocument);
           await job.log(`Saved transcription document for ${TGName} without vectorId`); 
-          await this.embeddingQueue.add('embedding-audio',{transcriptionDocument,combinedTranslation,TGId,TGName})
+          await this.embeddingQueue.add('embedding-audio',{transcriptionDocument,combinedTranslation,TGId,TGName,fileName})
           //return {transcriptionDocument};
         } catch (error) {
           this.logger.error(`Transcription job failed: ${error.message}`);
