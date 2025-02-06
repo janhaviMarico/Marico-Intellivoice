@@ -122,6 +122,7 @@ async getAudioList(@Body() body: { user?: string; projectName?: string, isAllFil
 
 
   @Get('details')
+  @ApiOperation({ summary: 'View Data for each Target groups' })
   async getAudioDetails(
   @Query('tgId') tgId: string,
   @Query('tgName') tgName: string
@@ -138,14 +139,16 @@ async getAudioList(@Body() body: { user?: string; projectName?: string, isAllFil
   }
 
 @Post('edit')
+@ApiOperation({ summary: 'Edit Transcription' })
 async editTranscription(
     @Body('editData') editTranscriptionDto: EditTranscriptionDto,
     @Body('vectorIds') vectorIds: string[],
+    @Body('audioName') audioName:string
 ) {
     if (!Array.isArray(vectorIds) || vectorIds.length === 0) {
         throw new BadRequestException('Vector document IDs are required and should be an array.');
     }
-    return this.audioService.editTranscription(editTranscriptionDto, vectorIds);
+    return this.audioService.editTranscription(editTranscriptionDto, vectorIds,audioName);
 } 
 
 /// audio trim code
