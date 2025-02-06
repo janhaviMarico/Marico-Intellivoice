@@ -237,11 +237,12 @@ export class AudioUtils{
         }
       }
 
-      async updateTranscriptionDocument(TGId: string, updateData: Partial<any>) {
+      async updateTranscriptionDocument(TGId: string, updateData: Partial<any>, audioName: any) {
         try {
             const querySpec = {
-                query: 'SELECT * FROM c WHERE c.TGId = @TGId',
-                parameters: [{ name: '@TGId', value: TGId }],
+                query: 'SELECT * FROM c WHERE c.TGId = @TGId AND c.audioName= @audioName',
+                parameters: [{ name: '@TGId', value: TGId },{ name: '@audioName', value: audioName }
+                ],
               };
            const { resources:existingDocuments } = await this.transcriptionContainer.items.query(querySpec).fetchAll();
        // const { resource: existingDocument } = await this.transcriptionContainer.item(TGId).read();
