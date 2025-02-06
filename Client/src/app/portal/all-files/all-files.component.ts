@@ -27,19 +27,32 @@ export class AllFilesComponent {
   myUserControl = new FormControl('');
   filteredOptionsUser!: Observable<any[]>;
   existingUser:any = [];
+  userRole: string = "";
 
   constructor(private audioServ:AudioService,private router:Router, private toastr: ToastrService,
     private commonServ:CommonService
   ) { }
 
   ngOnInit() {
+    this.userRole = localStorage.getItem('role') || '';
+    if(this.userRole === "1") {
+      this.userEmail = localStorage.getItem('User') || '';
+    }
     const param = {
       user:this.userEmail,
-      projectName: this.selectedProject
+      projectName: this.selectedProject,
+      isAllFile: 1
     }
-    this.getProjectData(param);
+    if (!this.selectedProject) { // Ensures API is called only if necessary
+      const param = {
+        user: this.userEmail,
+        projectName: this.selectedProject,
+        isAllFile: 1
+      };
+      this.getProjectData(param);
+    }
     this.getExistingProject();
-    //this.getExistingUser();
+    this.getExistingUser();
   }
 
   getExistingProject() {
@@ -77,16 +90,22 @@ export class AllFilesComponent {
     });
   }
 
-  changeFileOption(val:string) {
-    this.isAllFiles = (val === 'all');
-    if(val === 'all') {
-      this.userEmail = ''
+  changeFileOption(val:number) {
+    this.isAllFiles = (val === 1);
+    var email = ''
+    if(this.isAllFiles) {
+      if(this.userRole === "1") {
+        email = localStorage.getItem('User') || '';
+      } else {
+        email = ''
+      }
     } else {
-      this.userEmail = localStorage.getItem('User') || '';
+      email = localStorage.getItem('User') || '';
     }
     const param = {
-      user:this.userEmail,
-      projectName: this.selectedProject
+      user: email,
+      projectName: this.selectedProject,
+      isAllFile: val
     }
     this.getProjectData(param);
   }
@@ -96,12 +115,14 @@ export class AllFilesComponent {
   }
 
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
-    this.selectedProject = event.option.value;
-    const param = {
-      user:this.userEmail,
-      projectName: this.selectedProject
+    if (event.option.value !== this.selectedProject) {
+      this.selectedProject = event.option.value;
+      const param = {
+        user: this.userEmail,
+        projectName: this.selectedProject
+      };
+      this.getProjectData(param);
     }
-    this.getProjectData(param);
   }
 
   emptyProject() {
@@ -116,10 +137,9 @@ export class AllFilesComponent {
   }
 
   getExistingUser() {
-    this.commonServ.getAPI('master/project/all').subscribe(
+    this.commonServ.getAPI('users/all').subscribe(
       (res: any) => {
-        this.existingUser = res.data;
-          
+        this.existingUser = res;
         this.filteredOptionsUser = this.myUserControl.valueChanges.pipe(
             startWith(''),
             map(value => this._filterUser(value || '')),
@@ -132,29 +152,19 @@ export class AllFilesComponent {
   }
 
   onOptionSelectedUser(event: MatAutocompleteSelectedEvent): void {
-    this.selectedProject = event.option.value;
-    const param = {
-      user:this.userEmail,
-      projectName: this.selectedProject
-    }
-    this.getProjectData(param);
+    console.log(event.option.value);
   }
 
   emptyUser() {
     if(this.myUserControl.value === "") {
-      this.selectedProject = "";
-      const param = {
-        user:this.userEmail,
-        projectName: this.selectedProject
-      }
-      this.getProjectData(param);
+      
     }
   }
 
   private _filterUser(value: string): string[] {
     const filterValue = value.toLowerCase();
     return this.existingUser.filter((option: any) =>
-      option.ProjName.toLowerCase().includes(filterValue)
+      option.userName.toLowerCase().includes(filterValue)
     );
   }
 
