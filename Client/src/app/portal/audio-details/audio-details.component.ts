@@ -155,7 +155,7 @@ export class AudioDetailsComponent {
     if (this.question !== "") {
       const payload = {
         question: this.question,
-        vectorId: this.vectorId
+        vectorId: this.audioDetails.VectorId
       }
       this.isLoading = true;
       this.audioServ.sendQueryAI('chat/chatVectorId', payload).subscribe((res: any) => {
@@ -183,7 +183,6 @@ export class AudioDetailsComponent {
   }
   updateTranslation() {
     this.isLoading = true;
-    debugger
     const payload = {
       editData: {
         TGId: this.tgId,
@@ -195,7 +194,6 @@ export class AudioDetailsComponent {
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
-        debugger
         this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.isEdit = false;
@@ -237,14 +235,12 @@ export class AudioDetailsComponent {
         TGId: this.tgId,
         audiodata: this.audioDetails.AudioData,
       },
-      vectorIds: this.vectorId,
+      vectorIds: this.audioDetails.VectorId,
       audioName: this.audioName
     }
-    debugger
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
-        debugger
         this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.currentText = '';
@@ -296,7 +292,6 @@ export class AudioDetailsComponent {
   }
 
   onAudioNameChange(event: any) {
-    debugger
     const index = this.audioNameArr.indexOf(event.value);
     this.audioDetails = this.allAudioDetails.TranscriptionData[index];
     const audio = this.audioPlayer.nativeElement;

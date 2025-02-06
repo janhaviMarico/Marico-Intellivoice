@@ -649,7 +649,8 @@ export class AudioProcessComponent {
         Country: this.targetGrps.targetGrpArr[i].country,
         State: this.targetGrps.targetGrpArr[i].state,
         AgeGrp: `${this.targetGrps.targetGrpArr[i].minAge} - ${this.targetGrps.targetGrpArr[i].maxAge}`,
-        CompetetionProduct: this.targetGrps.targetGrpArr[i].competitors,
+        //CompetetionProduct: this.targetGrps.targetGrpArr[i].competitors,
+        CompetetionProduct: this.targetGrps.targetGrpArr[i].competitors.map((comp: any) => comp.name),
         MaricoProduct: this.targetGrps.targetGrpArr[i].maricoProduct,
         MainLang: this.targetGrps.targetGrpArr[i].primaryLang,
         SecondaryLang: this.targetGrps.targetGrpArr[i].otherLangs,
@@ -672,6 +673,7 @@ export class AudioProcessComponent {
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
     this.isLoading = true;
+    return false;
     this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
 
