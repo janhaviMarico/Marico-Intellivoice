@@ -268,8 +268,6 @@ export class AudioService {
       }  
       await this.targetContainer.items.upsert(latestDocument);
     }
-
-    console.log('audioProcessDtoArray',audioProcessDtoArray);
       this.logger.log('Target groups updated with SAS URLs.');
       return audioProcessDtoArray;
     } catch (error) {
@@ -562,21 +560,47 @@ export class AudioService {
         return { message: 'Transcription data not found' };
       }
       console.log(transcriptionData);
-      const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
+      // const transcriptionItem = transcriptionData[0]; // Assuming TGId and TGName are unique
       this.logger.log(`Combining transcription data for  ${tgId} and ${tgName} `);
       console.log('targetItem',targetItem);
-      const filenameurl = await this.generateBlobSasUrl(targetItem.filePath.substring(targetItem.filePath.lastIndexOf('/') + 1))
-      console.log('filenameurl',filenameurl);
+
+      const fileUrls = await Promise.all(
+        targetItem.filePath.map(async (filePath) => {
+          return await this.generateBlobSasUrl(filePath.substring(filePath.lastIndexOf('/') + 1));
+        })
+      );
+
+      console.log('Generated SAS URLs:', fileUrls);
+      const audioFileMap = {};
+        targetItem.AudioName.forEach((audioName, index) => {
+        audioFileMap[audioName] = fileUrls[index];
+      });
+
+      console.log('Audio File Map:', audioFileMap);
+
+
+
+      const combinedTranscriptionData = transcriptionData.map((transcriptionItem) => {
+        const audioName = transcriptionItem.audioName; // Extract base name without extension
+        console.log('audioName',audioName);
+        return {
+          filepath: audioFileMap[audioName] || 'URL Not Found', // Match SAS URL by AudioName
+          AudioData: transcriptionItem.audiodata,
+          Summary: transcriptionItem.summary,
+          SentimentAnalysis: transcriptionItem.sentiment_analysis,
+          VectorId: transcriptionItem.vectorId
+        };
+      });
+
+      
       // 3. Combine Target and Transcription Data
       const combinedData = {
         TGId: targetItem.TGId,
         TGName: targetItem.TGName,
-        FilePath: filenameurl, // Audio Blob Link from Target Container
-        AudioData: transcriptionItem.audiodata, // Transcription and Translation
-        Summary: transcriptionItem.summary, // Summary from Transcription Container
-        SentimentAnalysis: transcriptionItem.sentiment_analysis, // Sentiment Analysis from Transcription Container
-        vectorId: transcriptionItem.vectorId
+        AudioName: targetItem.AudioName.map(name => name.split('.')[0]), // Remove file extensions
+        TranscriptionData: combinedTranscriptionData
       };
+    
       return combinedData;
     } catch (error) {
       console.error('Error fetching audio details:', error.message);
