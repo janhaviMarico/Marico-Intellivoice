@@ -33,19 +33,19 @@ export class AudioProcessComponent {
   @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr: any[] = [
-    {
-      // competitors: ["Dabur Gold"],
-      // country: "India",
-      // maricoProduct: "REVIVE LIQ 400G+95G ROI",
-      // maxAge: 9,
-      // minAge: 6,
-      // name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
-      // numSpeakers: 3,
-      // otherLangs: ["Marathi"],
-      // primaryLang: "English",
-      // projectName: "ak_project_1",
-      // state: "Andhra Pradesh"
-    }
+    // {
+    //   competitors: ["Dabur Gold"],
+    //   country: "India",
+    //   maricoProduct: "REVIVE LIQ 400G+95G ROI",
+    //   maxAge: 9,
+    //   minAge: 6,
+    //   name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
+    //   numSpeakers: 3,
+    //   otherLangs: ["Marathi"],
+    //   primaryLang: "English",
+    //   projectName: "ak_project_1",
+    //   state: "Andhra Pradesh"
+    // }
   ];
   target: any;
   countries: any[] = [];

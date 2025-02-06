@@ -15,6 +15,7 @@
 
         h3 {
             font-size: 1.4em;
+            margin-right: 20px;
         }
     }
 
@@ -382,5 +383,16 @@
             color: #ffffff;
             transition: 0.5s;
         }
+    }
+}
+
+::ng-deep mat-form-field {
+
+    .mat-mdc-text-field-wrapper {
+        background: none;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+        display: none;
     }
 }

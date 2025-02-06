@@ -1,7 +1,13 @@
 <div class="tab-container">
   <div class="tab-header">
     <button (click)="back()" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
-    <h3>{{audioDetails?.TGName}}</h3>
+    <h3>{{allAudioDetails?.TGName}}</h3>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Audio Name</mat-label>
+      <mat-select [(ngModel)]="audioName" (selectionChange)="onAudioNameChange($event)">
+          <mat-option *ngFor="let audioNm of audioNameArr;let i=index" [value]="audioNm">{{ audioNm }}</mat-option>
+      </mat-select>
+  </mat-form-field>
   </div>
   <mat-tab-group class="tab-group" [(selectedIndex)]="selectedTabIndex">
     <mat-tab>
@@ -43,7 +49,7 @@
               <input type="range" class="seek-bar" [value]="seekValue" max="100" (input)="seekAudio($event)">
               <span id="duration-time">{{ durationTime }}</span>
               <audio #audioPlayer controls (timeupdate)="updateProgress($event)">
-                <source [src]="filePath" />
+                <source [src]="audioDetails?.filepath" />
                 Your browser does not support the audio element.
               </audio>
             </div>
@@ -84,7 +90,7 @@
         <label><img *ngIf="selectedTabIndex === 2"
             [src]="baseHref + 'assets/Img/AudioDetails/summary-a.png'"
             alt="">
-            <img *ngIf="selectedTabIndex === 2"
+            <img *ngIf="selectedTabIndex !== 2"
             [src]="baseHref + 'assets/Img/AudioDetails/summary-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 2}">Summary</span></label>
@@ -104,7 +110,7 @@
         <label><img *ngIf="selectedTabIndex === 3"
             [src]="baseHref + 'assets/Img/AudioDetails/senti-a.png'"
             alt="">
-            <img *ngIf="selectedTabIndex === 3"
+            <img *ngIf="selectedTabIndex !== 3"
             [src]="baseHref + 'assets/Img/AudioDetails/senti-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 3}">Sentiment analysis</span></label>
@@ -126,7 +132,7 @@
         <label><img *ngIf="selectedTabIndex === 4"
             [src]="baseHref + 'assets/Img/AudioDetails/chat-a.png'"
             alt="">
-            <img *ngIf="selectedTabIndex === 4"
+            <img *ngIf="selectedTabIndex !== 4"
             [src]="baseHref + 'assets/Img/AudioDetails/chat-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 4}">Chat</span></label>

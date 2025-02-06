@@ -38,6 +38,9 @@ export class AudioDetailsComponent {
   replaceText: string = '';
   tempAudioData: any = [];
   baseHref:string = '../../../';
+  audioNameArr:any[] = [];
+  audioName:string = '';
+  allAudioDetails:any;
   constructor(private audioServ: AudioService, private cdr: ChangeDetectorRef, private activeRoute: ActivatedRoute,
     private router: Router, private toastr: ToastrService, private dialog: MatDialog,
   ) {
@@ -60,10 +63,13 @@ export class AudioDetailsComponent {
   getAudioDetails() {
     this.isLoading = true;
     this.audioServ.getDetails('audio/details', this.tgId, this.tgName).subscribe((res: any) => {
-      this.audioDetails = res.data;
-      this.filePath = res.data.FilePath;
-      this.vectorId = res.data.vectorId;
-      this.tempAudioData = res.data.AudioData.map((x: any) => Object.assign({}, x));
+      this.allAudioDetails = res.data;
+      this.audioDetails = res.data.TranscriptionData[0];
+      // this.filePath = res.data.FilePath;
+      // this.vectorId = res.data.vectorId;
+      //this.tempAudioData = res.data.AudioData.map((x: any) => Object.assign({}, x));
+      this.audioNameArr = res.data.AudioName;
+      this.audioName = this.audioNameArr[0];
       this.isLoading = false;
     }, (err: any) => {
 
@@ -282,5 +288,14 @@ export class AudioDetailsComponent {
       this.toastr.error('Something Went Wrong!');
     });
     return true;
+  }
+
+  onAudioNameChange(event: any) {
+    const index = this.audioNameArr.indexOf(event.value);
+    this.audioDetails = this.allAudioDetails.TranscriptionData[index];
+    const audio = this.audioPlayer.nativeElement;
+    audio.load();
+    this.isPlaying = false;
+    this.currentTime = '0:00';
   }
 }
