@@ -34,7 +34,7 @@ export class UserListComponent {
   selectedUsers: any[] = new Array<any>();
   mapUnmapUsers: any[] = [];
   filteredCompetetiveProduct!: Observable<any[]>;
-  
+
   constructor(private commonServ: CommonService, private toastr: ToastrService,
     private fb: FormBuilder, private dialog: MatDialog
   ) {
@@ -48,6 +48,10 @@ export class UserListComponent {
 
   ngOnInit() {
     this.isLoading = true;
+    this.getUserList();
+  }
+
+  getUserList() {
     this.commonServ.getAPI('users/all').subscribe((res: any) => {
       this.isLoading = false;
       this.userList = res;
@@ -63,7 +67,10 @@ export class UserListComponent {
     this.userForm.controls['userEmail'].setValue(this.userList[index].email);
     this.userForm.controls['role'].setValue(this.userList[index].rolecode);
 
-    this.assignMapUnmapUser(this.userList[index].email);
+    this.assignMapUnmapUser(index);
+
+    this.userForm.get('mapUnmapUsers')!.setValue(this.selectedUsers);
+
     this.dialogRef = this.dialog.open(editTemplate, {
       width: '30%',
       disableClose: true,
@@ -71,13 +78,25 @@ export class UserListComponent {
   }
 
   submitForm() {
-    if (this.userForm.valid) {
-      console.log('Form Data:', this.userForm.value);
+    const userIds = this.selectedUsers.map(user => user.userid);
+    const param = {
+      name: this.userForm.value.userName,
+      email: this.userForm.value.userEmail,
+      role: this.userForm.value.role,
+      mapUser: userIds
     }
+    this.commonServ.postAPI('users/edit', param).subscribe((res: any) => {
+      this.toastr.success(res.message);
+      this.closeDialog();
+      this.getUserList()
+    }, (err: any) => {
+      this.toastr.error('Something Went Wrong!');
+    })
   }
 
   closeDialog() {
     this.dialogRef.close();
+    this.userForm.reset();
   }
 
   filterForCompetitor() {
@@ -121,9 +140,21 @@ export class UserListComponent {
     return '';
   }
 
-  assignMapUnmapUser(email:string) {
+  assignMapUnmapUser(index: number) {
+    const email = this.userList[index].email;
     this.mapUnmapUsers = [];
-    this.mapUnmapUsers = this.userList.filter(user => user.email !== email);
+    this.mapUnmapUsers = this.userList.filter(user => user.email !== email)
+    .map(user => ({
+      ...user,
+      selected: this.userList[index]?.mapUser?.includes(user.id) ? true : false
+    }));
+
+    this.selectedUsers = this.userList[index]?.mapUser
+      ? this.userList
+        .filter(user => this.userList[index].mapUser.includes(user.id))
+        .map(user => ({ ...user, selected: true }))
+      : [];
+
     this.filteredCompetetiveProduct = of(this.mapUnmapUsers);
   }
 }
