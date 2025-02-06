@@ -36,7 +36,7 @@ export class AllFilesComponent {
   ngOnInit() {
     this.userRole = localStorage.getItem('role') || '';
     if(this.userRole === "1") {
-      this.userEmail = localStorage.getItem('User') || '';
+      this.userEmail = localStorage.getItem('tenetId') || '';
     }
     const param = {
       user:this.userEmail,
@@ -95,12 +95,12 @@ export class AllFilesComponent {
     var email = ''
     if(this.isAllFiles) {
       if(this.userRole === "1") {
-        email = localStorage.getItem('User') || '';
+        email = localStorage.getItem('tenetId') || '';
       } else {
         email = ''
       }
     } else {
-      email = localStorage.getItem('User') || '';
+      email = localStorage.getItem('tenetId') || '';
     }
     const param = {
       user: email,
