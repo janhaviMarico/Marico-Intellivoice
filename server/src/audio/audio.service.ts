@@ -362,10 +362,7 @@ export class AudioService {
       } else if (userId) {
         // If only a specific user is given, fetch their projects
         userIdsToFetch.push(userId);
-      }
-
-      console.log('userIdsToFetch',userIdsToFetch);
-  
+      }  
       // Build query for projects
       let querySpecProject;
       if (userIdsToFetch.length > 0) {
@@ -620,7 +617,7 @@ export class AudioService {
       // Parameterized query to fetch items by TGId
       const { resources: items } = await this.transcriptContainer.items
         .query({
-          query: 'SELECT * FROM c WHERE c.TGId = @TGId AND c.audioName = @audioName',
+          query: 'SELECT * FROM c WHERE c.TGId = @TGId AND STARTSWITH(c.audioName, @audioName)',
           parameters: [
             { name: '@TGId', value: data.TGId },{ name: '@audioName', value: audioName }
           ],
