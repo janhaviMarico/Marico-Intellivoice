@@ -11,7 +11,8 @@
         <tr>
             <td>{{ user.userName }}</td>
             <td>{{ user.email }}</td>
-            <td></td>
+            <td>{{ user.rolecode==='1' ? 'Base User' : user.rolecode==='2' ? 'Admin User' : user.rolecode==='3'
+                ? 'Read User' : 'Unknown Role' }}</td>
             <td>
                 <button class="edit-btn" (click)="editDialog(EditTemplate, rowIndex)">Edit</button>
             </td>
@@ -55,8 +56,8 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
-                    <input type="text" placeholder="Competitor Products" aria-label="Competitor Producst"
-                        matInput [matAutocomplete]="auto" formControlName="mapUnmapUsers" [(ngModel)]="lastFilter"
+                    <input type="text" placeholder="User Mapping" aria-label="Map/UnMap Users" matInput
+                        [matAutocomplete]="auto" formControlName="mapUnmapUsers" [(ngModel)]="lastFilter"
                         (keyup)="filterForCompetitor()">
                 </mat-form-field>
 
