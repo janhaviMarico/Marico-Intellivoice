@@ -614,11 +614,11 @@ export class AudioProcessComponent {
   }
 
   audioProcessing() {
-    this.isLoading = true;
     const formData = new FormData();
     let Project: any;
     let TargetGrp: any = [];
     let tgArr: any[] = [];
+    
     for (let i = 0; i < this.targetGrps.targetGrpArr.length; i++) {
       if (i == 0) {
         Project = {
@@ -628,10 +628,24 @@ export class AudioProcessComponent {
           TGIds: []
         }
       }
-      const temp = {
+      const temp: {
+        ProjId: string; 
+        TGName: string; 
+        AudioName: string[];
+        Country: string;
+        State: string;
+        AgeGrp: string;
+        CompetetionProduct: string;
+        MaricoProduct: string;
+        MainLang: string;
+        SecondaryLang: string;
+        noOfSpek: number;
+        filePath: string;
+      } = {
         ProjId: Project.ProjId,
         TGName: this.targetGrps.targetGrpArr[i].name,
-        AudioName: this.targetGrps.targetGrpArr[i].audioList.map((audio: any) => audio.name),
+        //AudioName: this.targetGrps.targetGrpArr[i].audioList.map((audio: any) => audio.name),
+        AudioName: [],
         Country: this.targetGrps.targetGrpArr[i].country,
         State: this.targetGrps.targetGrpArr[i].state,
         AgeGrp: `${this.targetGrps.targetGrpArr[i].minAge} - ${this.targetGrps.targetGrpArr[i].maxAge}`,
@@ -642,22 +656,22 @@ export class AudioProcessComponent {
         noOfSpek: this.targetGrps.targetGrpArr[i].numSpeakers,
         filePath: ""
       }
-      console.log(this.targetGrps.targetGrpArr);
-
+      const renamedFiles: string[] = [];
       for (let j = 0; j < this.targetGrps.targetGrpArr[i].audioList.length; j++) {
         const originalExtension = this.targetGrps.targetGrpArr[i].audioList[j].data.name.substring(this.targetGrps.targetGrpArr[i].audioList[j].data.name.lastIndexOf('.'));
         const count = j + 1;
         const renamedFile = new File([this.targetGrps.targetGrpArr[i].audioList[j].data], `${this.targetGrps.targetGrpArr[i].name}_${count}${originalExtension}`, { type: this.targetGrps.targetGrpArr[i].audioList[j].data.type });
+        renamedFiles.push(renamedFile.name)
         formData.append('files', renamedFile);
       }
-
+      temp.AudioName = renamedFiles;
       TargetGrp.push(temp)
       tgArr.push(this.targetGrps.targetGrpArr[i].name);
     }
     Project["TGIds"] = tgArr;
-
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
+    this.isLoading = true;
     this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
 
