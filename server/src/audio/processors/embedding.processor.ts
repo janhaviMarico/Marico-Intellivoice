@@ -13,15 +13,16 @@ export class EmbeddingProcessor {
 
   @Process({name:'embedding-audio',concurrency:5})  // Handle jobs in the 'translate-audio' queue
   async handleTranslationJob(job: Job) {
-    const {transcriptionDocument,combinedTranslation,TGId,TGName,audioName} = job.data;
+    const {transcriptionDocument,combinedTranslation,TGId,TGName,fileName} = job.data;
     await job.log(`Processing translation job for ${TGName}`);  
     try {
         const vectorIds= await this.audioUtils.generateEmbeddings(combinedTranslation);
+        console.log('vectorIds in emb',vectorIds);
         //transcriptionDocument.vectorId=vectorIds;
         await job.log('Translation job completed');
         //await this.audioUtils.saveTranscriptionDocument(transcriptionDocument);
         const updateData = { vectorId: vectorIds };
-        await this.audioUtils.updateTranscriptionDocument(TGId,vectorIds,audioName);
+        await this.audioUtils.updateTranscriptionDocument(TGId,vectorIds,fileName);
       // You can then move to further processing like Summary or Sentiment Analysis here if needed.
       //return {translatedTextArray, combinedTranslation,TGName,TGId};
     } catch (error) {
