@@ -67,7 +67,7 @@ export class AudioDetailsComponent {
       this.audioDetails = res.data.TranscriptionData[0];
       // this.filePath = res.data.FilePath;
       // this.vectorId = res.data.vectorId;
-      //this.tempAudioData = res.data.AudioData.map((x: any) => Object.assign({}, x));
+      this.tempAudioData = res.data.TranscriptionData[0].AudioData.map((x: any) => Object.assign({}, x));
       this.audioNameArr = res.data.AudioName;
       this.audioName = this.audioNameArr[0];
       this.isLoading = false;
@@ -183,18 +183,19 @@ export class AudioDetailsComponent {
   }
   updateTranslation() {
     this.isLoading = true;
-
+    debugger
     const payload = {
       editData: {
         TGId: this.tgId,
         audiodata: this.audioDetails.AudioData,
       },
-      vectorIds: this.vectorId
+      vectorIds: this.audioDetails.VectorId,
+      audioName: this.audioName
     }
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
-        this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
+        //this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.isEdit = false;
       }
@@ -240,6 +241,7 @@ export class AudioDetailsComponent {
     this.audioServ.postAPI('audio/edit', payload).subscribe((res: any) => {
       if (res.statusCode === 200) {
         this.toastr.success(res.message);
+        debugger
         this.tempAudioData = this.audioDetails.AudioData.map((x: any) => Object.assign({}, x));
         this.isLoading = false;
         this.currentText = '';
@@ -294,6 +296,7 @@ export class AudioDetailsComponent {
     const index = this.audioNameArr.indexOf(event.value);
     this.audioDetails = this.allAudioDetails.TranscriptionData[index];
     const audio = this.audioPlayer.nativeElement;
+    this.tempAudioData = this.allAudioDetails.TranscriptionData[index].AudioData.map((x: any) => Object.assign({}, x));
     audio.load();
     this.isPlaying = false;
     this.currentTime = '0:00';

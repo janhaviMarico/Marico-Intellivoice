@@ -4,7 +4,7 @@
     <h3>{{allAudioDetails?.TGName}}</h3>
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Audio Name</mat-label>
-      <mat-select [(ngModel)]="audioName" (selectionChange)="onAudioNameChange($event)">
+      <mat-select [(ngModel)]="audioName" (selectionChange)="onAudioNameChange($event)" [disabled]="isEdit">
           <mat-option *ngFor="let audioNm of audioNameArr;let i=index" [value]="audioNm">{{ audioNm }}</mat-option>
       </mat-select>
   </mat-form-field>

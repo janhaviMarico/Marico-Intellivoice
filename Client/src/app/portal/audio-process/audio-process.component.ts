@@ -614,7 +614,6 @@ export class AudioProcessComponent {
   }
 
   audioProcessing() {
-    debugger
     this.isLoading = true;
     const formData = new FormData();
     let Project: any;
@@ -624,7 +623,7 @@ export class AudioProcessComponent {
       if (i == 0) {
         Project = {
           ProjName: this.targetGrps.targetGrpArr[i].projectName,
-          userid: localStorage.getItem('User'),
+          userid: localStorage.getItem('tenetId'),
           ProjId: uuidv4(),
           TGIds: []
         }
@@ -715,7 +714,7 @@ export class AudioProcessComponent {
     this.router.navigate(['/portal/dashboard'])
   }
 
-  editAudio(template: TemplateRef<any>, file: any, i:number, j:number) {
+  editAudio(template: TemplateRef<any>, file: any, i: number, j: number) {
     this.editFileName = file.name;
     const formData = new FormData();
     formData.append('files', file.data, file.data.name);
