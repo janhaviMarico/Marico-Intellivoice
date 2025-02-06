@@ -608,7 +608,7 @@ export class AudioService {
     }
   }
 
-  async editTranscription(data: EditTranscriptionDto, vectorIds: string[]) {
+  async editTranscription(data: EditTranscriptionDto, vectorIds: string[], audioName: string) {
     this.logger.log(`Attempting to edit transcription for TGId: ${data.TGId}`);
 
     if (!data.TGId) {
@@ -620,8 +620,10 @@ export class AudioService {
       // Parameterized query to fetch items by TGId
       const { resources: items } = await this.transcriptContainer.items
         .query({
-          query: 'SELECT * FROM c WHERE c.TGId = @TGId',
-          parameters: [{ name: '@TGId', value: data.TGId }],
+          query: 'SELECT * FROM c WHERE c.TGId = @TGId AND c.audioName = @audioName',
+          parameters: [
+            { name: '@TGId', value: data.TGId },{ name: '@audioName', value: audioName }
+          ],
         })
         .fetchAll();
 

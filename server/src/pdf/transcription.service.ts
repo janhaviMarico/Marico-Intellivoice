@@ -14,8 +14,8 @@ export class TranscriptionService {
     @InjectModel(TargetGroupEntity) private readonly targetGroupContainer: Container,
   ) {}
 
-  async getSummaryByTGID(tgid: string): Promise<any> {
-    const transcription = await this.fetchTranscription(tgid);
+  async getSummaryByTGID(tgid: string, audioName: string): Promise<any> {
+    const transcription = await this.fetchTranscription(tgid,audioName);
     const projectInfo = await this.fetchProjectInfo(tgid);
     const targetGroupInfo = await this.fetchTargetGroupInfo(tgid);
 
@@ -27,13 +27,17 @@ export class TranscriptionService {
     };
   }
 
-  private async fetchTranscription(tgid: string): Promise<any> {
+  private async fetchTranscription(tgid: string, audioName: string): Promise<any> {
     const querySpec = {
-      query: 'SELECT c.TGId, c.summary FROM c WHERE c.TGId = @tgid',
+      query: 'SELECT c.TGId, c.summary FROM c WHERE c.TGId = @tgid AND c.audioName= @audioName',
       parameters: [
         {
           name: '@tgid',
           value: tgid,
+        },
+        {
+          name: '@audioName',
+          value: audioName,
         },
       ],
     };
@@ -95,8 +99,8 @@ export class TranscriptionService {
     return items.length > 0 ? items[0] : null;
   }
 
-  async getSentimentalAnalysisByTGID(tgid: string): Promise<any> {
-    const transcription = await this.fetchSentimental(tgid);
+  async getSentimentalAnalysisByTGID(tgid: string, audioName: string): Promise<any> {
+    const transcription = await this.fetchSentimental(tgid,audioName);
     const projectInfo = await this.fetchProjectInfo(tgid);
     const targetGroupInfo = await this.fetchTargetGroupInfo(tgid);
 
@@ -109,13 +113,17 @@ export class TranscriptionService {
   
 }
 
-private async fetchSentimental(tgid: string): Promise<any> {
+private async fetchSentimental(tgid: string, audioName: string): Promise<any> {
   const querySpec = {
-    query: 'SELECT c.TGId, c.sentiment_analysis FROM c WHERE c.TGId = @tgid',
+    query: 'SELECT c.TGId, c.sentiment_analysis FROM c WHERE c.TGId = @tgid AND c.audioName= @audioName',
     parameters: [
       {
         name: '@tgid',
         value: tgid,
+      },
+      {
+        name: '@audioName',
+        value: audioName,
       },
     ],
   };

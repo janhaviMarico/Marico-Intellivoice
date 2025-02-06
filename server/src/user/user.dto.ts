@@ -34,7 +34,7 @@ export interface IUserDto {
     @ApiProperty({ example: 'Janhavi Parte', description: 'Full name of the user' })
     name: string;
   
-    @ApiProperty({ example: 'janhavi.parte@atriina.com', description: 'Email address of the user' })
+    @ApiProperty({ example: 'Janhavi.Parte@marico.com', description: 'Email address of the user' })
     email: string;
   
     @ApiProperty({ example: '1', description: 'User role' })

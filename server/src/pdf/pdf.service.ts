@@ -13,94 +13,112 @@ export class PdfService {
   }
 
   generatePDF(res: Response, data: any) {
-    const { TGId, summary, projectInfo, targetGroupInfo, chat,sentiment_analysis } = data;
-
-    const doc = new PDFDocument();
-
+    const { TGId, summary, projectInfo, targetGroupInfo, chat, sentiment_analysis } = data;
+  
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+  
     // Set PDF Headers
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=transcription_${TGId}.pdf`);
-
-    // Pipe the document to the response
+  
     doc.pipe(res);
-
+  
+    // Title Section with Clean Layout
     if (targetGroupInfo) {
+      // Add a blue rectangle for the title background
+      doc.fillColor('black')  // Set text color to black
+      .fontSize(22)
+      .font('Helvetica-Bold')
+      .text(`Transcription Report for: ${targetGroupInfo.MaricoProduct}`, { align: 'center' });
+      doc.moveDown(2);
 
-        const bullet = '• ';
-
-        // Title Section
-        doc.fontSize(28).font('Helvetica-Bold').text(`Transcription Report for: ${targetGroupInfo.MaricoProduct}`, { align: 'center' });
-        doc.moveDown(2);
-        
-        doc.fontSize(18).font('Helvetica-Bold').text('Target Group Information:', { underline: true });
-        doc.moveDown(0.5);
-    
-        const rows = [
-            [`Project:`, `${projectInfo.ProjName}`],
-            [`Country:`, `${targetGroupInfo.Country}`],
-            [`State:`, `${targetGroupInfo.State}`],
-            [`Competition Products:`, `${targetGroupInfo.CompetetionProduct.join(', ')}`],
-            [`Age Group:`, `${targetGroupInfo.AgeGrp}`],
-            [`Marico Product:`, `${targetGroupInfo.MaricoProduct}`],
-            [`Main Language:`, `${targetGroupInfo.MainLang}`],
-        ];
-    
-        rows.forEach(([title, content]) => {
-            doc.fontSize(14).font('Helvetica-Bold').text(`${bullet}${title}`, { continued: true });
-            doc.font('Helvetica').text(` ${content}`); // Add space before content
-            doc.moveDown(0.5); // Space between lines
-        });
+  
+      // Target Group Information Section
+      doc.fillColor('#333333').fontSize(16).font('Helvetica-Bold').text('Target Group Information : ', { underline: true });
+      doc.moveDown(0.5);
+  
+      const rows = [
+        [`Project: `, `${projectInfo.ProjName}`],
+        [`Country: `, `${targetGroupInfo.Country}`],
+        [`State: `, `${targetGroupInfo.State}`],
+        [`Competition Products: `, `${targetGroupInfo.CompetetionProduct.join(', ')}`],
+        [`Age Group: `, `${targetGroupInfo.AgeGrp}`],
+        [`Marico Product: `, `${targetGroupInfo.MaricoProduct}`],
+        [`Main Language: `, `${targetGroupInfo.MainLang}`],
+      ];
+  
+      rows.forEach(([title, content]) => {
+        doc.fontSize(12).font('Helvetica-Bold').fillColor('#4B9CD3').text(title, { continued: true });
+        doc.font('Helvetica').fillColor('black').text(` ${content}`);
+        doc.moveDown(0.3);
+      });
+  
+      doc.moveDown(1);
     }
-    
-    
-
+  
     // Summary Section
     if (summary) {
-      doc.moveDown(1); // Add space before summary
-      doc.fontSize(18).font('Helvetica-Bold').text('Summary:', { underline: true });
+      doc.fillColor('#4B9CD3').fontSize(16).font('Helvetica-Bold').text('Summary :', { underline: true });
       doc.moveDown(0.5);
-
-
-      doc.fontSize(14).font('Helvetica').text(summary, {
-        //width: availableWidth,
-        align: 'left',
+  
+      doc.fillColor('black').fontSize(12).font('Helvetica').text(summary, {
+        align: 'justify',
+        lineGap: 4
       });
-      doc.moveDown(1); // Add extra space after the summary
+      doc.moveDown(1);
     }
-
-    // Chat Section
+  
+    // Chat Section with Subtle Boxed Style
     if (chat && chat.length > 0) {
-
-        // Title Section
-        doc.fontSize(20).font('Helvetica-Bold').text(`Transcription Report for: Chat`, { align: 'center' });
-        doc.moveDown(2);
-        
-        doc.moveDown(1); // Add space before chat section
-        doc.fontSize(16).font('Helvetica-Bold').text('Chat:', { underline: true });
-        doc.moveDown(0.5);
-        
-        chat.forEach((message) => {
-            doc.fontSize(14).font('Helvetica-Bold').text(`${message.from}:`, { continued: true });
-            doc.font('Helvetica').text(` ${message.message}`); // Normal font for the message
-            doc.moveDown(0.5);
-        });
+      doc.rect(50, doc.y, doc.page.width - 100, 25).fill('#F1C40F');
+      doc.fillColor('black').fontSize(16).font('Helvetica-Bold')
+         .text('Chat Transcript', { align: 'center' });
+      doc.moveDown(2);
+  
+      chat.forEach((message) => {
+        doc.fontSize(12).font('Helvetica-Bold').fillColor('#4B9CD3').text(`${message.from}:`, { continued: true });
+        doc.font('Helvetica').fillColor('black').text(` ${message.message}`);
+        doc.moveDown(0.3);
+      });
+  
+      doc.moveDown(1);
+    }
+  
+    // Sentiment Analysis Section
+    if (sentiment_analysis) {
+      doc.fillColor('#4B9CD3')
+         .fontSize(16)
+         .font('Helvetica-Bold')
+         .text('Sentiment Analysis : ', { underline: true });
+      doc.moveDown(0.5);
+    
+      // Split the sentiment analysis into lines
+      const sentimentLines = sentiment_analysis.split('\n');
+    
+      sentimentLines.forEach(line => {
+        if (line.includes('### Overall Sentiment Analysis:')) {
+          doc.fontSize(14).fillColor('#34495E').font('Helvetica-Bold').text(line);  // Dark Gray
+        } else if (line.includes('### Comprehensive Sentiment Analysis:')) {
+          doc.fontSize(14).fillColor('#1F618D').font('Helvetica-Bold').text(line);  // Navy Blue
+        } else if (line.includes('#### Positive Sentiments')) {
+          doc.fontSize(12).fillColor('#27AE60').font('Helvetica-Bold').text(line);  // Green
+        } else if (line.includes('#### Neutral Sentiments')) {
+          doc.fontSize(12).fillColor('#F39C12').font('Helvetica-Bold').text(line);  // Orange
+        } else if (line.includes('#### Negative Sentiments')) {
+          doc.fontSize(12).fillColor('#E74C3C').font('Helvetica-Bold').text(line);  // Red
+        } else {
+          doc.fontSize(11).fillColor('black').font('Helvetica').text(line);  // Default text
+        }
+        doc.moveDown(0.3);  // Add spacing between lines
+      });
+    
+      doc.moveDown(1);
     }
     
-
-    if (sentiment_analysis) {
-      doc.moveDown(1); // Add space before summary
-      doc.fontSize(18).font('Helvetica-Bold').text('sentiment_analysis:', { underline: true });
-      doc.moveDown(0.5);
-
-
-      doc.fontSize(14).font('Helvetica').text(sentiment_analysis, {
-        //width: availableWidth,
-        align: 'left',
-      });
-      doc.moveDown(1); // Add extra space after the summary
-    }
-
+  
     // Finalize the PDF
     doc.end();
   }
+  
+  
 }

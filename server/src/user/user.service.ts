@@ -93,11 +93,11 @@ export class UserService {
       }
   
       let existingUser = existingUsers[0]; // Assuming email is unique
-  
       // Step 4: Update only provided fields (Preserve existing values)
       existingUser.userName = payload.name || existingUser.userName;
+      existingUser.email=payload.email || existingUser.email;
       existingUser.rolecode = payload.role || existingUser.rolecode;
-      existingUser.mapUser = payload.mapUser && payload.mapUser.length > 0 ? payload.mapUser : existingUser.mapUser;
+      existingUser.mapUser = payload.mapUser;
   
       // Step 5: Upsert the updated user back into CosmosDB
       const { resource: updatedUser } = await this.userContainer.items.upsert(existingUser);
