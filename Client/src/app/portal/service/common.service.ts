@@ -16,8 +16,15 @@ export class CommonService {
     return this.http.post(this.baseUrl + url, payload);
   }
 
-  getAPI(url: string): Observable<any> {
-    return this.http.get(this.baseUrl + url);
+  getAPI(url: string, userCode?:string): Observable<any> {
+    if(userCode) {
+      let params = new HttpParams().set('userId', userCode)
+      return this.http.get(this.baseUrl + url,{
+        params: params
+      });
+    } else {
+      return this.http.get(this.baseUrl + url);
+    }
   }
 
   getParamAPI(url: string, isProject: boolean, projTgArr: any[]) {

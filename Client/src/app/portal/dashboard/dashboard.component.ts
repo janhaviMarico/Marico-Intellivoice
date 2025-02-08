@@ -120,9 +120,4 @@ export class DashboardComponent {
     this.loading = false;
   }
 
-
-  hostfunction(){
-    const  url = `${window.location.protocol}//${window.location.host}`
-    console.log(url,"vikas")
-  }
 }
