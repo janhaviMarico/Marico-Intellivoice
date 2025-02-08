@@ -6,7 +6,6 @@ export interface IUserDto {
     userid: string;
     userName: string;
     email: string;
-    access?: string;  // Optional with default value 'read'
     rolecode:string;
   }
   
@@ -22,9 +21,6 @@ export interface IUserDto {
   
     @ApiProperty({ example: 'janhavi.parte@atriina.com', description: 'Email address of the user' })
     email: string;
-  
-    @ApiProperty({ example: 'upload', description: 'Access level', required: false, default: 'upload' })
-    access?: string;
   
     @ApiProperty({ example: '1', description: 'User role code' })
     rolecode: string;

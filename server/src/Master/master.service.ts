@@ -5,6 +5,7 @@ import { Container } from '@azure/cosmos';
 import { MasterEntity } from './master.entity';
 import { ProjectEntity } from 'src/audio/entity/project.entity';
 import { TargetGroupEntity } from 'src/audio/entity/target.entity';
+import { User } from 'src/user/user.entity';
 
 
 // Define a response interface
@@ -21,7 +22,9 @@ export interface GetAllProjectsResponse {
 @Injectable()
 export class MasterService {
  
-  constructor(@InjectModel(MasterEntity) private readonly masterContainer: Container,
+  constructor(
+  @InjectModel(User) private readonly userContainer: Container,
+  @InjectModel(MasterEntity) private readonly masterContainer: Container,
   @InjectModel(ProjectEntity) private readonly ProjectContainer: Container,
   @InjectModel(TargetGroupEntity) private readonly TargetContainer: Container,
 ) {}
@@ -60,34 +63,63 @@ export class MasterService {
   //   };
   // }
 
- async getAllProjects(): Promise<GetAllProjectsResponse> {
-  const querySpec = {
-    query: `SELECT * FROM c`,
-  };
-
-  // Fetch all projects
-  const { resources: projects } = await this.ProjectContainer.items.query(querySpec).fetchAll();
-
-  // For each project, fetch the associated target details
-  for (const project of projects) {
-    const targetQuerySpec = {
-      query: `SELECT * FROM c WHERE c.ProjId = @ProjId`,
-      parameters: [{ name: '@ProjId', value: project.ProjId }]
-    }; 
-
-    // Execute the target details query for the current project
-    const { resources: targetDetails } = await this.TargetContainer.items.query(targetQuerySpec).fetchAll();  
-
-    // Attach target details to the current project if data is found
-    project.targetDetails = targetDetails.length ? targetDetails : [];
+  async getAllProjects(userId?: string): Promise<GetAllProjectsResponse> {
+    try {
+      let projectQuerySpec;
+  
+      // Case 1: If no userId is provided, fetch all projects
+      if (!userId) {
+        projectQuerySpec = { query: `SELECT * FROM c` };
+      } else {
+        // Case 2: If userId is provided, fetch mapped users from userContainer
+        const userQuerySpec = {
+          query: `SELECT * FROM c WHERE c.userid = @userId`,
+          parameters: [{ name: '@userId', value: userId }],
+        };
+  
+        const { resources: userResults } = await this.userContainer.items.query(userQuerySpec).fetchAll();
+  
+        if (!userResults || userResults.length === 0) {
+          throw new Error(`User with userId ${userId} not found.`);
+        }
+  
+        const currentUser = userResults[0];
+  
+        // Prepare a list of userIds to fetch projects for (current user + mapped users)
+        const userIdsToFetch = [currentUser.userid, ...(currentUser.mapUser || [])];
+  
+        // Fetch projects where UserId matches userId or mapped users
+        projectQuerySpec = {
+          query: `SELECT * FROM c WHERE ARRAY_CONTAINS(@userIds, c.UserId)`,
+          parameters: [{ name: '@userIds', value: userIdsToFetch }],
+        };
+      }
+  
+      // Fetch projects based on the query
+      const { resources: projects } = await this.ProjectContainer.items.query(projectQuerySpec).fetchAll();
+  
+      // For each project, fetch the associated target details
+      for (const project of projects) {
+        const targetQuerySpec = {
+          query: `SELECT * FROM c WHERE c.ProjId = @ProjId`,
+          parameters: [{ name: '@ProjId', value: project.ProjId }],
+        };
+  
+        const { resources: targetDetails } = await this.TargetContainer.items.query(targetQuerySpec).fetchAll();
+        project.targetDetails = targetDetails.length ? targetDetails : [];
+      }
+  
+      // Return projects with associated target details
+      return {
+        statusCode: 200,
+        data: projects,
+      };
+    } catch (error) {
+      console.error('Error fetching projects:', error.message);
+      throw new Error('Failed to fetch projects');
+    }
   }
-
-  // Return the projects with their associated target details
-  return {
-    statusCode: 200,
-    data: projects,
-  };
-}
+  
 
 //update the master data
 

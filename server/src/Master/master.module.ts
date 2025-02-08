@@ -7,6 +7,7 @@ import { MasterController } from './master.controller';
 import { ProjectEntity } from 'src/audio/entity/project.entity';
 import { TargetGroupEntity } from 'src/audio/entity/target.entity';
 import { UpdateMasterDto } from './update-master.dto';
+import { User } from 'src/user/user.entity';
 
 @Module({
     imports:[AzureCosmosDbModule.forFeature([
@@ -17,9 +18,14 @@ import { UpdateMasterDto } from './update-master.dto';
         {
             collection:'Projects',
             dto: ProjectEntity
-        },{
+        },
+        {
             collection:'TargetGroups',
             dto: TargetGroupEntity
+        },
+        {
+            collection:'User',
+            dto: User
         }
 
 ])],

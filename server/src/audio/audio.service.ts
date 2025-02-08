@@ -339,7 +339,6 @@ export class AudioService {
   async getAudioData(userId?: string, isAllFile?: boolean): Promise<any[]> {
     try {
       let userIdsToFetch: string[] = [];
-  
       // If isAllFile is true, fetch all users and get their mapped users
       if (isAllFile && userId) {
         const querySpecUsers = {
@@ -923,12 +922,15 @@ export class AudioService {
         }
   
         const targetItem = targetItems[0];
-        const blobPath = targetItem.filePath.substring(
-          targetItem.filePath.lastIndexOf('/') + 1,
-        );
-  
-        // Step 2: Delete the blob from Azure Storage
-        await this.deleteBlob(blobPath);
+        if (Array.isArray(targetItem.filePath)) {
+          for (const path of targetItem.filePath) {
+            const blobPath = path.substring(path.lastIndexOf('/') + 1);
+            this.logger.log(`Deleting blob: ${blobPath}`);
+            await this.deleteBlob(blobPath);  // Delete each blob
+          }
+        } else {
+          this.logger.warn('No file paths found to delete.');
+        }
   
         // Step 3: Delete the target from the TargetContainer
         await this.targetContainer.item(targetItem.id, targetItem.TGId).delete();
