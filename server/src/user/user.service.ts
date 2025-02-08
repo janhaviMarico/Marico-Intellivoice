@@ -53,17 +53,49 @@ export class UserService {
       );
     }
   }
-  async getAllUsers(): Promise<User[]> {
-    const querySpec = {
-      query: `SELECT * FROM c`,
+
+
+  async getAllUsers(userId?: string): Promise<User[]> {
+  try {
+    // Case 1: If no userId is provided, return all users
+    if (!userId) {
+      const querySpec = { query: `SELECT * FROM c` };
+      const { resources: allUsers } = await this.userContainer.items.query(querySpec).fetchAll();
+      return allUsers;
+    }
+
+    // Case 2: If userId is provided, fetch the user and their mapped users
+    const userQuerySpec = {
+      query: `SELECT * FROM c WHERE c.userid = @userId`,
+      parameters: [{ name: '@userId', value: userId }],
     };
 
-    const { resources: users } = await this.userContainer.items
-      .query(querySpec)
-      .fetchAll();
+    const { resources: userResults } = await this.userContainer.items.query(userQuerySpec).fetchAll();
+    
+    if (!userResults || userResults.length === 0) {
+      throw new Error(`User with userId ${userId} not found.`);
+    }
 
-    return users;
+    const currentUser = userResults[0];
+
+    if (!currentUser.mapUser || currentUser.mapUser.length === 0) {
+      return [];  // Return empty array if no mapped users are found
+    }
+
+    // Fetch users from mapUser array
+    const mappedUserQuerySpec = {
+      query: `SELECT * FROM c WHERE ARRAY_CONTAINS(@mappedUserIds, c.userid)`,
+      parameters: [{ name: '@mappedUserIds', value: currentUser.mapUser }],
+    };
+
+    const { resources: mappedUsers } = await this.userContainer.items.query(mappedUserQuerySpec).fetchAll();
+    return mappedUsers;
+    
+  } catch (error) {
+    console.error('Error fetching users:', error.message);
+    throw new Error('Failed to fetch users');
   }
+}
 
 
   async editUser(payload: IUserEditDto): Promise<{ response: number; message: string; updatedUser?: User }> {

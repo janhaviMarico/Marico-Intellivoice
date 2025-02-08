@@ -28,6 +28,14 @@ export const authGuard: CanActivateFn = (route, state) => {
     router.navigate(["/login"]);
     return false;
   }
+
+  const userRole = Number(localStorage.getItem('role'));
+
+  // Role-based redirection: If userRole is 3 and trying to access /portal/dashboard, redirect
+  if (userRole === 3 && (state.url === '/portal/dashboard' || state.url === '/portal/userList')) {
+    router.navigate(['/portal/allFiles']);
+    return false;
+  }
   
   return true;
 };
