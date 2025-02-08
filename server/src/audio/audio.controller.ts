@@ -277,7 +277,5 @@ async editTranscription(
       throw new InternalServerErrorException('Failed to delete audio files');
     }
   }
-  
-
 }
 

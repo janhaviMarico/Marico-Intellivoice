@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { IUserDto, IUserEditDto } from './user.dto';
 import { get } from 'http';
@@ -18,8 +18,8 @@ export class UserController {
     }
     @Get('all') // GET /users/all
     @ApiOperation({ summary: 'Get all users' })
-    async getAllUsers() {
-        return await this.userService.getAllUsers();
+    async getAllUsers(@Query('userId') userId?:string) {
+        return await this.userService.getAllUsers(userId);
     }
 
     @Post('edit')
@@ -28,5 +28,3 @@ export class UserController {
     }
  
 }
-
-
