@@ -5,7 +5,7 @@ import { map, Observable, of, startWith } from 'rxjs';
 import { AudioService } from '../service/audio.service';
 import { CommonService } from '../service/common.service';
 import { InfoComponent } from '../Dialog/info/info.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { Router } from '@angular/router';
@@ -113,7 +113,8 @@ export class AudioProcessComponent {
   durationTimeFinal: string = '0:00';
   seekValueFinal: number = 0;
   isPlayingFinal: boolean = false;
-
+  dialogRef!: MatDialogRef<any>;
+  isEditPlayerLoad:boolean = false;
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
     private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog, private renderer: Renderer2) {
     if (window.location.origin.includes('ai.maricoapps.biz')) {
@@ -734,18 +735,20 @@ export class AudioProcessComponent {
     this.editFileName = file.name;
     const formData = new FormData();
     formData.append('files', file.data, file.data.name);
-
-    this.dialog.open(template, {
+    this.isEditPlayerLoad = true;
+    this.dialogRef = this.dialog.open(template, {
       width: '70%',
       disableClose: true,
-    }).afterOpened().subscribe(() => {
+    });
+    
+    this.dialogRef.afterOpened().subscribe(() => {
       this.audioServ.postAPI('audio/upload-and-peaks', formData).subscribe((res: any) => {
-        this.isLoading = false;
+        this.isEditPlayerLoad = false;
         this.url = res.files;
-
-        setTimeout(() => this.createWave(), 100); // Ensure DOM is rendered
+    
+        setTimeout(() => this.createWave(), 50); // Ensure DOM is rendered
       }, (err: any) => {
-        this.isLoading = false;
+        this.isEditPlayerLoad = false;
         this.toastr.error('Something Went Wrong!');
       });
     });
@@ -827,7 +830,7 @@ export class AudioProcessComponent {
       this.toastr.warning('Please select part of the Audio');
       return false;
     }
-    this.isLoading = true;
+    this.isEditPlayerLoad = true;
     const fileRes = await this.urlToFile(this.url[0].fileUrl);
     let filteredRegions = this.regionArr.map(({ start, end }) => ({ start, end }));
 
@@ -836,13 +839,13 @@ export class AudioProcessComponent {
     formData.append('fileTrimPairs', JSON.stringify(filteredRegions));
     this.audioServ.postAPIBinaryData('audio/merge-with-trims', formData).subscribe(
       (res: Blob) => {
-        this.isLoading = false;
+        this.isEditPlayerLoad = false;
         this.createFileFormate(res);
 
         this.audioUrlFinal = URL.createObjectURL(res);
       },
       (err: any) => {
-        this.isLoading = false;
+        this.isEditPlayerLoad = false;
         this.toastr.error('Something went wrong while processing the file.');
         console.error(err);
       }
@@ -924,6 +927,14 @@ export class AudioProcessComponent {
   seekBackward(): void {
     const audio = this.audioPlayerFinal.nativeElement;
     audio.currentTime = Math.max(audio.currentTime - 10, 0); // Ensure it doesn't go below 0
+  }
+
+  closeEditPlayer() {
+    if(!this.isEditPlayerLoad){
+      this.dialogRef.close();
+      this.audioUrlFinal = '';
+    }
+   
   }
 
 }

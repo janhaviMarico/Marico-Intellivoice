@@ -441,7 +441,13 @@
 
 <ng-template #editDialog>
     <div class="dialog-container">
-        <h1 mat-dialog-title class="dialog-title">Edit Audio</h1>
+        <div *ngIf="isEditPlayerLoad" class="spinner">
+            <mat-spinner></mat-spinner>
+        </div>
+        <div class="main-title">
+            <span class="dialog-title">Edit Audio</span>
+            <button matTooltip="Close" (click)="closeEditPlayer()"><mat-icon>clear</mat-icon></button>
+        </div>
         <div mat-dialog-content>
             <div class="title-head">
                 <h3>{{editFileName}}</h3>
@@ -456,9 +462,9 @@
         <div mat-dialog-actions class="dialog-footer">
             <div class="final-audio">
                 <div class="audio-label">
-                    <h3>Final Result</h3>
+                    <h3>Final Result : </h3>
                 </div>
-                <div class="audio-sample">
+                <div class="audio-sample" *ngIf="audioUrlFinal">
                     <div class="model-audio">
                         <div class="controls">
                           <button (click)="seekBackward()" matTooltip="Rewind to 10 sec"><mat-icon>fast_rewind</mat-icon></button>
@@ -479,7 +485,7 @@
                         </div>
                       </div>
                 </div>
-                <div class="submit-btn">
+                <div class="submit-btn" *ngIf="audioUrlFinal">
                     <button [disabled]="!audioUrlFinal || audioUrlFinal.trim() === ''" matTooltip="Replace with original audio">Replace</button>
                 </div>
             </div>
