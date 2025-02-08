@@ -393,7 +393,12 @@
                                             <div class="data-group">
                                                 <div class="target">
                                                     <span class="label">Competitor Products</span>
-                                                    <span class="value">{{target?.competitors}}</span>
+                                                    <!-- <span class="value">{{target?.competitors}}</span> -->
+                                                    <span class="value"><ng-container
+                                                        *ngFor="let competitor of target?.competitors; let i = index">
+                                                        {{ competitor.name }}<span
+                                                            *ngIf="i < target.competitors.length - 1">, </span>
+                                                    </ng-container></span>
                                                 </div>
                                                 <div class="target">
                                                     <span class="label">Marico Product</span>
