@@ -12,7 +12,6 @@ import { CommonService } from 'src/app/portal/service/common.service';
 })
 export class LoginPageComponent {
   userDetails:any;
-  user:any;
   constructor(readonly msalService: MsalService,readonly router:Router,readonly toastr: ToastrService,
     readonly commonServ:CommonService
   ) { }
@@ -39,7 +38,7 @@ export class LoginPageComponent {
       this.userDetails = res;
       this.addUserDetails()
       localStorage.setItem('LoginTime',new Date().getTime().toString())
-      this.router.navigate(['/portal/dashboard'])
+      //this.router.navigate(['/portal/dashboard'])
     }, (err) => {
       this.toastr.error('Something Went Wrong!')
     });
@@ -54,9 +53,13 @@ export class LoginPageComponent {
       "rolecode": 3
     }
     this.commonServ.postAPI('users/create',payload).subscribe((res:any)=> {
-      if(res.response === 200) {
-        this.user = res.user;
-      }
+        localStorage.setItem('userName',res.existingUser.userName);
+        localStorage.setItem('role',res.existingUser.rolecode)
+        if(res.existingUser.rolecode === "3") {
+          this.router.navigate(['/portal/allFiles'])
+        } else {
+          this.router.navigate(['/portal/dashboard'])
+        }
     },(err)=> {
       this.toastr.error('Something Went Wrong!');
     })

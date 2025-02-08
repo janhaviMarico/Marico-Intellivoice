@@ -10,22 +10,26 @@
                 placeholder="Search Files, Projects, Target Groups, Competitors, Products">
         </div> -->
         <div class="profile">
-            <button matTooltip="Help"><mat-icon>help_outline</mat-icon></button>
-            <button matTooltip="Settings"><mat-icon>settings</mat-icon></button>
-            <button matTooltip="Profile"><img [src]="baseHref + 'assets/Img/header/profile.png'" (click)="logoutModel($event)" alt="Profile"></button>
+            <!-- <button matTooltip="Help"><mat-icon>help_outline</mat-icon></button>
+            <button matTooltip="Settings"><mat-icon>settings</mat-icon></button> -->
+            <div class="welcomeCont">
+                <span>Welcome</span>
+                <span>{{userName}}</span>
+            </div>
+            <button matTooltip="Profile" (click)="logoutModel($event)"><mat-icon>account_circle</mat-icon></button>
         </div>
     </div>
 </header>
 <div class="main-body">
     <div class="sidebar">
         <ul>
-            <li routerLink="dashboard" [routerLinkActive]="['active']" #dashboardActive="routerLinkActive">
+            <li routerLink="dashboard" [routerLinkActive]="['active']" #dashboardActive="routerLinkActive" *ngIf="roleCode !== '3'">
                 <mat-icon>home</mat-icon> Dashboard
             </li>
             <li routerLink="allFiles" [routerLinkActive]="['active']" #allFilesActive="routerLinkActive">
                 <mat-icon>file_copy</mat-icon> All Files
             </li>
-            <li routerLink="userList" [routerLinkActive]="['active']" #usersActive="routerLinkActive">
+            <li routerLink="userList" [routerLinkActive]="['active']" #usersActive="routerLinkActive" *ngIf="roleCode === '1'">
                 <mat-icon>list</mat-icon> User List
             </li>
             <li routerLink="comparison" [routerLinkActive]="['active']" #compareActive="routerLinkActive">

@@ -9,10 +9,14 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class LayoutComponent {
   baseHref: string = '../../../';
+  roleCode: string = '';
+  userName: string = '';
   constructor(private dialog: MatDialog) {
     if (window.location.origin.includes('ai.maricoapps.biz')) {
       this.baseHref = 'Insightopedia/'
     }
+    this.roleCode = localStorage.getItem('role') || '';
+    this.userName = localStorage.getItem('userName') || '';
   }
 
   logoutModel(event: MouseEvent) {

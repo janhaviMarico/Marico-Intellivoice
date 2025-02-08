@@ -30,13 +30,31 @@ header {
         .profile {
             display: flex;
             align-items: center;
+            .welcomeCont {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                span:first-child {
+                    font-weight: bold;
+                    font-size: 18px;
+                }
+                span:nth-child(2) {
+                    color: #014FA1;
+                    font-size: 15px;
+                }
+            }
             button {
                 border: none;
                 outline: none;
                 background: transparent;
-                margin: 0 5px;
+                width: 40px;
+                height: 40px;
+                margin-left: 15px;
                 mat-icon {
                     color: #014FA1;
+                    font-size: 35px;
+                    width: 40px;
+                    height: 40px;
                 }
             }
         }
