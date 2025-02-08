@@ -486,7 +486,8 @@
                       </div>
                 </div>
                 <div class="submit-btn" *ngIf="audioUrlFinal">
-                    <button [disabled]="!audioUrlFinal || audioUrlFinal.trim() === ''" matTooltip="Replace with original audio">Replace</button>
+                    <button [disabled]="!audioUrlFinal || audioUrlFinal.trim() === ''" matTooltip="Replace with original audio"
+                    (click)="replaceAudio()">Done</button>
                 </div>
             </div>
         </div>

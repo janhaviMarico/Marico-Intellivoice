@@ -115,6 +115,9 @@ export class AudioProcessComponent {
   isPlayingFinal: boolean = false;
   dialogRef!: MatDialogRef<any>;
   isEditPlayerLoad:boolean = false;
+  transIndex:number = 0;
+  audioIndex:number = 0;
+  mergedFile:any;
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
     private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog, private renderer: Renderer2) {
     if (window.location.origin.includes('ai.maricoapps.biz')) {
@@ -733,6 +736,8 @@ export class AudioProcessComponent {
 
   editAudio(template: TemplateRef<any>, file: any, i: number, j: number) {
     this.editFileName = file.name;
+    this.transIndex = i;
+    this.audioIndex = j;
     const formData = new FormData();
     formData.append('files', file.data, file.data.name);
     this.isEditPlayerLoad = true;
@@ -847,7 +852,6 @@ export class AudioProcessComponent {
       (err: any) => {
         this.isEditPlayerLoad = false;
         this.toastr.error('Something went wrong while processing the file.');
-        console.error(err);
       }
     );
     return true;
@@ -863,9 +867,7 @@ export class AudioProcessComponent {
   }
 
   createFileFormate(mergedBlob: Blob) {
-    const mergedFile = new File([mergedBlob], 'merged-audio.mp3', { type: 'audio/mpeg' });
-    console.log(mergedFile)
-    console.log(this.targetGrps.targetGrpArr[0].audioList[0].data)
+    this.mergedFile = new File([mergedBlob], 'merged-audio.mp3', { type: 'audio/mpeg' });
   }
 
   togglePlayPauseFinal(): void {
@@ -934,7 +936,11 @@ export class AudioProcessComponent {
       this.dialogRef.close();
       this.audioUrlFinal = '';
     }
-   
+  }
+
+  replaceAudio() {
+    this.targetGrps.targetGrpArr[this.transIndex].audioList[this.audioIndex].data = this.mergedFile;
+    this.closeEditPlayer()
   }
 
 }
