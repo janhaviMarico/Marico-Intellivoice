@@ -8,6 +8,13 @@
           files</span></button>
     </div>
     <div class="allfiles-container-header-search">
+      <button
+      class="delete-selected-btn"
+      [disabled]="selectedProjects.size === 0"
+      (click)="deleteConfirm(deleteTemplate)"
+    >
+      Delete Selected
+    </button>
       <form class="example-form">
         <mat-form-field class="example-full-width">
           <mat-label>Search by User Name</mat-label>
@@ -37,6 +44,9 @@
       <p-table #dt2 [value]="project" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true">
         <ng-template pTemplate="header">
           <tr>
+            <th>
+              <input type="checkbox" (change)="toggleSelectAll($event)" />
+            </th>
             <th headers="user-name">User Name</th>
             <th headers="project-name">Project Name</th>
             <th headers="country">Country</th>
@@ -51,6 +61,13 @@
         </ng-template>
         <ng-template pTemplate="body" let-project>
           <tr>
+            <td>
+              <input
+                type="checkbox"
+                [checked]="selectedProjects.has(project.TargetId)"
+                (change)="toggleSelection(project.TargetId, project.TargetGroup, $event)"
+              />
+            </td>
             <td>{{ project.UserName }}</td>
             <td>{{ project.ProjectName }}</td>
             <td>{{ project.Country }}</td>
@@ -77,3 +94,16 @@
 <div *ngIf="isLoading" class="spinner">
   <mat-spinner></mat-spinner>
 </div>
+
+<ng-template #deleteTemplate>
+  <div class="dialog-container">
+    <h1 mat-dialog-title class="dialog-title">Delete Confirmation</h1>
+    <div mat-dialog-content>
+     <p  class="dialog-subtitle">Are you sure you want to delete this audio?</p>
+    </div>
+    <div mat-dialog-actions class="btns">
+      <button mat-button mat-dialog-close>No</button>
+      <button mat-button mat-dialog-close (click)="deleteSelectedProjects()">Yes</button>
+    </div>
+  </div>
+</ng-template>
