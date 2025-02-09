@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CommonService } from '../../service/common.service';
 import { MsalService } from '@azure/msal-angular';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-info',
@@ -10,16 +11,13 @@ import { MsalService } from '@azure/msal-angular';
 })
 export class InfoComponent {
   infoObj:any;
-  baseHref:string = '../../../../';
+  imageBasePath: string = environment.imageBasePath;
   constructor(private dialog: MatDialog, 
     public infoDialogRef: MatDialogRef<InfoComponent>,
     @Inject(MAT_DIALOG_DATA) public info: {name?:string,title?:string},
     private commonServ:CommonService, private msalService:MsalService
   ) {
     this.infoObj = info;
-    if(window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'Insightopedia/'
-    }
   }
 
   closeInfo() {

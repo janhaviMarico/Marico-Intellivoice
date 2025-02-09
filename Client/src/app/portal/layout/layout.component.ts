@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { InfoComponent } from '../Dialog/info/info.component';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-layout',
@@ -8,13 +9,10 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./layout.component.scss']
 })
 export class LayoutComponent {
-  baseHref: string = '../../../';
+  imageBasePath: string = environment.imageBasePath;
   roleCode: string = '';
   userName: string = '';
   constructor(private dialog: MatDialog) {
-    if (window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'Insightopedia/'
-    }
     this.roleCode = localStorage.getItem('role') || '';
     this.userName = localStorage.getItem('userName') || '';
   }

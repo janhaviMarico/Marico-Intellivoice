@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions';
 import Hover from 'wavesurfer.js/dist/plugins/hover';
+import { environment } from 'src/environments/environment';
 
 interface AudioFile {
   name: string;
@@ -82,7 +83,7 @@ export class AudioProcessComponent {
   isLoading: boolean = false;
   //targetGrps!: { targetGrpArr: any[] };
   targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
-  baseHref: string = '../../../../';
+  imageBasePath: string = environment.imageBasePath;
   readonly panelOpenState = signal(false);
 
   wavesurfer!: WaveSurfer;
@@ -121,9 +122,7 @@ export class AudioProcessComponent {
   mergedFile:any;
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
     private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog, private renderer: Renderer2) {
-    if (window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'Insightopedia/'
-    }
+
   }
 
   ngOnInit() {

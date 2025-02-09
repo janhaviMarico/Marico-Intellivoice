@@ -264,7 +264,7 @@
                     (dragleave)="onDragLeave($event)">
                     <input type="file" #fileDropRef id="fileDropRef" (change)="onFileSelected($event)" multiple
                         accept="audio/*">
-                    <img [src]="baseHref + 'assets/Img/dashboard/upload-file.png'" alt="upload-file">
+                    <img [src]="imageBasePath + 'assets/Img/dashboard/upload-file.png'" alt="upload-file">
                     <div class="upload-label">
                         <label for="fileDropRef">Drag your file(s) or <span>browser</span></label>
                         <label class="validation-msg" for="">Maximum Upload File Size is 4GB</label>
@@ -284,13 +284,13 @@
 
                             <ul>
                                 <li class="expanse-li" *ngFor="let file of exp.audioList; let i = index">
-                                    <button *ngIf="!file.isEdit"><img [src]="baseHref + 'assets/Img/dashboard/drag.png'" alt=""
+                                    <button *ngIf="!file.isEdit"><img [src]="imageBasePath + 'assets/Img/dashboard/drag.png'" alt=""
                                             (click)="removeFileFromExpansionList(expIndex, i)"></button>
                                             <button class="edited-audio" matTooltip="Edited Audio" *ngIf="file.isEdit"><mat-icon> edit_attributes</mat-icon></button>
                                     <div class="upload-player">
                                         <div class="controls">
                                             <div class="file-name">
-                                                <img [src]="baseHref + 'assets/Img/dashboard/file.png'" alt="">
+                                                <img [src]="imageBasePath + 'assets/Img/dashboard/file.png'" alt="">
                                                 <span>{{ file.name | truncate:25 }}</span>
                                             </div>
                                             <div class="control">
@@ -315,7 +315,7 @@
                             <div class="upload-player">
                                 <div class="controls">
                                     <div class="file-name">
-                                        <img [src]="baseHref + 'assets/Img/dashboard/file.png'" alt="">
+                                        <img [src]="imageBasePath + 'assets/Img/dashboard/file.png'" alt="">
                                         <span>{{ file.name | truncate:25}}</span>
                                     </div>
                                     <div class="control">
@@ -347,7 +347,7 @@
     <!-- Upload Success -->
     <div class="upload-success-cont" *ngIf="currentStep === 4">
         <div class="info-container">
-            <img [src]="baseHref + 'assets/Img/dashboard/file-process.png'" alt="">
+            <img [src]="imageBasePath + 'assets/Img/dashboard/file-process.png'" alt="">
             <h5>Files submitted for Intelli-Voice processing!</h5>
             <p>An email with link will be send to when the processing is complete.</p>
             <div class="info-btn">
