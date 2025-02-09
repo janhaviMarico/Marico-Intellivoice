@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { InfoComponent } from '../Dialog/info/info.component';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-layout',
@@ -8,12 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./layout.component.scss']
 })
 export class LayoutComponent {
-  baseHref: string = '../../../';
-  constructor(private dialog: MatDialog) {
-    if (window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'Insightopedia/'
-    }
-  }
+  imageBasePath: string = environment.imageBasePath;
+  constructor(private dialog: MatDialog) { }
 
   logoutModel(event: MouseEvent) {
     const targetElement = event.target as HTMLElement;

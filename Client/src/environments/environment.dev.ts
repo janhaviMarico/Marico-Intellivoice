@@ -5,5 +5,6 @@
  */
 export const environment = {
   production: false,
-  API_URL: 'https://dev.myhector.com/api_dev'
+  API_URL: 'https://dev.myhector.com/api_dev',
+  imageBasePath: 'https://ai.maricoapps.biz/Insightopedia/'
 };

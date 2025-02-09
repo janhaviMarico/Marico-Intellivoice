@@ -8,10 +8,10 @@
       <ng-template mat-tab-label>
         <label>
           <img *ngIf="selectedTabIndex === 0"
-            [src]="baseHref + 'assets/Img/AudioDetails/trascriptor-a.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/trascriptor-a.png'"
             alt="">
             <img *ngIf="selectedTabIndex !== 0"
-            [src]="baseHref + 'assets/Img/AudioDetails/transcriptor-i.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/transcriptor-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 0}">Transcript</span>
         </label>
@@ -55,10 +55,10 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <label><img *ngIf="selectedTabIndex === 1"
-            [src]="baseHref + '../../../assets/Img/AudioDetails/translation-a.png'"
+            [src]="imageBasePath + '../../../assets/Img/AudioDetails/translation-a.png'"
             alt="">
             <img *ngIf="selectedTabIndex !== 1"
-            [src]="baseHref + '../../../assets/Img/AudioDetails/translation-i.png'"
+            [src]="imageBasePath + '../../../assets/Img/AudioDetails/translation-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 1}">Translation</span></label>
       </ng-template>
@@ -82,10 +82,10 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <label><img *ngIf="selectedTabIndex === 2"
-            [src]="baseHref + 'assets/Img/AudioDetails/summary-a.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/summary-a.png'"
             alt="">
             <img *ngIf="selectedTabIndex === 2"
-            [src]="baseHref + 'assets/Img/AudioDetails/summary-i.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/summary-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 2}">Summary</span></label>
       </ng-template>
@@ -102,10 +102,10 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <label><img *ngIf="selectedTabIndex === 3"
-            [src]="baseHref + 'assets/Img/AudioDetails/senti-a.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/senti-a.png'"
             alt="">
             <img *ngIf="selectedTabIndex === 3"
-            [src]="baseHref + 'assets/Img/AudioDetails/senti-i.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/senti-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 3}">Sentiment analysis</span></label>
       </ng-template>
@@ -124,10 +124,10 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <label><img *ngIf="selectedTabIndex === 4"
-            [src]="baseHref + 'assets/Img/AudioDetails/chat-a.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/chat-a.png'"
             alt="">
             <img *ngIf="selectedTabIndex === 4"
-            [src]="baseHref + 'assets/Img/AudioDetails/chat-i.png'"
+            [src]="imageBasePath + 'assets/Img/AudioDetails/chat-i.png'"
             alt="">
             <span [ngClass]="{'active': selectedTabIndex === 4}">Chat</span></label>
       </ng-template>

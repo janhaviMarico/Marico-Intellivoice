@@ -37,14 +37,10 @@ export class AudioDetailsComponent {
   currentText: string = '';
   replaceText: string = '';
   tempAudioData: any = [];
-  baseHref:string = '../../../';
+  imageBasePath: string = environment.imageBasePath;
   constructor(private audioServ: AudioService, private cdr: ChangeDetectorRef, private activeRoute: ActivatedRoute,
     private router: Router, private toastr: ToastrService, private dialog: MatDialog,
-  ) {
-    if(window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'Insightopedia/'
-    }
-  }
+  ) { }
 
   ngOnInit() {
     this.tgId = this.activeRoute.snapshot.paramMap.get("tgId") ?? "";

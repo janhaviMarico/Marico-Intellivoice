@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -108,13 +109,9 @@ export class DashboardComponent {
       maricoProduct: "Product I",
     }
   ];
-  baseHref:string = '../../../';
+  imageBasePath: string = environment.imageBasePath;
   loading: boolean = true;
-  constructor(private dialog: MatDialog) {
-    if(window.location.origin.includes('ai.maricoapps.biz')) {
-      this.baseHref = 'Insightopedia/'
-    }
-  }
+  constructor(private dialog: MatDialog) { }
 
   ngOnInit() {
     this.loading = false;

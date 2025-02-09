@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { v4 as uuidv4 } from 'uuid';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 interface AudioFile {
   name: string;
@@ -63,15 +64,11 @@ export class AudioProcessComponent {
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
   targetGrps!: { targetGrpArr: any[] };
-  baseHref:string = '../../../../';
+  imageBasePath: string = environment.imageBasePath;
   readonly panelOpenState = signal(false);
 
   constructor(private fb: FormBuilder, private audioServ: AudioService, private router: Router,
-    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) {
-      if(window.location.origin.includes('ai.maricoapps.biz')) {
-        this.baseHref = 'Insightopedia/'
-      }
-     }
+    private toastr: ToastrService, private commonServ: CommonService, private dialog: MatDialog) { }
 
   ngOnInit() {
     //Add Project Code
