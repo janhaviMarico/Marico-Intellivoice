@@ -147,14 +147,14 @@
             <div *ngFor="let message of chatHistory">
               <div *ngIf="message.from === 'user'" class="question-format">
                 <div class="question">
-                  <img src="../../../assets/Img/header/profile.png" alt="profile">
+                  <button><mat-icon>account_circle</mat-icon></button>
                   <p>{{ message.message }}</p>
                 </div>
               </div>
 
               <div *ngIf="message.from === 'AI'" class="answer-format">
                 <div class="answer">
-                  <img src="../../../assets/Img/header/Logo.png" alt="logo">
+                  <img [src]="imageBasePath + 'assets/Img/header/Logo.png'" alt="logo">
                   <pre>{{ message.message }}</pre>
                 </div>
               </div>

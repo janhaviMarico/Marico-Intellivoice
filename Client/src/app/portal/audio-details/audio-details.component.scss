@@ -256,11 +256,26 @@
                         width: 80%;
 
                         img {
-                            margin-right: 15px;
+                            margin: 0 10px;
                         }
 
                         pre {
                             text-wrap: wrap;
+                        }
+                    }
+                    .question {
+                        button {
+                            border: none;
+                            background: none;
+                            width: 40px;
+                            height: 40px;
+                            margin: 0 10px 0 4px;;
+                            mat-icon {
+                                color: #014FA1;
+                                font-size: 35px;
+                                width: 40px;
+                                height: 40px;
+                            }
                         }
                     }
                 }

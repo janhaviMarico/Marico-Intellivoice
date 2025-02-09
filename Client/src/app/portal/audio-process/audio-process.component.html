@@ -284,7 +284,7 @@
 
                             <ul>
                                 <li class="expanse-li" *ngFor="let file of exp.audioList; let i = index">
-                                    <button *ngIf="!file.isEdit"><img [src]="imageBasePath + 'assets/Img/dashboard/drag.png'" alt=""
+                                    <button matTooltip="Move Out From Target" *ngIf="!file.isEdit"><img [src]="imageBasePath + 'assets/Img/dashboard/drag.png'" alt=""
                                             (click)="removeFileFromExpansionList(expIndex, i)"></button>
                                             <button class="edited-audio" matTooltip="Edited Audio" *ngIf="file.isEdit"><mat-icon> edit_attributes</mat-icon></button>
                                     <div class="upload-player">

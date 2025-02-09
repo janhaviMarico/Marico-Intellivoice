@@ -10,9 +10,11 @@
                 placeholder="Search Files, Projects, Target Groups, Competitors, Products">
         </div> -->
         <div class="profile">
-            <button matTooltip="Help"><mat-icon>help_outline</mat-icon></button>
-            <button matTooltip="Settings"><mat-icon>settings</mat-icon></button>
-            <button matTooltip="Profile"><img [src]="imageBasePath + 'assets/Img/header/profile.png'" (click)="logoutModel($event)" alt="Profile"></button>
+            <div class="welcomeCont">
+                <span>Welcome</span>
+                <span>{{userName}}</span>
+            </div>
+            <button matTooltip="Profile" (click)="logoutModel($event)"><mat-icon>account_circle</mat-icon></button>
         </div>
     </div>
 </header>

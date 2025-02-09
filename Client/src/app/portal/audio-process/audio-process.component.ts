@@ -35,19 +35,19 @@ export class AudioProcessComponent {
   @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr: any[] = [
-    {
-      competitors: ["Dabur Gold"],
-      country: "India",
-      maricoProduct: "REVIVE LIQ 400G+95G ROI",
-      maxAge: 9,
-      minAge: 6,
-      name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
-      numSpeakers: 3,
-      otherLangs: ["Marathi"],
-      primaryLang: "English",
-      projectName: "ak_project_1",
-      state: "Andhra Pradesh"
-    }
+    // {
+    //   competitors: ["Dabur Gold"],
+    //   country: "India",
+    //   maricoProduct: "REVIVE LIQ 400G+95G ROI",
+    //   maxAge: 9,
+    //   minAge: 6,
+    //   name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
+    //   numSpeakers: 3,
+    //   otherLangs: ["Marathi"],
+    //   primaryLang: "English",
+    //   projectName: "ak_project_1",
+    //   state: "Andhra Pradesh"
+    // }
   ];
   target: any;
   countries: any[] = [];
@@ -65,7 +65,7 @@ export class AudioProcessComponent {
   filteredMaricoProduct!: Observable<any[]>;
   filteredCompetetiveProduct!: Observable<any[]>;
   steps = ['Project Details', 'Add Media', 'Assign TG', 'Upload Audio'];
-  currentStep = 1;
+  currentStep = 0;
 
   selectedUsers: any[] = new Array<any>();
   lastFilter: string = '';
@@ -81,8 +81,8 @@ export class AudioProcessComponent {
   expansionArr: any[] = [];
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
-  //targetGrps!: { targetGrpArr: any[] };
-  targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
+  targetGrps!: { targetGrpArr: any[] };
+  //targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
   imageBasePath: string = environment.imageBasePath;
   readonly panelOpenState = signal(false);
 
@@ -679,7 +679,6 @@ export class AudioProcessComponent {
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
     this.isLoading = true;
-    return false;
     this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
       this.ClearProject();

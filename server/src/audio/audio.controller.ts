@@ -10,6 +10,7 @@ import { diskStorage } from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 
 @ApiTags('Audio Management')
@@ -17,8 +18,9 @@ import { Response } from 'express';
 export class AudioController {
   private readonly logger = new Logger(AudioController.name);
   fileUploadService: any;
+  configService: any;
 
-  constructor(private readonly audioService: AudioService) {}
+  constructor(private readonly audioService: AudioService, private readonly config: ConfigService) {}
 
   @Post('upload')
   @ApiOperation({ summary: 'Upload audio files and process them' })
@@ -191,7 +193,7 @@ async editTranscription(
     const results = await Promise.all(
       files.map(async (file) => {
         // Generate file URL
-        const fileUrl = `http://localhost:3001/uploads/${file.filename}`;
+        const fileUrl = `${this.config.get<string>('BASE_URL')}uploads/${file.filename}`;
 
         // Generate peaks from file path
         const peaks = await this.audioService.generatePeaksFromFilePath(

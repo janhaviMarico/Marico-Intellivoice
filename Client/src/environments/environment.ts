@@ -14,5 +14,5 @@ export const environment = {
   //BASE_URL: 'https://intellivoice.atriina.com/',
   baseHref: '/',
   redirectUrl: 'http://localhost:4200',
-  imageBasePath: 'https://ai.maricoapps.biz/Insightopedia/'
+  imageBasePath: 'http://localhost:4200/'
 };

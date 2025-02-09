@@ -252,7 +252,7 @@ export class AudioDetailsComponent {
   }
 
   downloadSummaryAndSenti(content:string) {
-    const url = `${environment.BASE_URL}transcription/generate-pdf?tgid=${this.tgId}&type=${content}`;
+    const url = `${environment.BASE_URL}transcription/generate-pdf?tgid=${this.tgId}&type=${content}&audioName=${this.audioName}`;
     this.audioServ.getDownload(url);
   }
 
