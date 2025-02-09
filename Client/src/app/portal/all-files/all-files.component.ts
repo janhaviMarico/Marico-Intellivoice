@@ -37,7 +37,7 @@ export class AllFilesComponent {
 
   ngOnInit() {
     this.userRole = localStorage.getItem('role') || '';
-    this.userCode = localStorage.getItem('tenetId') || '';
+    this.userCode = localStorage.getItem('uId') || '';
     if (this.userRole === "1") {
       this.userCode = '';
     }
@@ -82,7 +82,7 @@ export class AllFilesComponent {
       this.project = res.data;
       this.tempAudioData = res.data.map((x: any) => Object.assign({}, x));
       this.count = res.count;
-      this.userCode = localStorage.getItem('tenetId') || '';
+      this.userCode = localStorage.getItem('uId') || '';
       this.isLoading = false;
     }, (err: any) => {
       this.isLoading = false;
@@ -92,18 +92,18 @@ export class AllFilesComponent {
 
   changeFileOption(val: number) {
     this.isAllFiles = (val === 1);
-    var email = ''
+    var code = ''
     if (this.isAllFiles) {
       if (this.userRole !== "1") {
-        email = localStorage.getItem('tenetId') || '';
+        code = localStorage.getItem('uId') || '';
       } else {
-        email = ''
+        code = ''
       }
     } else {
-      email = localStorage.getItem('tenetId') || '';
+      code = localStorage.getItem('uId') || '';
     }
     const param = {
-      user: email,
+      user: code,
       projectName: this.selectedProject,
       isAllFile: val
     }

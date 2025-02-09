@@ -21,6 +21,7 @@ interface AudioFile {
   currentTime?: string;   // Track time for each audio
   durationTime?: string;  // Duration for each audio
   seekValue?: number;     // Seek value for progress bar
+  isEdit: boolean
 }
 
 @Component({
@@ -33,19 +34,19 @@ export class AudioProcessComponent {
   @ViewChild('formEnd') formEnd!: ElementRef;
   targetForm!: FormGroup;
   targetGrpArr: any[] = [
-    // {
-    //   competitors: ["Dabur Gold"],
-    //   country: "India",
-    //   maricoProduct: "REVIVE LIQ 400G+95G ROI",
-    //   maxAge: 9,
-    //   minAge: 6,
-    //   name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
-    //   numSpeakers: 3,
-    //   otherLangs: ["Marathi"],
-    //   primaryLang: "English",
-    //   projectName: "ak_project_1",
-    //   state: "Andhra Pradesh"
-    // }
+    {
+      competitors: ["Dabur Gold"],
+      country: "India",
+      maricoProduct: "REVIVE LIQ 400G+95G ROI",
+      maxAge: 9,
+      minAge: 6,
+      name: "IN_AP_DG_111_6_9_EN_MR_3_ak_project_1_1733724860098",
+      numSpeakers: 3,
+      otherLangs: ["Marathi"],
+      primaryLang: "English",
+      projectName: "ak_project_1",
+      state: "Andhra Pradesh"
+    }
   ];
   target: any;
   countries: any[] = [];
@@ -63,7 +64,7 @@ export class AudioProcessComponent {
   filteredMaricoProduct!: Observable<any[]>;
   filteredCompetetiveProduct!: Observable<any[]>;
   steps = ['Project Details', 'Add Media', 'Assign TG', 'Upload Audio'];
-  currentStep = 0;
+  currentStep = 1;
 
   selectedUsers: any[] = new Array<any>();
   lastFilter: string = '';
@@ -79,8 +80,8 @@ export class AudioProcessComponent {
   expansionArr: any[] = [];
   isProcessingDisable: boolean = true;
   isLoading: boolean = false;
-  targetGrps!: { targetGrpArr: any[] };
-  //targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
+  //targetGrps!: { targetGrpArr: any[] };
+  targetGrps: { targetGrpArr: any[] } = { targetGrpArr: this.targetGrpArr };
   baseHref: string = '../../../../';
   readonly panelOpenState = signal(false);
 
@@ -437,7 +438,8 @@ export class AudioProcessComponent {
         name: file.name,
         size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
         data: file,
-        url: URL.createObjectURL(file)
+        url: URL.createObjectURL(file),
+        isEdit:false
       });
     }
     event.target.value = null;
@@ -454,7 +456,8 @@ export class AudioProcessComponent {
           name: file.name,
           size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
           data: file,
-          url: URL.createObjectURL(file)
+          url: URL.createObjectURL(file),
+          isEdit: false
         });
       }
     }
@@ -609,6 +612,7 @@ export class AudioProcessComponent {
       this.audioFiles.push(fileToMove);
     }
     this.expansionArr[expIndex].audioList.splice(fileIndex, 1);
+    this.targetGrps.targetGrpArr[expIndex].audioList.splice(fileIndex, 1);
 
     if (this.expansionArr[expIndex].audioList.length === 0) {
       this.expansionArr.splice(expIndex, 1);
@@ -622,12 +626,11 @@ export class AudioProcessComponent {
     let Project: any;
     let TargetGrp: any = [];
     let tgArr: any[] = [];
-    
     for (let i = 0; i < this.targetGrps.targetGrpArr.length; i++) {
       if (i == 0) {
         Project = {
           ProjName: this.targetGrps.targetGrpArr[i].projectName,
-          userid: localStorage.getItem('tenetId'),
+          userid: localStorage.getItem('uId'),
           ProjId: uuidv4(),
           TGIds: []
         }
@@ -677,6 +680,7 @@ export class AudioProcessComponent {
     formData.append('Project', JSON.stringify(Project));
     formData.append('TargetGrp', JSON.stringify(TargetGrp));
     this.isLoading = true;
+    return false;
     this.audioServ.postAPI('audio/upload', formData).subscribe((res: any) => {
       this.isLoading = false;
       this.ClearProject();
@@ -870,7 +874,6 @@ export class AudioProcessComponent {
 
   togglePlayPauseFinal(): void {
     if (!this.audioPlayerFinal) {
-      console.error('Audio player is not initialized.');
       return;
     }
 
@@ -938,6 +941,7 @@ export class AudioProcessComponent {
 
   replaceAudio() {
     this.targetGrps.targetGrpArr[this.transIndex].audioList[this.audioIndex].data = this.mergedFile;
+    this.expansionArr[this.transIndex].audioList[this.audioIndex].isEdit = true;
     this.closeEditPlayer()
   }
 

@@ -8,23 +8,23 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 @ApiTags('User Management')
 @Controller('users')
 export class UserController {
-    constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
-    @Post('create') // This sets the route to /users/create
-    @ApiOperation({ summary: 'Create a new user' }) // Provides a description in Swagger
-    @ApiBody({ type: IUserDto }) // Specifies the input type
-    async createUser(@Body() payload: IUserDto) {
+  @Post('create') // This sets the route to /users/create
+  @ApiOperation({ summary: 'Create a new user' }) // Provides a description in Swagger
+  @ApiBody({ type: IUserDto }) // Specifies the input type
+  async createUser(@Body() payload: IUserDto) {
     return await this.userService.createUserWithSP(payload);
-    }
-    @Get('all') // GET /users/all
-    @ApiOperation({ summary: 'Get all users' })
-    async getAllUsers(@Query('userId') userId?:string) {
-        return await this.userService.getAllUsers(userId);
-    }
+  }
+  @Get('all') // GET /users/all
+  @ApiOperation({ summary: 'Get all users' })
+  async getAllUsers(@Query('userId') userId?: string) {
+    return await this.userService.getAllUsers(userId);
+  }
 
-    @Post('edit')
-    async editUser(@Body() payload: IUserEditDto){
-      return await this.userService.editUser(payload);
-    }
- 
+  @Post('edit')
+  async editUser(@Body() payload: IUserEditDto) {
+    return await this.userService.editUser(payload);
+  }
+
 }

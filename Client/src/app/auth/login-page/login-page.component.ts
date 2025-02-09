@@ -31,9 +31,9 @@ export class LoginPageComponent {
   async login() {
     await this.msalService.instance.initialize();
 
-    this.msalService.loginPopup().subscribe((res: AuthenticationResult) => {
+    this.msalService.loginPopup().subscribe((res: any) => {
       localStorage.setItem('User',res.account.username);
-      localStorage.setItem('tenetId',res.account.tenantId);
+      localStorage.setItem('uId',res.uniqueId);
       this.msalService.instance.setActiveAccount(res.account);
       this.userDetails = res;
       this.addUserDetails()
@@ -46,10 +46,9 @@ export class LoginPageComponent {
 
   addUserDetails() {
     const payload = {
-      "userid": this.userDetails.account.tenantId,
+      "userid": this.userDetails.uniqueId,
       "userName": this.userDetails.account.name,
       "email": this.userDetails.account.username,
-      "access": "read",
       "rolecode": 3
     }
     this.commonServ.postAPI('users/create',payload).subscribe((res:any)=> {

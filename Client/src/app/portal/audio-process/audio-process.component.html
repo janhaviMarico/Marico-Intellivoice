@@ -284,8 +284,9 @@
 
                             <ul>
                                 <li class="expanse-li" *ngFor="let file of exp.audioList; let i = index">
-                                    <button><img [src]="baseHref + 'assets/Img/dashboard/drag.png'" alt=""
+                                    <button *ngIf="!file.isEdit"><img [src]="baseHref + 'assets/Img/dashboard/drag.png'" alt=""
                                             (click)="removeFileFromExpansionList(expIndex, i)"></button>
+                                            <button class="edited-audio" matTooltip="Edited Audio" *ngIf="file.isEdit"><mat-icon> edit_attributes</mat-icon></button>
                                     <div class="upload-player">
                                         <div class="controls">
                                             <div class="file-name">
@@ -297,7 +298,7 @@
                                                     (click)="editAudio(editDialog, file,expIndex,i)">
                                                     <mat-icon>shuffle</mat-icon>
                                                 </button>
-                                                <button (click)="removeFileFromExpansionList(expIndex, i , true)">
+                                                <button matTooltip="Delete-Audio" (click)="removeFileFromExpansionList(expIndex, i , true)">
                                                     <mat-icon>delete</mat-icon>
                                                 </button>
                                             </div>
