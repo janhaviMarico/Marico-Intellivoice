@@ -1,6 +1,6 @@
 <header>
     <div class="logo">
-        <img [src]="baseHref + 'assets/Img/header/Logo.png'" alt="Marico-Logo" matTooltip="Marico">
+        <img [src]="imageBasePath + 'assets/Img/header/Logo.png'" alt="Marico-Logo" matTooltip="Marico">
         <label>Intelli-Voice</label>
     </div>
     <div class="section">
@@ -10,13 +10,9 @@
                 placeholder="Search Files, Projects, Target Groups, Competitors, Products">
         </div> -->
         <div class="profile">
-            <!-- <button matTooltip="Help"><mat-icon>help_outline</mat-icon></button>
-            <button matTooltip="Settings"><mat-icon>settings</mat-icon></button> -->
-            <div class="welcomeCont">
-                <span>Welcome</span>
-                <span>{{userName}}</span>
-            </div>
-            <button matTooltip="Profile" (click)="logoutModel($event)"><mat-icon>account_circle</mat-icon></button>
+            <button matTooltip="Help"><mat-icon>help_outline</mat-icon></button>
+            <button matTooltip="Settings"><mat-icon>settings</mat-icon></button>
+            <button matTooltip="Profile"><img [src]="imageBasePath + 'assets/Img/header/profile.png'" (click)="logoutModel($event)" alt="Profile"></button>
         </div>
     </div>
 </header>
