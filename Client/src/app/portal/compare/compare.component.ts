@@ -24,10 +24,13 @@ export class CompareComponent implements OnInit {
   filteredProjectsArray: Observable<any[]>[] = [];
   existingTGs: any[] = [];
   filteredTGsArray: Observable<any[]>[] = [];
+  userCode: string = '';
+  userRole: string = "";
 
   constructor(private fb: FormBuilder, private toastr: ToastrService, private commonServ: CommonService,
     private audioServ: AudioService, private router: Router) {
-
+      this.userRole = localStorage.getItem('role') || '';
+      this.userCode = localStorage.getItem('uId') || '';
     this.projectForm = this.fb.group({
       projects: this.fb.array([]),
     });
@@ -47,27 +50,32 @@ export class CompareComponent implements OnInit {
   }
 
   getExistingProject() {
-    this.commonServ.getAPI('master/project/all').subscribe(
+    let userCode = '';
+    userCode = this.userRole === "1" ? '' : this.userCode;
+    this.commonServ.getAPI('master/project/all', userCode).subscribe(
       (res: any) => {
         this.existingProject = res.data;
-        const projectControl = this.targetForm.get('project');
-        if (projectControl) {
-          this.filteredProject = projectControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value || '')),
-          );
-        } else {
-          this.filteredProject = of([]);
-        }
-
-        this.projects.controls.forEach((control, index) => {
-          this.setupAutocomplete(index);
-        });
+        this.projectFilterDropdown();
       },
       (err: any) => {
         this.toastr.error('Something Went Wrong!');
       }
     );
+  }
+  projectFilterDropdown() {
+    const projectControl = this.targetForm.get('project');
+    if (projectControl) {
+      this.filteredProject = projectControl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filter(value || '')),
+      );
+    } else {
+      this.filteredProject = of([]);
+    }
+
+    this.projects.controls.forEach((control, index) => {
+      this.setupAutocomplete(index);
+    });
   }
 
   private _filter(value: string): string[] {

@@ -147,7 +147,7 @@ export class UserListComponent {
     .map(user => ({
       ...user,
       selected: this.userList[index]?.mapUser?.includes(user.id) ? true : false
-    }));
+    })).sort((a, b) => Number(b.selected) - Number(a.selected));
 
     this.selectedUsers = this.userList[index]?.mapUser
       ? this.userList
