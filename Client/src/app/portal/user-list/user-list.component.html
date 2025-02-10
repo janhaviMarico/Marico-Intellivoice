@@ -11,7 +11,7 @@
         <tr>
             <td>{{ user.userName }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ user.rolecode==='1' ? 'Base User' : user.rolecode==='2' ? 'Admin User' : user.rolecode==='3'
+            <td>{{ user.rolecode==="1" ? 'Admin User' : user.rolecode==="2" ? 'Base User' : user.rolecode==="3"
                 ? 'Read User' : 'Unknown Role' }}</td>
             <td>
                 <button class="edit-btn" (click)="editDialog(EditTemplate, rowIndex)">Edit</button>
